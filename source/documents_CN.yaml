@@ -8,13 +8,15 @@
       work_in_progress: true
       contributor: jhjguxin
       description: Everything you need to know to install Rails and create your first application.
-      
+
 -
   name: Models
   documents:
     -
-      name: Rails Database Migrations
+      name: Rails 数据迁移
       url: migrations.html 
+      work_in_progress: true
+      contributor: zernel
       description: This guide covers how you can use Active Record migrations to alter your database in a structured and organized manner.
     -
       name: Active Record Validations and Callbacks
