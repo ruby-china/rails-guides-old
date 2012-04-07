@@ -1,6 +1,8 @@
 # Ruby on Rails Guides 中文指南
 
 如果你也想为 Ruby on Rails 社区出一份力就从这里开始吧！
+
+http://www.railschina.org/
  
 ## Rails Guides 中文
  

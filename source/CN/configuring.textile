@@ -1,42 +1,40 @@
-h2. Configuring Rails Applications
+h2. 配置 Rails 应用程序
 
-This guide covers the configuration and initialization features available to Rails applications. By referring to this guide, you will be able to:
+这个指南覆盖了Rails应用可以使用的配置和初始化设置.通过浏览这个指南,你将能:
 
-* Adjust the behavior of your Rails applications
-* Add additional code to be run at application start time
+* 控制Rails应用的行为
+* 添加在程序启动时运行的代码
 
-endprologue.
+h3. 初始化代码的为止
 
-h3. Locations for Initialization Code
-
-Rails offers four standard spots to place initialization code:
+Rails 提供四个标准的位置防止初始化代码
 
 * +config/application.rb+
-* Environment-specific configuration files
-* Initializers
-* After-initializers
+* 运行环境相关的配置文件
+* 各初始化文件
+* 初始化后运行文件
 
-h3. Running Code Before Rails
+h3. 先于Rails运行代码
 
-In the rare event that your application needs to run some code before Rails itself is loaded, put it above the call to +require 'rails/all'+ in +config/application.rb+.
+有时候你需要在 Rails 加载自己之前运行代码, 将调入代码放在 +config/application.rb+ 文件的 +require 'rails/all'+ 之上.
 
-h3. Configuring Rails Components
+h3. 配置 Rails 组件
 
-In general, the work of configuring Rails means configuring the components of Rails, as well as configuring Rails itself. The configuration file +config/application.rb+ and environment-specific configuration files (such as +config/environments/production.rb+) allow you to specify the various settings that you want to pass down to all of the components.
+一般而言, 配置Rails的工作其实就是配置Rails的组件, 就像配置Rails本身一样. 配置文件+config/application.rb+ 和运行环境相关的配置文件(比如 +config/environments/production.br+) 可以让你设定一些你想传递给所有组件的设置.
 
-For example, the default +config/application.rb+ file includes this setting:
+例如, 缺省的 +config/application.rb+ 文件包括这个设置:
 
 <ruby>
 config.filter_parameters += [:password]
 </ruby>
 
-This is a setting for Rails itself. If you want to pass settings to individual Rails components, you can do so via the same +config+ object in +config/application.rb+:
+这是给Rails本身的设置. 如果你想向单独的Rails组件传递设置, 你同样可以在+config/application.rb+文件里通过同一个+config+对象做一样的操作.
 
 <ruby>
 config.active_record.observers = [:hotel_observer, :review_observer]
 </ruby>
 
-Rails will use that particular setting to configure Active Record.
+Rails 将会使用那些特定的设置来配置Active Record.
 
 h4. Rails General Configuration
 

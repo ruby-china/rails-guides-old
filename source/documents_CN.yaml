@@ -87,7 +87,9 @@
     - 
       name: Configuring Rails Applications
       url: configuring.html
-      description: This guide covers the basic configuration settings for a Rails application.
+      work_in_progress: true
+      contributor: ichord
+      description: 这个指南覆盖Rails应用的所有基本配置.
     - 
       name: Rails Command Line Tools and Rake Tasks
       url: command_line.html
