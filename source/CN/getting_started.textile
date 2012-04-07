@@ -9,19 +9,19 @@ h2. 与Rails的第一次接触
 
 endprologue.
 
-WARNING. 这个指导手册适用与 Rails 3.1，有些代码在 Rails 早期版本可能会不工作。
+WARNING. 这个指导手册适用与 Rails 3.1，有些代码在 Rails 早期版本可能无法正常运行。
 
 h3. 手册假设
 
 本指导设计给那些想大概的了解 Rails 应用创建的初学者。这里假设你对 Rails 没有任何预先的了解。要得到（本手册的）知识，你需要预先安装：
 
-* "Ruby":http://www.ruby-lang.org/en/downloads version 1.8.7 或者更高
+* "Ruby":http://www.ruby-lang.org/en/downloads version 1.8.7 或者更高版本
 
-TIP: 注意 Ruby 1.8.7 p248 and p249 有 marshaling bugs 会与 Rails 3.0 发生冲突。Ruby 1.8.7 p248 and p249在 发行版 1.8.7-2010.02 已经得到解决。Ruby 1.9 前提下，Ruby 1.9.1 不能使用因为它在 Rails 3.0 上会出现 segfaults 错误，因此如果你希望使用 Rails 3 和 1.9.x 跳至 1.9.2 （就可以）安全地使用 Rails。
+TIP: 注意 Ruby 1.8.7 p248 和 p249 有 marshaling bugs ，会与 Rails 3.0 发生冲突。Ruby 1.8.7 p248 和 p249在 发行版 1.8.7-2010.02 已经得到解决。Ruby 1.9 下 Ruby 1.9.1 不能使用，因为它在 Rails 3.0 上会出现 segfaults 错误，因此如果你希望使用 Rails 3 和 1.9.x ，更新版本到 1.9.2 就可以安全地使用 Rails。
  
 
 * "RubyGems":http://rubyforge.org/frs/?group_id=126 包管理系统
-  ** 如果你想了解更多关于RubyGems，请阅读 "RubyGems User Guide":http://docs.rubygems.org/read/book/1
+  ** 如果你想了解更多关于 RubyGems 的知识，请阅读 "RubyGems User Guide":http://docs.rubygems.org/read/book/1
 * 安装 "SQLite3 Database":http://www.sqlite.org
 
 Rails是一个基于Ruby程序语言的web程序框架。如果你没有预先的学习ruby，你会发现直接的入门Rails学习很有跨度。这里有一些学习ruby的免费互联网资源。
@@ -40,7 +40,7 @@ Rails是一个值得骄傲的软件。它使得我们以最好的方式去做事
 
 Rails 理念包含几个指导原则
 
-* DRY - 不要自己重复——建议一次又一次编写同样的代码是一件坏事请。
+* DRY - 不要自己重复——建议一次又一次编写同样的代码是一件坏事请
 * 约定优于配置——意思是 Rails 假设对于你想做什么以及你想怎么做的事情，刻意的做很少的事情比编写无尽的配置文件更好
 
 h4. MVC架构
@@ -50,56 +50,56 @@ Model，View，Controller架构是Rails的核心，通常称之为MVC。MVC 的�
 * 很容易使得代码保持 DRY # “Don’t Repeat Yourself”
 * 明确代码的不同之处使之跟容易维护
 
-h5. 模型
+h5. 模型（ Models ）
 
 模型代表了应用程序的信息（数据）和操纵这些数据的规则。在 Rails 中， models 主要用于管理数据表和相应的规则的互动。在大多数情况，在你数据库中的每个表都会和你的应用程序互动。你应用程序的逻辑业务将会集中放置在 models 中。
 
-h5. 视图
+h5. 视图（ Views ）
 
-View代表了应用程序的用户界面。在Rails中，Views通常是嵌入了执行演示数据任务的Ruby代码的HTML文件。Views完成了给web浏览器或者其他工具用于提出来自你的程序的请求提供数据。
+View代表了应用程序的用户界面。在 Rails 中，Views 通常是嵌入了执行演示数据任务的Ruby代码的HTML文件。Views完成了给web浏览器或者其他工具用于提出来自你的程序的请求提供数据。
 
-h5. 控制器
+h5. 控制器（ Controllers ）
 
-Controllers 提供了models和视图间的粘合。在 Rails 中，controllers 相应来自 web 浏览器请求的进程，向 models 询问数据以及传递数据给 views 用于呈现。
+Controllers 提供了 Models 和 Views 间的粘合。在 Rails 中，Controllers 响应来自 Web 浏览器请求的进程，向 Models 询问数据并将数据传递给 Views 呈现。
 
 h3. Rails 的组件
 
-Rails关联着许多独立的组件。对这些组件在下面给出简要的解释。如果你是Rails的新人，当你阅读到这个部分，不要抛弃任何一个组件的描述，而且他们还会做进一步解释。例如，我们将会构造应用骨架，但是在这里，你不需要知道关于他们的更进一步的任何知识。
+Rails 关联着许多独立的组件。对这些组件在下面给出简要的解释。如果你是 Rails 的新人，当你阅读到这个部分时，不要忽视任何一个组件的描述，但也没有必要了解的过于深入。例如，我们会构造应用骨架，但你不需要了解有关构造应用骨架的深层知识。
 
-* Action Pack活动组
-  ** Action Controller 活动控制
-  ** Action Dispatch 活动传输
-  ** Action View 活动视图
-* Action Mailer 活动信封
-* Active Model 
-* Active Record 
+* Action Pack
+  ** Action Controller
+  ** Action Dispatch
+  ** Action View
+* Action Mailer
+* Active Model
+* Active Record
 * Active Resource 
 * Active Support 
 * Railties 
 
 h4. Action Pack
 
-Action Pack是一个单独的包它包含了 Action Controller, Action View and Action Dispatch（传输调度）。是MVC的VC部分。
+Action Pack是一个单独的包它包含了 Action Controller, Action View and Action Dispatch（传输调度）。是 MVC 的 VC 部分。
 
 h5. Action Controller
 
-Action Controller是在Rails中管理控制的组件。 The Action Controller框架进程收到Rails应用程序的请求，提取参数，以及调度他们到具有相应义务的动作。这些服务是由 Action Controller包含了会话管理部分，模板渲染（翻译），重定向部分。
+Action Controller 是在 Rails 中管理控制的组件。 The Action Controller 框架进程收到 Rails 应用程序的请求，提取参数，以及调度他们到具有相应义务的动作。这些服务是由 Action Controller 提供，包含会话管理、模板渲染、重定向功能。
 
 h5. Action Dispatch
 
-Action Dispatch处理了你的和其他部分的应用程序的路由——这些web请求以及一些你所期望的调度。Rack applications 是更高级的主题它涵盖在一个叫做 "Rails on Rack":http://guides.rubyonrails.org/rails_on_rack.html 的教程中。
+Action Dispatch处理了你和其他部分的应用程序的路由——一些Web请求以及你的配置。Rack applications 是更高级的模块，你可以到 "Rails on Rack":http://guides.rubyonrails.org/rails_on_rack.html 了解它。
 
 h5. Action Mailer
 
-Action Mailer 是一个营造 E-mail 服务的框架。你可以使用 Action Mailer 去发送、接收 email 以及发送一些简单的计划文本或者基于灵活模板的复杂的多重的电子邮件。
+Action Mailer 是一个营造 E-mail 服务的框架。你可以使用 Action Mailer 去发送、接收 Email 。
 
 h5. Active Model
 
-Active Model 提供了 Action Pack gem 服务和 Object Relationship Mapping gems 之间的接口定义，比如Active记录。Active Model 允许 Rails 在 Active Record 部分采用其他 ORM 框架如果你的应用程序需要。
+Active Model 提供了 Action Pack gem 服务和 Object Relationship Mapping gems 之间的接口定义，比如 Active 记录。Active Model 允许 Rails 在 Active Record 部分采用其他 ORM 框架如果你的应用程序需要。
 
 h5. Active Record
 
-Active Record 是一个 Rails 应用程序的 models 根本。它提供独立的数据库，基于 CRUD 功能，先进（高级）的查找能力，和与另一个 models 关联的能力，几乎所有其他服务。
+Active Record 是一个 Rails 应用程序的 Models 根本。它提供有 CRUD 功能独立的数据库，有高级的查找、与另一个 Models 关联的能力，支持几乎所有数据库服务。
 
 h5. Active Resource
 
@@ -107,7 +107,7 @@ Active Resource提供一个管理目标业务和 RESTful web 服务之间连接�
 
 h5. Active Support
 
-Active Support 是一个广泛收集实用工具类和标准的 Ruby 库的扩展，它们由的核心代码和您的应用程序（决定）。
+Active Support 是一个广泛收集实用工具类和标准的 Ruby 库的扩展，它们由的核心代码和您的应用程序决定。
 
 h5. Railties
 
