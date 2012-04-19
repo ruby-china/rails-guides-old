@@ -106,9 +106,11 @@
       url: asset_pipeline.html
       description: This guide documents the asset pipeline.
     - 
-      name: Getting Started with Engines
+      name: Engine 入门
       url: engines.html
-      description: This guide explains how to write a mountable engine.     
+      work_in_progress: true
+      contributor: jhjguxin
+      description: 这是一个解释如何编写一个可挂载的 engine 的教程。
     - 
       name: The Rails Initialization Process
       url: initialization.html
