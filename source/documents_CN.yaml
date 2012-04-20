@@ -24,8 +24,10 @@
       contributor: reyesyang
       description: This guide covers how you can use Active Record validations and callbacks.
     -
-      name: Active Record Associations
+      name: Active Record 数据表关联
       url: association_basics.html
+      work_in_progress: true
+      contributor: sanatir
       description: This guide covers all the associations provided by Active Record.
     -
       name: Active Record Query Interface
