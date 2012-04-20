@@ -1,60 +1,62 @@
-h2. Getting Started with Engines
+h2. Engine 入门
 
-In this guide you will learn about engines and how they can be used to provide additional functionality to their host applications through a clean and very easy-to-use interface. You will learn the following things in this guide:
+在这个教程中你将会学习关于 engine（的知识）以及如何使用它们从而保证其额外的功能能够通过一个干净，易用的接口到它们的宿主程序（host applications）。在这个教程中你将学习如下内容：
 
-* What makes an engine
-* How to generate an engine
-* Building features for the engine
-* Hooking the engine into an application
-* Overriding engine functionality in the application
+* Engine 的产生
+* 怎样去创建一个 engine
+* 为 engine 构建特性
+* 衔接 engine 到一个应用程序中
+* 在应用程序中覆盖 engine 的功能
 
 endprologue.
 
-h3. What are engines?
+h3. Engine 是什么？
 
-Engines can be considered miniature applications that provide functionality to their host applications. A Rails application is actually just a "supercharged" engine, with the +Rails::Application+ class inheriting a lot of its behaviour from +Rails::Engine+.
+Engine 可以被看作是（一个）微型的应用程序其提供（一些额外的）功能给它们的宿主程序（host applications）。一个 Rails 应用程序实际上就是一个 “加强版”（supercharged） engine，因为 +Rails::Application+ 继承了来自 +Rails::Engine+ 的更多习惯。
 
-Therefore, engines and applications can be thought of almost the same thing, just with very minor differences, as you'll see throughout this guide. Engines and applications also share a common structure.
+因此，engine 和应用程序可以被认为是几乎相同的事物，仅仅有一些次要的不同，正如你贯穿这个教程将会发现的。Engine 和应用程序也共享了一个通用的结构。
 
-Engines are also closely related to plugins where the two share a common +lib+ directory structure and are both generated using the +rails plugin new+ generator. The difference being that an engine is considered a "full plugin" by Rails -- as indicated by the +--full+ option that's passed to the generator command -- but this guide will refer to them simply as "engines" throughout. An engine *can* be a plugin, and a plugin *can* be an engine.
+Engines 也与 plugin 关联紧密这里有两点（说明）共享了一个通用的 +lib+ 目录结构以及都是使用 +rails plugin new+ 创建器来创建的。不同之处是一个明确指定了 +--full+ 给创建器命令的生成的 engine 被认为是一个“完整插件”（full plugin），但是这个教程将会参考始终将它们仅仅参考为 “engine”。一个 engine *能够*是一个 plugin，一个 plugin *能够*是一个 engine。
 
-The engine that will be created in this guide will be called "blorgh". The engine will provide blogging functionality to its host applications, allowing for new posts and comments to be created. At the beginning of this guide, you will be working solely within the engine itself, but in later sections you'll see how to hook it into an application.
+在本教程中将会创建一个名为 *“blorgh”* 的 engine。这个 engine 将会提供给 博客功能给他的宿主程序，允许新文章和新评论被创建。在教程的开始部分，你将会单独的在 engine 自身内部工作，但是在后面的部分你将会看到怎样将它衔接（hook）到一个应用程序中。
 
-Engines can also be isolated from their host applications. This means that an application is able to have a path provided by a routing helper such as +posts_path+ and use an engine also that provides a path also called +posts_path+, and the two would not clash. Along with this, controllers, models and table names are also namespaced. You'll see how to do this later in this guide.
+Engine 也可以与他们的宿主程序相互隔离。这里的意思是一个应用程序可以有一个由路由 helper 提供的 path 例如 +posts_path+ 并且其使用的 engine 也可以一样有一个（通过路由 helper 提供的）名叫 +posts_path+ 的 path，并且这两个不会冲突。基于此，controllers， models 和 table也是名称空间化的。在教程后面你将会看到怎样来使用它。
 
 It's important to keep in mind at all times that the application should *always* take precedence over its engines. An application is the object that has final say in what goes on in the universe (with the universe being the application's environment) where the engine should only be enhancing it, rather than changing it drastically.
+在任何时间都要注意应用程序应该*总是*优先于它的 engine 这很重要。一个应用程序是最终在 universe 中说明会发生什么的对象（这里的 universe 就是应用程序的环境）**这样 engine 应该是仅仅加强它而不是大幅度的改变它**。
 
-To see demonstrations of other engines, check out "Devise":https://github.com/plataformatec/devise, an engine that provides authentication for its parent applications, or "Forem":https://github.com/radar/forem, an engine that provides forum functionality. There's also "Spree":https://github.com/spree/spree which provides an e-commerce platform, and "RefineryCMS":https://github.com/resolve/refinerycms, a CMS engine.
+要查看其他的 engine 示范， check out "Devise":https://github.com/plataformatec/devise，一个为其父程序提供认证的 engine，或者 "Forem":https://github.com/radar/forem，一个提供 forum 功能的 engine。这里还有 "RefineryCMS":https://github.com/resolve/refinerycms，一个 CMS engine。
 
-Finally, engines would not have be possible without the work of James Adam, Piotr Sarnacki, the Rails Core Team, and a number of other people. If you ever meet them, don't forget to say thanks!
+最后，engine 离不开 James Adam， Piotr Sarnacki， Rails Core Team， and a number of other people。如果你看到他们，不要忘记说声感谢。
 
-h3. Generating an engine
+h3. 创建一个 engine
 
-To generate an engine with Rails 3.1, you will need to run the plugin generator and pass it the +--full+ and +--mountable+ options. To generate the beginnings of the "blorgh" engine you will need to run this command in a terminal:
+要创建一个基于 Rails 3.1的 engine，你需要运行 plugin 创建器并且传递 +--full+ 和 +--mountable+ 给它。要创建初始的“blorgh” engine 你将需要在终端中运行如下命令：
 
 <shell>
 $ rails plugin new blorgh --full --mountable
 </shell>
 
 The +--full+ option tells the plugin generator that you want to create an engine (which is a mountable plugin, hence the option name), creating the basic directory structure of an engine by providing things such as the foundations of an +app+ folder, as well a +config/routes.rb+ file. This generator also provides a file at +lib/blorgh/engine.rb+ which is identical in function to an application's +config/application.rb+ file.
++--full+ 选项告诉 plugin 创建器你想创建一个 engine（它是一个可挂载的 plugin，因为选项的名字），创建 engine 基本的目录结构提供了这些如基础的 +app+ 文件夹，以及 +config/routes.rb+ 文件。这个创建器也提供了一个在 +lib/blorgh/engine.rb+ 的文件它是与应用程序的 +config/application.rb+ 文件的功能是一致的。
 
-The +--mountable+ option tells the generator to mount the engine inside the dummy testing application located at +test/dummy+ inside the engine. It does this by placing this line in to the dummy application's +config/routes.rb+ file, located at +test/dummy/config/routes.rb+ inside the engine:
++--mountable+ 选项告诉创建器去 挂载 engine 到在 engine 中的 +test/dummy+ 的模拟（dummy）测试程序。它通过在 dummy 应用程序的 +config/routes.rb+文件中置入下面内容，文件在 engine的 +test/dummy/config/routes.rb+ 中：
 
 <ruby>
 mount Blorgh::Engine, :at => "blorgh"
 </ruby>
 
-h4. Inside an engine
+h4. 进入一个 Engine
 
-h5. Critical files
+h5. Critical files 关键文件
 
-At the root of this brand new engine's directory, lives a +blorgh.gemspec+ file. When you include the engine into the application later on, you will do so with this line in a Rails application's +Gemfile+:
+在标识这个新 engine 的根目录中，居住着一个 +blorgh.gemspec+ 文件，当你在后面包含 engine 到应用程序中的时候，你将会添加这行到一个 Rails 应用程序的 +Gemfile+ 中：
 
 <ruby>
-  gem 'blorgh', :path => "vendor/engines/blorgh"
+gem 'blorgh', :path => "vendor/engines/blorgh"
 </ruby>
 
-By specifying it as a gem within the +Gemfile+, Bundler will load it as such, parsing this +blorgh.gemspec+ file and requiring a file within the +lib+ directory called +lib/blorgh.rb+. This file requires the +blorgh/engine.rb+ file (located at +lib/blorgh/engine.rb+) and defines a base module called +Blorgh+.
+通过指定它为一个在+Gemfile+中的 gem，Bundler 将会这样导入它，解析这个 +blorgh.gemspec+ 文件并且 require 一个在 +lib+ 目录中的叫做 +lib/blorgh.rb+ 的文件。这个文件 require +blorgh/engine.rb+ 文件（位于 +lib/blorgh/engine.rb+）并且定义了一个名叫 +Blorgh+ 的基础模块。
 
 <ruby>
 require "blorgh/engine"
@@ -63,9 +65,9 @@ module Blorgh
 end
 </ruby>
 
-TIP: Some engines choose to use this file to put global configuration options for their engine. It's a relatively good idea, and so if you're wanting offer configuration options, the file where your engine's +module+ is defined is perfect for that. Place the methods inside the module and you'll be good to go.
+TIP: 有些 engine 选择这个文件为他们的 engine 放置全局配置选项。这是一个相当好的主意，并且如果你想提供（一些）配置选项，你的 engine 的 +module+ 定义所在的文件绝妙的主意。放置方法在模块中同样不赖。
 
-Within +lib/blorgh/engine.rb+ is the base class for the engine:
+在 +lib/blorgh/engine.rb+ 中是 engine 的基础类：
 
 <ruby>
 module Blorgh
@@ -76,67 +78,68 @@ end
 </ruby>
 
 By inheriting from the +Rails::Engine+ class, this gem notifies Rails that there's an engine at the specified path, and will correctly mount the engine inside the application, performing tasks such as adding the +app+ directory of the engine to the load path for models, mailers, controllers and views.
+通过继承至 +Rails::Engine+ 类，这个 gem 通知 Rails 在指定路径有一个 engine，并且正确的挂载这个 engine 到应用程序中，执行一些例如给 engine 添加 +app+ 来导入 models， mailers， controllers 和 views 之类的任务。
 
-The +isolate_namespace+ method here deserves special notice. This call is responsible for isolating the controllers, models, routes and other things into their own namespace, away from similar components inside hte application. Without this, there is a possibility that the engine's components could "leak" into the application, causing unwanted disruption, or that important engine components could be overriden by similarly named things within the application. One of the examples of such conflicts are helpers. Without calling +isolate_namespace+, engine's helpers would be included in application's controllers.
++isolate_namespace+  方法值得特别注意。这个调用是相应隔离的 controllers， models， routes 以及其他到它们相应的名称空间，远离应用程序中相似的组件。如果没有它，这里可能会有 engine 组件泄漏到应用程序，引起未注意的干扰，或者很重要的一点 engine 组件可能会被应用程序中相似的名称的事物覆盖。冲突的一个例子是 helpers。没有调用 +isolate_namespace+， engine 的 helper 将会被包含到应用程序的 controller 中。
 
-NOTE: It is *highly* recommended that the +isolate_namespace+ line be left within the +Engine+ class definition. Without it, classes generated in an engine *may* conflict with an application.
+NOTE： *强力推荐* 在 engine 的类定义中使用 +isolate_namespace+。没有它，被类所创建的 engine *可能*会与应用程序冲突。
 
-What this isolation of the namespace means is that a model generated by a call to +rails g model+ such as +rails g model post+ wouldn't be called +Post+, but instead be namespaced and called +Blorgh::Post+. In addition to this, the table for the model is namespaced, becoming +blorgh_posts+, rather than simply +posts+. Similar to the model namespacing, a controller called +PostsController+ would be +Blorgh::Postscontroller+ and the views for that controller would not be at +app/views/posts+, but rather +app/views/blorgh/posts+. Mailers would be namespaced as well.
+这个 'isolation' 的名称空间的意义是：一个被称之为 +rails g model+ 的创建的 model比如  +rails g model post+ 将不会被称为 +Post+，与之替代的是（加有名称空间的） +Blorgh::Post+。这里的额外信息， 'model' 的 'table' 也是被名称空间的，变成 +blorgh_posts+，而不是简单的 +posts+。于 'model' 相似的名称空间化，一个叫做 +PostsController+ 的 'controller' 会是 +Blorgh::Postscontroller+并且这个 'controller' 的视图将不在 +app/views/posts+，而是 +app/views/blorgh/posts+。'Maillers' 也会名称空间化。
 
-Finally, routes will also be isolated within the engine. This is one of the most important parts about namespacing, and is discussed later in the "Routes":#routes section of this guide.
+最后， 'route' 也会被隔离在 engine 中。这是名称空间中最重要的一点，并且会在本教程随后的 "Routes":#routes 部分讨论它。
 
-h5. +app+ directory
+h5. +app+ 目录
 
-Inside the +app+ directory there is the standard +assets+, +controllers+, +helpers+, +mailers+, +models+ and +views+ directories that you should be familiar with from an application. The +helpers+, +mailers+ and +models+ directories are empty and so aren't described in this section. We'll look more into models in a future section, when we're writing the engine.
+在 +app+ 目录中标准会有 +assets+， +controllers+， +helpers+， +mailers+， +models+ 以及 +views+ 目录对其你会感到于一个应用程序很相似。+helpers+， +mailers+ 和 +models+ 目录是空的因此这部分不做描述。我们会更多关注 +models+ 在 后续部分，当我们编写 engine的时候。
 
-Within the +app/assets+ directory, there is the +images+, +javascripts+ and +stylesheets+ directories which, again, you should be familiar with due to their similarities of an application. One difference here however is that each directory contains a sub-directory with the engine name. Because this engine is going to be namespaced, its assets should be too.
+在 +app/assets+ 目录，这里有 +images+， +javascripts+ 和 +stylesheets+ 目录，对其你应该感到和应用程序的很相似。*这里有一点不同无论在哪个目录下面都包含一个以 engine 名称命名的子文件*。因为这个 engine 是被名称空间化的，它的 +assets+ 也是一样的。
 
-Within the +app/controllers+ directory there is a +blorgh+ directory and inside that a file called +application_controller.rb+. This file will provide any common functionality for the controllers of the engine. The +blorgh+ directory is where the other controllers for the engine will go. By placing them within this namespaced directory, you prevent them from possibly clashing with identically-named controllers within other engines or even within the application.
+在 +app/controllers+ 目录中这里有一个 +blorgh+ 目录并且在里面有一个名叫 +application_controller.rb+ 的文件。这个文件将会为 engine 的 'controller' 提供常用的功能。+blorgh+ 目录也是这个 engine 的其它的 'controller' 的所在。通过放置它们到这样的名称空间化的目录，你防止了在应用程序中的其它 engine 中的相同名称的 'controller'与之冲突。
 
-NOTE: The +ApplicationController+ class is called as such inside an engine -- rather than +EngineController+ -- mainly due to that if you consider that an engine is really just a mini-application, it makes sense. You should also be able to convert an application to an engine with relatively little pain, and this is just one of the ways to make that process easier, albeit however so slightly.
+NOTE: Engine 中的 +ApplicationController+ 类会这样命名 -- 而不是 +EngineController+ -- 主要是因为如果你这样思考，一个 engine 事实上只是一个 mini-application，这很有道理。你也可以转换一个应用程序到一个 engine 通过少量的相关的文字，这也是使得这个过程更容易的方式，尽管这里很微妙。
 
-Lastly, the +app/views+ directory contains a +layouts+ folder which contains file at +blorgh/application.html.erb+ which allows you to specify a layout for the engine. If this engine is to be used as a stand-alone engine, then you would add any customization to its layout in this file, rather than the applications +app/views/layouts/application.html.erb+ file.
+最后， +app/views+ 包含一个 +layouts+ 文件夹其包含 +blorgh/application.html.erb+ 它允许你为 engine 指定一个 'layout'。如果这个 engine 被作为一个 单独的 engine 使用，那么你将会添加任何定制到他的 'layout' 中，而不是应用程序的 +app/views/layouts/application.html.erb+ 文件。
 
-If you don't want to force a layout on to users of the engine, then you can delete this file and reference a different layout in the controllers of your engine.
+如果你不希望强制一个 layout 给 engine 使用，那么你可以删除这个文件并且在你 engine 的 'controller' 中引用一个不同的 'layout'.
 
-h5. +script+ directory
+h5. +script+ 目录
 
-This directory contains one file, +script/rails+, which enables you to use the +rails+ sub-commands and generators just like you would within an application. This means that you will very easily be able to generate new controllers and models for this engine by running commands like this:
+这个目录包含一个文件，+script/rails+，其让你能够使用 +rails+ 子命令并且就像你在应用程序中一样使用。这里意思是你会非常容易的为这个 engine 创建新的 'controllers' 和 'models'通过如下命令：
 
 <shell>
 rails g model
 </shell>
 
-Keeping in mind, of course, that anything generated with these commands inside an engine that has +isolate_namespace+ inside the Engine class will be namespaced.
+注意，当然 engine 中的这些命令创建的任何事物，如果 'Engine' 类中有 +isolate_namespace+ 都会被名称空间化。
 
-h5. +test+ directory
+h5. +test+ 目录
 
-The +test+ directory is where tests for the engine will go. To test the engine, there is a cut-down version of a Rails application embedded within it at +test/dummy+. This application will mount the engine in the +test/dummy/config/routes.rb+ file:
++test+ 目录是用来测试 engine 的。要测试 engine，这里有一个 cut-down 版的 rails 应用程序镶嵌在 +test/dummy+ 中。这个程序将会在 +test/dummy/config/routes.rb+ 这个文件挂载这个 engine。
 
 <ruby>
 Rails.application.routes.draw do
-
   mount Blorgh::Engine => "/blorgh"
 end
 </ruby>
 
-This line mounts the engine at the path of +/blorgh+, which will make it accessible through the application only at that path.
 
-Also in the test directory is the +test/integration+ directory, where integration tests for the engine should be placed. Other directories can be created in the +test+ directory also. For example, you may wish to create a +test/unit+ directory for your unit tests.
+这行挂载 engine 到 +/blorgh+ 路径，其将会使得应用程序只能通过这个路径来访问。
 
-h3. Providing engine functionality
+在测试目录同样也有 +test/integration+，这里是放置 engine 的集成测试。也可以在 +test+ 目录中创建其他目录。例如，你可能希望创为你的单元测试创建一个 +test/unit+ 目录。
 
-The engine that this guide covers will provide posting and commenting functionality and follows a similar thread to the "Getting Started Guide":getting-started.html, with some new twists.
+h3. 为 engine 提供功能
 
-h4. Generating a post resource
+这个教程包含了提供文章和留言功能并且依照了 "Getting Started Guide":getting_started.html 相似的进程，和一些新的波折。
 
-The first thing to generate for a blog engine is the +Post+ model and related controller. To quickly generate this, you can use the Rails scaffold generator.
+h4. 创建一个 post 资源
+
+创建一个博客 engine 的第一件事是 +Post+ 'model' 以及相关的 'controller'。要快速的创建这些，你可以使用 Rails 脚手架（scaffold）创建器。
 
 <shell>
 $ rails generate scaffold post title:string text:text
 </shell>
 
-This command will output this information:
+这条命令会输出这样的信息：
 
 <shell>
 invoke  active_record
@@ -170,24 +173,24 @@ invoke  css
 create    app/assets/stylesheets/scaffold.css
 </shell>
 
-The first thing that the scaffold generator does is invoke the +active_record+ generator, which generates a migration and a model for the resource. Note here, however, that the migration is called +create_blorgh_posts+ rather than the usual +create_posts+. This is due to the +isolate_namespace+ method called in the +Blorgh::Engine+ class's definition. The model here is also namespaced, being placed at +app/models/blorgh/post.rb+ rather than +app/models/post.rb+ due to the +isolate_namespace+ call within the +Engine+ class.
+脚手架创建器做的第一件事是调用 +active_record+ 创建器，其为 'resource' 创建一个迁移和一个模型。这里要注意，无论如何，迁移被称为 +create_blorgh_posts+ 而不是一般的 +create_posts+。这是因为+isolate_namespace+ 在 +Blorgh::Engine+ 类的定义中被调用。这里的 'model' 也被名称空间化了，被放在 +app/models/blorgh/post.rb+ 而不是 +app/models/post.rb+ 因为 +isolate_namespace+ 在+Engine+ 类中被调用。
 
-Next, the +test_unit+ generator is invoked for this model, generating a unit test at +test/unit/blorgh/post_test.rb+ (rather than +test/unit/post_test.rb+) and a fixture at +test/fixtures/blorgh/posts.yml+ (rather than +test/fixtures/posts.yml+).
+接下来， +test_unit+ 创建器被这个 'model' 调用，在 +test/unit/blorgh/post_test.rb+ (而不是 +test/unit/post_test.rb+)创建一个单元测试以及一个 'fixture' 在 +test/fixtures/blorgh/posts.yml+ (而不是 +test/fixtures/posts.yml+)。
 
-After that, a line for the resource is inserted into the +config/routes.rb+ file for the engine. This line is simply +resources :posts+, turning the +config/routes.rb+ file for the engine into this:
+在那之后，与资源相应的一行被插入到这个 engine的 +config/routes.rb+ 文件中。这行是简单的 +resources :posts+，转到 +config/routes.rb+ 给这个 engine 输入：
 
 <ruby>
 Blorgh::Engine.routes.draw do
   resources :posts
-
 end
 </ruby>
 
-Note here that the routes are drawn upon the +Blorgh::Engine+ object rather than the +YourApp::Application+ class. This is so that the engine routes are confined to the engine itself and can be mounted at a specific point as shown in the "test directory":#test-directory section. This is also what causes the engine's routes to be isolated from those routes that are within the application. This is discussed further in the "Routes":#routes section of this guide.
+**这里注意 'routes' 是 'drawn' 在 +Blorgh::Engine+ 上面而不是 +YourApp::Application+。**这也是 engine 'routes' 仅限于 engine 自身并且可以被挂载在一个指定的点上正如 "test directory":#test-directory 部分显示。这里也会使得 engine 的 'route' 于应用程序的其他 'routes' 分割。这会在后面的 "Routes":#routes 被讨论。
 
-Next, the +scaffold_controller+ generator is invoked, generating a controlled called +Blorgh::PostsController+ (at +app/controllers/blorgh/posts_controller.rb+) and its related views at +app/views/blorgh/posts+. This generator also generates a functional test for the controller (+test/functional/blorgh/posts_controller_test.rb+) and a helper (+app/helpers/blorgh/posts_controller.rb+).
 
-Everything this generator has created is neatly namespaced. The controller's class is defined within the +Blorgh+ module:
+接下来，+scaffold_controller+ 创建器被调用，创建一个名为 +Blorgh::PostsController+ (在 +app/controllers/blorgh/posts_controller.rb+)的控制器并且他的相关的视图在 +app/views/blorgh/posts+。这个创建器也为控制器创建一个功能测试(+test/functional/blorgh/posts_controller_test.rb+)以及一个 'helper ' (+app/helpers/blorgh/posts_controller.rb+)。
+
+这个创建器创建的任何事物都有整洁的名称空间。控制器的类被定义在 +Blorgh+ 模块中。
 
 <ruby>
 module Blorgh
@@ -197,9 +200,9 @@ module Blorgh
 end
 </ruby>
 
-NOTE: The +ApplicationController+ class being inherited from here is the +Blorgh::ApplicationController+, not an application's +ApplicationController+.
+NOTE: +ApplicationController+ 类继承至 +Blorgh::ApplicationController+，不是一个应用程序的+ApplicationController+。
 
-The helper inside +app/helpers/blorgh/posts_helper.rb+ is also namespaced:
++app/helpers/blorgh/posts_helper.rb+ 中的 'helper' 也被名称空间化的：
 
 <ruby>
 module Blorgh
@@ -209,48 +212,44 @@ module Blorgh
 end
 </ruby>
 
-This helps prevent conflicts with any other engine or application that may have a post resource also.
+这里帮助防止和其他也有一个 'post' 资源的 engine 或者应用程序冲突。
 
-Finally, two files that are the assets for this resource are generated, +app/assets/javascripts/blorgh/posts.js+ and +app/assets/javascripts/blorgh/posts.css+. You'll see how to use these a little later.
+最后，这个资源的两个 'assets' 文件文件被创建，+app/assets/javascripts/blorgh/posts.js+ 和 +app/assets/javascripts/blorgh/posts.css+。你会在随后看到怎样使用它们。
 
-By default, the scaffold styling is not applied to the engine as the engine's layout file, +app/views/blorgh/application.html.erb+ doesn't load it. To make this apply, insert this line into the +<head>+ tag of this layout:
+默认情况，脚手架样式不会应用到 engine 作为 engine 的 'layout' 文件， +app/views/blorgh/application.html.erb+ 不会导入它。要使这个应用生效，插入这行到这个 'layout' 的 +<head>+ 标签：
 
 <erb>
 <%= stylesheet_link_tag "scaffold" %>
 </erb>
 
-You can see what the engine has so far by running +rake db:migrate+ at the root of our engine to run the migration generated by the scaffold generator, and then running +rails server+. When you open +http://localhost:3000/blorgh/posts+ you will see the default scaffold that has been generated.
+你可以看见 engine 到现在有些什么通过在你的 engine 的根目录运行 +rake db:migrate+ 来运行被脚手架创建器创建的迁移，然后在 +test/dummy+ 运行 +rails server+。当你打开 +http://localhost:3000/blorgh/posts+ 你将会看到被创建的默认的 'scaffold'。点击四周！你刚刚创建的你第一个 engine 的功能。
 
-!images/engines_scaffold.png(Blank engine scaffold)!
-
-Click around! You've just generated your first engine's first functions.
-
-If you'd rather play around in the console, +rails console+ will also work just like a Rails application. Remember: the +Post+ model is namespaced, so to reference it you must call it as +Blorgh::Post+.
+如果你更愿意在控制台中玩耍，+rails console+ 将会像 Rails 应用程序的那样工作。记住： +Post+ 模型被名称空间化了，因此引用它你必须这样调用 +Blorgh::Post+。
 
 <ruby>
-  >> Blorgh::Post.find(1)
-  => #<Blorgh::Post id: 1 ...>
+>> Blorgh::Post.find(1)
+=> #<Blorgh::Post id: 1 ...>
 </ruby>
 
-One final thing is that the +posts+ resource for this engine should be the root of the engine. Whenever someone goes to the root path where the engine is mounted, they should be shown a list of posts. This can be made to happen if this line is inserted into the +config/routes.rb+ file inside the engine:
+最后一件事情是这个 engine的 +posts+ 资源应该是engine 的根目录。无论何人来到 engine挂载的根目录，他们应该看到一个文章列表。如果下面这行被插入了 engine 的 +config/routes.rb+ 文件：
 
 <ruby>
 root :to => "posts#index"
 </ruby>
 
-Now people will only need to go to the root of the engine to see all the posts, rather than visiting +/posts+. This means that instead of +http://localhost:3000/blorgh/posts+, you only need to go to +http://localhost:3000/blorgh+ now.
+现在人们仅仅需要来到 engine 的根目录来查看所有文章，而不是访问 +/posts+。这里的意思是替代 +http://localhost:3000/blorgh/posts+，现在你仅仅需要到 +http://localhost:3000/blorgh+。
 
-h4. Generating a comments resource
+h4. 创建一个 comments 资源
 
-Now that the engine has the ability to create new blog posts, it only makes sense to add commenting functionality as well. To do get this, you'll need to generate a comment model, a comment controller and then modify the posts scaffold to display comments and allow people to create new ones.
+现在 engine 能够创建新的 blog 文章，它还需要添加评论功能才会有意义。要得到这样的功能，你将需要创建一个 comment 模型，一个 comment 控制器以及修改 post scaffold 来显示评论和允许人们创建新的评论。
 
-Run the model generator and tell it to generate a +Comment+ model, with the related table having two columns: a +post_id+ integer and +text+ text column.
+运行 model 创建器并且告诉它创建一个  +Comment+ 模型，以及相应的表有两个字段：一个 +post_id+ integer型 和 +text+ text型 字段。
 
 <shell>
 $ rails generate model Comment post_id:integer text:text
 </shell>
 
-This will output the following:
+这将会输出随后内容：
 
 <shell>
 invoke  active_record
@@ -261,22 +260,22 @@ create      test/unit/blorgh/comment_test.rb
 create      test/fixtures/blorgh/comments.yml
 </shell>
 
-This generator call will generate just the necessary model files it needs, namespacing the files under a +blorgh+ directory and creating a model class called +Blorgh::Comment+.
+这个创建器调用将会仅仅创建需要的 'model' 文件。名称空间文件在 +blorgh+ 目录下以及一个名叫 +Blorgh::Comment+ 的类。
 
-To show the comments on a post, edit +app/views/posts/show.html.erb+ and add this line before the "Edit" link:
+要在一篇文章中显示评论，编辑 +app/views/blorgh/posts/show.html.erb+ 并且添加这行在 "Edit" 链接 前面：
 
 <erb>
 <h3>Comments</h3>
 <%= render @post.comments %>
 </erb>
 
-This line will require there to be a +has_many+ association for comments defined on the +Blorgh::Post+ model, which there isn't right now. To define one, open +app/models/blorgh/post.rb+ and add this line into the model:
+这行将会在这里 require 被定义在 +Blorgh::Post+ 模型中对应于评论的 +has_many+ 关系，现在这还没弄好。要定义一个（关系），打开 +app/models/blorgh/post.rb+ 并且添加这行到 'model'：
 
 <ruby>
 has_many :comments
 </ruby>
 
-Turning the model into this:
+转到 'model' 这样输入：
 
 <ruby>
 module Blorgh
@@ -286,15 +285,15 @@ module Blorgh
 end
 </ruby>
 
-NOTE: Because the +has_many+ is defined inside a class that is inside the +Blorgh+ module, Rails will know that you want to use the +Blorgh::Comment+ model for these objects, so there's no need to specify that using the +:class_name+ option here.
+NOTE: 因为 +has_many+ 在 +Blorgh+ 模块中的一个类中定义，Rails 将会知道你希望对 +Blorgh::Comment+ 的对象使用，因此这里没有必要指定使用的 +:class_name+ 选项。
 
-Next, there needs to be a form so that comments can be created on a post. To add this, put this line underneath the call to +render @post.comments+ in +app/views/blorgh/posts/show.html.erb+:
+接下来，需要一个 'form' 使得可以在一篇文章中创建评论。添加这些，在 +app/views/blorgh/posts/show.html.erb+ 中的 +render @post.comments+ 调用下面加入如下行：
 
 <erb>
 <%= render "blorgh/comments/form" %>
 </erb>
 
-Next, the partial that this line will render needs to exist. Create a new directory at +app/views/blorgh/comments+ and in it a new file called +_form.html.erb+ which has this content to create the required partial:
+接下来，需要有这行 'render' 的 'partial' 存在。在 +app/views/blorgh/comments+ 创建一个新目录并且里面一个新文件叫做 +_form.html.erb+ 其有这样的内容来创建 partial require：
 
 <erb>
 <h3>New comment</h3>
@@ -307,7 +306,7 @@ Next, the partial that this line will render needs to exist. Create a new direct
 <% end %>
 </erb>
 
-When this form is submitted, it is going to attempt to perform a +POST+ request to a route of +/posts/:post_id/comments+ within the engine. This route doesn't exist at the moment, but can be created by changing the +resources :posts+ line inside +config/routes.rb+ into these lines:
+当这个 'form' 被提交，它尝试执行一个 +POST+ 请求到 engine 中的 +/posts/:post_id/comments+ 路由。这个路由现在不存在，但是能给通过改变 +config/routes.rb+ 中的 +resources :posts+ 为这样：
 
 <ruby>
 resources :posts do
@@ -315,15 +314,15 @@ resources :posts do
 end
 </ruby>
 
-This creates a nested route for the comments, which is what the form requires.
+这里为评论创建一个嵌套的路由，它是 'form' 请求的（路由）。
 
-The route now exists, but the controller that this route goes to does not. To create it, run this command:
+路由存在了，但是这个路由的控制器还没有。要创建它，运行这个命令：
 
 <shell>
 $ rails g controller comments
 </shell>
 
-This will generate the following things:
+这将创建随后的事情：
 
 <shell>
 create  app/controllers/blorgh/comments_controller.rb
@@ -342,7 +341,7 @@ invoke    css
 create      app/assets/stylesheets/blorgh/comments.css
 </shell>
 
-The form will be making a +POST+ request to +/posts/:post_id/comments+, which will correspond with the +create+ action in +Blorgh::CommentsController+. This action needs to be created and can be done by putting the following lines inside the class definition in +app/controllers/blorgh/comments_controller.rb+:
+'form' 将会生成一个 +POST+ 请求到 +/posts/:post_id/comments+，其将会对应于 +Blorgh::CommentsController+ 的 +create+ 动作。这个动作需要创建并通过放置下面行到 +app/controllers/blorgh/comments_controller.rb+ 类定义中使之生效：
 
 <ruby>
 def create
@@ -353,122 +352,127 @@ def create
 end
 </ruby>
 
-This is the final part required to get the new comment form working. Displaying the comments however, is not quite right yet. If you were to create a comment right now you would see this error:
+这是使得新评论 'form' 工作的最后部分。显示评论，无论如何，这里不是十分正确。如果你现在创建一个评论你将会看到这样的错误：
 
-<text>
-  Missing partial blorgh/comments/comment with {:handlers=>[:erb, :builder], :formats=>[:html], :locale=>[:en, :en]}. Searched in:
-    * "/Users/ryan/Sites/side_projects/blorgh/test/dummy/app/views"
-    * "/Users/ryan/Sites/side_projects/blorgh/app/views"
-</text>
+<plain>
+Missing partial blorgh/comments/comment with {:handlers=>[:erb, :builder], :formats=>[:html], :locale=>[:en, :en]}. Searched in:
+  * "/Users/ryan/Sites/side_projects/blorgh/test/dummy/app/views"
+  * "/Users/ryan/Sites/side_projects/blorgh/app/views"
+</plain>
 
-The engine is unable to find the partial required for rendering the comments. Rails has looked firstly in the application's (+test/dummy+) +app/views+ directory and then in the engine's +app/views+ directory. When it can't find it, it will throw this error. The engine knows to look for +blorgh/comments/comment+ because the model object it is receiving is from the +Blorgh::Comment+ class.
+这个 engine 不能找到 'partial' 请求来渲染评论。Rails 首先在应用程序的 (+test/dummy+) +app/views+目录然后在 +app/views+ 目录。当不能找到，它将抛出这样的错误。Engine 指定查找 +blorgh/comments/comment+ 因为接收对象的 'model' 来自 +Blorgh::Comment+ 类。
 
-This partial will be responsible for rendering just the comment text, for now. Create a new file at +app/views/blorgh/comments/_comment.html.erb+ and put this line inside it:
+这个 'partial' 模板将会仅仅响应渲染评论文本，直到现在。在 +app/views/blorgh/comments/_comment.html.erb+ 创建一个文件并且将下面这行放进去：
 
 <erb>
 <%= comment_counter + 1 %>. <%= comment.text %>
 </erb>
 
 The +comment_counter+ local variable is given to us by the +<%= render @post.comments %>+ call, as it will define this automatically and increment the counter as it iterates through each comment. It's used in this example to display a small number next to each comment when it's created.
++comment_counter+ 当地变量被提供给我们通过（在 +app/views/blorgh/posts/show.html.erb+）调用 +<%= render @post.comments %>+，如果一切正常这将会对评论自身遍历并对每条自动的增加数目。在这个例子中，用它显示每条评论旁边时，它会创建一个小数目。
 
 That completes the comment function of the blogging engine. Now it's time to use it within an application.
+这里完成了博客 engine 的 评论功能。现在是时候在一个应用程序中使用它们了。
 
-h3. Hooking into an application
+h3. Hooking into an application 衔接到一个应用程序中
 
 Using an engine within an application is very easy. This section covers how to mount the engine into an application and the initial setup required for it, as well as linking the engine to a +User+ class provided by the application to provide ownership for posts and comments within the engine.
+在一个应用程序中使用一个 engine 非常简单。这部分涵盖了怎样挂载 engine 到一个应用程序并且初始化它需要的设置，正如链接 engine 到由应用程序提供的一个 +User+ 类来保证 engine 中文章和评论的关系。
 
-h4. Mounting the engine
+h4. 挂载 engine
 
-First, the engine needs to be specified inside the application's +Gemfile+. If there isn't an application handy to test this out in, generate one using the +rails new+ command outside of the engine directory like this:
+首先，engine 需要被插入到指定应用程序的 +Gemfile+ 文件中。如果这里没有合适的一个应用程序来测试（engine），像这样使用 +rails new+ 命令*在 engine 目录外面**创建一个：
 
 <shell>
 $ rails new unicorn
 </shell>
 
 Usually, specifying the engine inside the Gemfile would be done by specifying it as a normal, everyday gem.
+一般来说，常规的指定 engine 到 'Gemfile' 也是可以工作的的，日常的 gem。
 
 <ruby>
 gem 'devise'
 </ruby>
 
-Because the +blorgh+ engine is still under development, it will need to have a +:path+ option for its +Gemfile+ specification:
+因为 +blorgh+ 仍然处于开发中，它还会需要一个 +:path+ 选项在指定它的 +Gemfile+ （的语句中）：
 
 <ruby>
 gem 'blorgh', :path => "/path/to/blorgh"
 </ruby>
 
-If the whole +blorgh+ engine directory is copied to +vendor/engines/blorgh+ then it could be specified in the +Gemfile+ like this:
+如果整个 +blorgh+ engine 目录被复制到 +vendor/engines/blorgh+ 然后可以在 +Gemfile+ 这样去指定它：
 
 <ruby>
 gem 'blorgh', :path => "vendor/engines/blorgh"
 </ruby>
 
-As described earlier, by placing the gem in the +Gemfile+ it will be loaded when Rails is loaded, as it will first require +lib/blorgh.rb+ in the engine and then +lib/blorgh/engine.rb+, which is the file that defines the major pieces of functionality for the engine.
+正如先前描述的，通过以放置 gem 到 +Gemfile+ （的形式）它将会在 Rails 应用程序启动的时候被导入，如同它将会首先 require 在 engine 中的 +lib/blorgh.rb+ 以及随后（require 的）+lib/blorgh/engine.rb+，这是定义 engine 的主体功能的文件。
 
-To make the engine's functionality accessible from within an application, it needs to be mounted in that application's +config/routes.rb+ file:
+要想使得在应用程序中可访问 engine 的功能，engine 需要被挂载到应用程序的 +config/routes.rb+ 文件：
 
 <ruby>
 mount Blorgh::Engine, :at => "/blog"
 </ruby>
 
-This line will mount the engine at +/blog+ in the application. Making it accessible at +http://localhost:3000/blog+ when the application runs with +rails server+.
+这行将会挂载 engine 在应用程序的 +/blog+。使得它在运行 +rails server+ 的时候可以访问 +http://localhost:3000/blog+。
 
-NOTE: Other engines, such as Devise, handle this a little differently by making you specify custom helpers such as +devise_for+ in the routes. These helpers do exactly the same thing, mounting pieces of the engines's functionality at a pre-defined path which may be customizable.
+NOTE: 其他的 engine，例如 Devise，处理这些有一点不同它是通过为你生成指定的自定义 'helper' 例如路由中的 +devise_for+。这些 'helper' 做的基本相同的事情，挂载 engine 到一个预定义的路径的功能块是可以定制的。
 
-h4. Engine setup
+h4. 安装 engine
 
-The engine contains migrations for the +blorgh_posts+ and +blorgh_comments+ table which need to be created in the application's database so that the engine's models can query them correctly. To copy these migrations into the application use this command:
+这个 engine 包含 +blorgh_posts+ 和 +blorgh_comments+ 表的迁移 需要在应用程序的数据库中被创建使得 engine 的 'model' 可以正确的查询他们。复制这些迁移到应用程序使用这个命令：
 
 <shell>
 $ rake blorgh:install:migrations
 </shell>
 
-If you have multiple engines that need migrations copied over, use +railties:install:migrations+ instead:
+如果你有多个 engine 需要全部迁移，使用 +railties:install:migrations+ 作为替代：
 
 <shell>
 $ rake railties:install:migrations
 </shell>
 
-This command, when run for the first time will copy over all the migrations from the engine. When run the next time, it will only copy over migrations that haven't been copied over already. The first run for this command will output something such as this:
+这个命令，当第一次运行将会从 engine 复制所有的迁移。在以后的，他将仅仅复制没有被复制过的迁移。第一次运行这个命令将会产生像这样的输出：
 
 <shell>
 Copied migration [timestamp_1]_create_blorgh_posts.rb from blorgh
 Copied migration [timestamp_2]_create_blorgh_comments.rb from blorgh
 </shell>
 
-The first timestamp (+\[timestamp_1\]+) will be the current time and the second timestamp (+\[timestamp_2\]+) will be the current time plus a second. The reason for this is so that the migrations for the engine are run after any existing migrations in the application.
+第一次 时间戳(+\[timestamp_1\]+) 将会是当前的时间以及第二次时间戳(+\[timestamp_2\]+)将会是当前的的时间再加上一个（偏移的）秒。这样做的原因是因为 engine 的迁移是在任何存在在应用程序的迁移之后的。
 
-To run these migrations within the context of the application, simply run +rake db:migrate+. When accessing the engine through +http://localhost:3000/blog+, the posts will be empty. This is because the table created inside the application is different from the one created within the engine. Go ahead, play around with the newly mounted engine. You'll find that it's the same as when it was only an engine.
+要执行这些迁移到应用程序的上下文中，运行简单的 +rake db:migrate+。当通过 +http://localhost:3000/blog+ 访问 engine，文字将会是空的。这是因为在应用程序中创建的表和在 engine 中创建的是不一样的。向前走，欣赏刚刚挂载的 engine。你会发现它与其仅仅在 engine 中一样的。
 
-If you would like to run migrations only from one engine, you can do it by specifying +SCOPE+:
+如果你希望仅仅对一个 engine 执行迁移，你可以通过指定 +SCOPE+ 来完成它：
 
 <shell>
 rake db:migrate SCOPE=blorgh
 </shell>
 
-This may be useful if you want to revert engine's migrations before removing it. In order to revert all migrations from blorgh engine you can run such code:
+这会很有用如果你希望在移除它之前撤销 engine 的迁移。为了撤销从 'blorgh' engine 的所有迁移你可以运行这样的代码：
 
 <shell>
 rake db:migrate SCOPE=blorgh VERSION=0
 </shell>
 
-h4. Using a class provided by the application
+h4. （在 engine 中）使用一个被应用程序提供的类
 
-When an engine is created, it may want to use specific classes from an application to provide links between the pieces of the engine and the pieces of the application. In the case of the +blorgh+ engine, making posts and comments have authors would make a lot of sense.
+当一个 engine 被创建后，它可能希望使用一个指定的来自应用程序的类提供 engine 块和应用程序块之间的连接。在 +blorgh+ engine 实例中，使文章和评论拥有作者将有很大的意义。
 
 Usually, an application would have a +User+ class that would provide the objects that would represent the posts' and comments' authors, but there could be a case where the application calls this class something different, such as +Person+. It's because of this reason that the engine should not hardcode the associations to be exactly for a +User+ class, but should allow for some flexibility around what the class is called.
+通常情况，一个应用程序会有一个 +User+ 类其将会提供对象来表示文章和论论的作者，这是一个示例其展示了与在应用程序中调用这个类的不同，例如 +Person+。这是因为 engine 不能准确的硬编码与 +User+ 类的关系，但是应该允许关于类的一些灵活的调用。
 
-To keep it simple in this case, the application will have a class called +User+ which will represent the users of the application. It can be generated using this command inside the application:
+为了保持这个示例的简单，这个应用程序将会有一个名叫 +User+ 的类其将会表示应用程序的用户。在应用程序中可以使用这个命令来创建它：
 
 <shell>
 rails g model user name:string
 </shell>
 
-The +rake db:migrate+ command needs to be run here to ensure that our application has the +users+ table for future use.
+在运行 +rake db:migrate+ 前需要确认我们的应用程序会在将来使用 +users+ 表。
 
-Also, to keep it simple, the posts form will have a new text field called +author_name+ where users can elect to put their name. The engine will then take this name and create a new +User+ object from it or find one that already has that name, and then associate the post with it.
+同样，保持示例的简单，文章 'form' 将会有一个名叫 +author_name+ 的 text field 在这里用户可以选择并且输入他们的名字。Engine 将会随后获取这个名字并且依据它创建一个新的 +User+ 对象或者找到一个存在的有相同名字的对象，然后关联文章和它。
 
-First, the +author_name+ text field needs to be added to the +app/views/blorgh/posts/_form.html.erb+ partial inside the engine. This can be added above the +title+ field with this code:
+首先，+author_name+ text field 需要被添加到 engine 中的 +app/views/blorgh/posts/_form.html.erb+ partial。这里可以在添加 +title+ 上方添加这个代码：
 
 <erb>
 <div class="field">
@@ -477,9 +481,9 @@ First, the +author_name+ text field needs to be added to the +app/views/blorgh/p
 </div>
 </erb>
 
-The +Blorgh::Post+ model should then have some code to convert the +author_name+ field into an actual +User+ object and associate it as that post's +author+ before the post is saved. It will also need to have an +attr_accessor+ setup for this field so that the setter and getter methods are defined for it.
+接着 +Blorgh::Post+ 'model' 应该有一些代码来转换 +author_name+ field 到一个实际的 +User+ 对象并且在 文章保存之前关联它为文章的作者。这里也需要为这个 field 设置一个 +attr_accessor+ 使得为它定义来 setter and getter 方法。
 
-To do all this, you'll need to add the +attr_accessor+ for +author_name+, the association for the author and the +before_save+ call into +app/models/blorgh/post.rb+. The +author+ association will be hard-coded to the +User+ class for the time being.
+要这样做，你需要为 +author_name+ 添加 +attr_accessor+，作者的关系和 +before_save+ 调用到 +app/models/blorgh/post.rb+中。+author+ 关系将会被暂时硬编码到 +User+ 类中。
 
 <ruby>
 attr_accessor :author_name
@@ -493,39 +497,40 @@ private
   end
 </ruby>
 
-By defining that the +author+ association's object is represented by the +User+ class a link is established between the engine and the application. There needs to be a way of associating the records in the +blorgh_posts+ table with the records in the +users+ table. Because the association is called +author+, there should be an +author_id+ column added to the +blorgh_posts+ table.
+通过那样定义，+author+ 关系的对象被 +User+ 类代表一个在 engine 和应用程序的连接被建立。这需要一种方式来关联 +blorgh_posts+ 表中的记录和 +users+ 表中的记录。因为关系被 +author+ 调用，这里应该有一个 +author_id+ 被添加到 +blorgh_posts+ 表中。
 
-To generate this new column, run this command within the engine:
+要创建这个这个新字段，在 engine 中运行这个命令：
 
 <shell>
 $ rails g migration add_author_id_to_blorgh_posts author_id:integer
 </shell>
 
-NOTE: Due to the migration's name and the column specification after it, Rails will automatically know that you want to add a column to a specific table and write that into the migration for you. You don't need to tell it any more than this.
+NOTE: 因为迁移名和字段在他之后指定，Rails 将会自动知道你希望添加一个字段到一个指定的表并且为你将其写进迁移。你不需要在告诉它更多的消息。
 
-This migration will need to be run on the application. To do that, it must first be copied using this command:
+这个迁移需要在应用程序中运行。要这样做，首先需要复制并使用这个命令：
 
 <shell>
 $ rake blorgh:install:migrations
 </shell>
 
-Notice here that only _one_ migration was copied over here. This is because the first two migrations were copied over the first time this command was run.
+注意这里仅仅只有 _一个_迁移被复制。这是因为开始的两个迁移已经在这个命令第一次运行的时候全部复制了。
 
-<shell>
-  NOTE: Migration [timestamp]_create_blorgh_posts.rb from blorgh has been skipped. Migration with the same name already exists.
-  NOTE: Migration [timestamp]_create_blorgh_comments.rb from blorgh has been skipped. Migration with the same name already exists.
-  Copied migration [timestamp]_add_author_id_to_blorgh_posts.rb from blorgh
-</shell>
+<plain>
+NOTE Migration [timestamp]_create_blorgh_posts.rb from blorgh has been skipped. Migration with the same name already exists.
+NOTE Migration [timestamp]_create_blorgh_comments.rb from blorgh has been skipped. Migration with the same name already exists.
+Copied migration [timestamp]_add_author_id_to_blorgh_posts.rb from blorgh
+</plain>
 
-Run this migration using this command:
+运行这个迁移使用这个命令：
 
 <shell>
 $ rake db:migrate
 </shell>
 
 Now with all the pieces in place, an action will take place that will associate an author -- represented by a record in the +users+ table -- with a post, represented by the +blorgh_posts+ table from the engine.
+现在所有部分都准备就绪了，一个动作将会发生关联一个作者--被 +users+ 表中的一条记录表示--与一篇文章，代表来自 engine 的 +blorgh_posts+ （表记录）。
 
-Finally, the author's name should be displayed on the post's page. Add this code above the "Title" output inside +app/views/blorgh/posts/show.html.erb+:
+最后，作者的名称应该被显示在文章页面。添加这个代码在 +app/views/blorgh/posts/show.html.erb+ 中的 "Title" 输出的上方：
 
 <erb>
 <p>
@@ -534,13 +539,13 @@ Finally, the author's name should be displayed on the post's page. Add this code
 </p>
 </erb>
 
-By outputting +@post.author+ using the +<%=+ tag the +to_s+ method will be called on the object. By default, this will look quite ugly:
+对于输出的 +@post.author+ 使用 +<%=+ 标签，对象的 +to_s+ 方法将会被调用。（否则）默认情况，这将会相当难看：
 
-<text>
+<plain>
 #<User:0x00000100ccb3b0>
-</text>
+</plain>
 
-This is undesirable and it would be much better to have the user's name there. To do this, add a +to_s+ method to the +User+ class within the application:
+这是是不可取的这里有用户名显示会更好。要这样做添加一个 +to_s+ 方法给应用程序中的 +User+ 类：
 
 <ruby>
 def to_s
@@ -548,109 +553,122 @@ def to_s
 end
 </ruby>
 
-Now instead of the ugly Ruby object output the author's name will be displayed.
+现在作者名显示将会替代丑陋的 Ruby 对象输出。
 
-h4. Configuring an engine
+h4. 配置一个 engine
 
 This section covers firstly how you can make the +user_class+ setting of the Blorgh engine configurable, followed by general configuration tips for the engine.
+本节涵盖首先怎样去设定配置（好的） +user_class+ 的 'Blorgh' engine 的配置，其次是一般 engine 的配置技巧。
 
-h5. Setting configuration settings in the application
+h5. 在应用程序中设定配置文件
 
 The next step is to make the class that represents a +User+ in the application customizable for the engine. This is because, as explained before, that class may not always be +User+. To make this customizable, the engine will have a configuration setting called +user_class+ that will be used to specify what the class representing users is inside the application.
+下面的步骤是定制相关信息使得应用程序中的 +User+ 类代表 engine（中的作者。这是因为，正如前面解释的，这个类不会一直都是 +User+。要使的这里可定制，engine 将会有一个配置设置 +user_class+ 其将会用于指定应用程序的哪个类表示用户。
 
-To define this configuration setting, you should use a +mattr_accessor+ inside the +Blorgh+ module for the engine, located at +lib/blorgh.rb+ inside the engine. Inside this module, put this line:
+要定义这个配置设置，你需要在 +Blorgh+ engine 的模块中使用一个 +mattr_accessor+，位置在 engine 中的 +lib/blorgh.rb+。在这个模块中输入这行：
 
 <ruby>
 mattr_accessor :user_class
 </ruby>
 
 This method works like its brothers +attr_accessor+ and +cattr_accessor+, but provides a setter and getter method on the module with the specified name. To use it, it must be referenced using +Blorgh.user_class+.
+它的工作方法就好像 +attr_accessor+ 和 +cattr_accessor+，但是在模块中提供了一个 'setter' 和 'getter' 方法给指定的名称。要使用它，它必须引用 +Blorgh.user_class+。
 
-The next step is switching the +Blorgh::Post+ model over to this new setting. For the +belongs_to+ association inside this model (+app/models/blorgh/post.rb+), it will now become this:
+接下来是打开 +Blorgh::Post+ 开关到这个新的设置。对于这个 'model' (+app/models/blorgh/post.rb+)的 +belongs_to+ 关系，现在会是这样：
 
 <ruby>
 belongs_to :author, :class_name => Blorgh.user_class
 </ruby>
 
 The +set_author+ method also located in this class should also use this class:
++set_author+ 方法也位于这个类中应该也使用这个类：
 
 <ruby>
 self.author = Blorgh.user_class.constantize.find_or_create_by_name(author_name)
 </ruby>
 
-To save having to call +constantize+ on the +user_class+ result all the time, you could instead just override the +user_class+ getter method inside the +Blorgh+ module in the +lib/blorgh.rb+ file to always call +constantize+ on the saved value before returning the result:
+要保存在任何时候调用 +user_class+ 的 +constantize+，作为替代你可以仅仅覆盖在 +lib/blorgh.rb+ 里的 +Blorgh+ 'module' 中的 +user_class+ getter method 用于在返回结果之前的保存值的时候总是调用 +constantize+：
 
 <ruby>
-  def self.user_class
-    @@user_class.constantize
-  end
+def self.user_class
+  @@user_class.constantize
+end
 </ruby>
 
 This would then turn the above code for +self.author=+ into this:
+这里将会转换上面对于 +self.author=+ 的代码成这样：
 
 <ruby>
 self.author = Blorgh.user_class.find_or_create_by_name(author_name)
 </ruby>
 
-Resulting in something a little shorter, and more implicit in its behaviour. The +user_class+ method should always return a +Class+ object.
+结果要短一点了，在行为上更加含蓄。+user_class+ 方法应该总是返回一个 +Class+ 对象。
 
 To set this configuration setting within the application, an initializer should be used. By using an initializer, the configuration will be set up before the application starts and calls the engine's models which may depend on this configuration setting existing.
+要在应用程序中设置这个配置，会使用一个 'initializer'。通过使用一个 'initializer'，配置信息将会在启动应用程序和调用 engine 的 'model' 之前被设置好，它可能依赖于存在的 configuration setting。
 
-Create a new initializer at +config/initializers/blorgh.rb+ inside the application where the +blorgh+ engine is installed and put this content in it:
+在安装了 +blorgh+ engine 的应用程序中的 +config/initializers/blorgh.rb+ 创建一个新的 'initializer'并且放入如下内容：
 
 <ruby>
 Blorgh.user_class = "User"
 </ruby>
 
-WARNING: It's very important here to use the +String+ version of the class, rather than the class itself. If you were to use the class, Rails would attempt to load that class and then reference the related table, which could lead to problems if the table wasn't already existing. Therefore, a +String+ should be used and then converted to a class using +constantize+ in the engine later on.
+WARNING: 这里的类使用 +String+ 版的很重要，而不是类本身。如果你使用的类 Rails 会尝试导入这个类并且引用相关的表，这里可能会导致问题如果表不存在。因此，一个 +String+ 应该被使用并且转换一个存在的类后面通过使用 engine 中的 +constantize+。
 
 Go ahead and try to create a new post. You will see that it works exactly in the same way as before, except this time the engine is using the configuration setting in +config/initializers/blorgh.rb+ to learn what the class is.
+继续向前并且尝试创建一个新的文章。你将会看到和开始工作的方式一样的，但这次 engine 使用在 +config/initializers/blorgh.rb+ 中的配置设置来学习类是什么。
 
 There are now no strict dependencies on what the class is, only what the class's API must be. The engine simply requires this class to define a +find_or_create_by_name+ method which returns an object of that class to be associated with a post when it's created. This object, of course, should have some sort of identifier by which it can be referenced.
+这里现在并不严格依赖于类是什么（不管存在与否，只是字符串），仅仅是依赖（Engine类的）类 'API'。engine 简单的请求这个类定义一个 +find_or_create_by_name+ 方法用来访问文章创建的时候关联的类的对象。这个对象，当然，应该有能够引用它的一系列的 'identifier'。
 
 h5. General engine configuration
 
 Within an engine, there may come a time where you wish to use things such as initializers, internationalization or other configuration options. The great news is that these things are entirely possible because a Rails engine shares much the same functionality as a Rails application. In fact, a Rails application's functionality is actually a superset of what is provided by engines!
+在一个 engine 中，有时候你会希望使用这样的东西例如 initializers， internationalization 或者 其他的 configuration 选项。好消息是这些是完全可能的因为Rails engine 共享了很多与应用程序相同的功能。事实上，一个 Rails 应用程序的功能实际上是一个由 engine 提供的功能的大集合！
 
 If you wish to use an initializer -- code that should run before the engine is loaded -- the place for it is the +config/initializers+ folder. This directory's functionality is explained in the "Initializers section":http://guides.rubyonrails.org/configuring.html#initializers of the Configuring guide, and works precisely the same way as the +config/initializers+ directory inside an application. Same goes for if you want to use a standard initializer.
+如果你希望使用一个 'initializer' -- 代码应该在 engine 被导入之前运行 -- 它的位置在  +config/initializers+ 文件夹。这个目录的功能的解释在配置教程 "Initializers section":http://guides.rubyonrails.org/configuring.html#initializers ，并且恰好于应用程序中的 +config/initializers+ 目录相同。如果你想使用一个标准的 'initializer' 也一样。
 
-For locales, simply place the locale files in the +config/locales+ directory, just like you would in an application.
+对于 'locales' 文件，简单的放置 'locales' 文件到 +config/locales+ 目录，就像你在应用程序中一样。
 
 h3. Testing an engine
 
-When an engine is generated there is a smaller dummy application created inside it at +test/dummy+. This application is used as a mounting point for the engine to make testing the engine extremely simple. You may extend this application by generating controllers, models or views from within the directory, and then use those to test your engine.
+当一个 engie 被创建后在 +test/dummy+ 里面应该会有一个简单的 'dummy' 应用程序。这个应用程序被用来挂载 engine 并且使得测试极其简单。你可以通过在目录中创建 controllers， models 或 views 来扩展这个应用程序，并且随后使用它们来测试你的engine。
 
-The +test+ directory should be treated like a typical Rails testing environment, allowing for unit, functional and integration tests.
++test+ 目录应该被看作是一个典型的 Rails 测试环境，允许 unit, functional 和 integration 测试.
 
 h4. Functional tests
 
 A matter worth taking into consideration when writing functional tests is that the tests are going to be running on an application -- the +test/dummy+ application -- rather than your engine. This is due to the setup of the testing environment; an engine needs an application as a host for testing its main functionality, especially controllers. This means that if you were to make a typical +GET+ to a controller in a controller's functional test like this:
+一个值得考虑的问题，在编写功能测试的时候是测试打算运行在一个应用程序上 -- +test/dummy+ 应用程序 -- 而不是你的 engine。这是因为测试环境的设置；一个 engine 需要一个应用程序作为宿主来测试主要的功能，尤其是 'controllers'。这里的意思是如果你希望产生一个典型的 +GET+ 到一个如下的控制器的功能测试：
 
 <ruby>
 get :index
 </ruby>
 
 It may not function correctly. This is because the application doesn't know how to route these requests to the engine unless you explicitly tell it *how*. To do this, you must pass the +:use_route+ option (as a parameter) on these requests also:
+它可能无法正常工作。这是因为应用程序不知道怎样 route这些请求到 engine 除非你准确的告诉它*怎么做*。要这样做，你必须提供 +:use_route+ 选项（作为一个参数）在这些请求：
 
 <ruby>
 get :index, :use_route => :blorgh
 </ruby>
 
 This tells the application that you still want to perform a +GET+ request to the +index+ action of this controller, just that you want to use the engine's route to get there, rather than the application.
+这告诉应用程序你仍然希望执行一个 +GET+ 到这个控制器的 +index+ 'action'，只要是你希望使用在 engine 中的 'route' 到达那里，而不是在应用程序中。
 
 h3. Improving engine functionality
 
-This section looks at overriding or adding functionality to the views, controllers and models provided by an engine.
+本节着眼于覆盖或添加功能 engine 所提供的 views， controllers 和 models。
 
 h4. Overriding views
 
-When Rails looks for a view to render, it will first look in the +app/views+ directory of the application. If it cannot find the view there, then it will check in the +app/views+ directories of all engines which have this directory.
+当 Rails 查找一个 'view' 来渲染，它将会首先查找应用程序的 +app/views+ 目录。如果这里不能找到 'view'，那么它将会检查所有拥有 +app/views+这个目录的 engine。
 
-In the +blorgh+ engine, there is a currently a file at +app/views/blorgh/posts/index.html.erb+. When the engine is asked to render the view for +Blorgh::PostsController+'s +index+ action, it will first see if it can find it at +app/views/blorgh/posts/index.html.erb+ within the application and then if it cannot it will look inside the engine.
+在 +blorgh+ engine中，这里有一个正确的文件在 +app/views/blorgh/posts/index.html.erb+。当 engine 被请求渲染 +Blorgh::PostsController+' 的 +index+ 'action' 的 'view'。他会首先看到如果它可以在应用程序中 +app/views/blorgh/posts/index.html.erb+ 被找到并且如果不能它将会在 engine 中查找。
 
-By overriding this view in the application, by simply creating a new file at +app/views/blorgh/posts/index.html.erb+, you can completely change what this view would normally output.
+通过在应用程序(添加相应的 'view')中覆盖这个 'view'，通过简单的创建一个新文件在+app/views/blorgh/posts/index.html.erb+，你可以完全改变 'view' 的正常输出。
 
-Try this now by creating a new file at +app/views/blorgh/posts/index.html.erb+ and put this content in it:
+这里尝试创建一个新文件在 +app/views/blorgh/posts/index.html.erb+ 并且在其中放入这样的内容。
 
 <erb>
 <h1>Posts</h1>
@@ -663,82 +681,95 @@ Try this now by creating a new file at +app/views/blorgh/posts/index.html.erb+ a
 <% end %>
 </erb>
 
-Rather than looking like the default scaffold, the page will now look like this:
-
-!images/engines_post_override.png(Engine scaffold overriden)!
-
 h4. Routes
 
-Routes inside an engine are, by default, isolated from the application. This is done by the +isolate_namespace+ call inside the +Engine+ class. This essentially means that the application and its engines can have identically named routes, and that they will not clash.
+在一个 engine 中的路由，默认是于应用程序隔离的。是因为 +Engine+ 中 +isolate_namespace+ 被调用。这里的本质上的意思是应用程序和它的 engine 可以有相同名字的 route，并且它们不会冲突。
 
-Routes inside an engine are drawn on the +Engine+ class within +config/routes.rb+, like this:
+Engine 中的路由被 'drawn' 在 +config/routes.rb+ 中的 +Engine+ 类中，像这样：
 
 <ruby>
-  Blorgh::Engine.routes.draw do
-    resources :posts
-  end
+Blorgh::Engine.routes.draw do
+  resources :posts
+end
 </ruby>
 
-By having isolated routes such as this, if you wish to link to an area of an engine from within an application, you will need to use the engine's routing proxy method. Calls to normal routing methods such as +posts_path+ may end up going to undesired locations if both the application and the engine both have such a helper defined.
+由于有像这样的隔离路由，如果你希望从应用程序中连接一个 engine 的一个区域，你将需要使用 engine 的路由前缀的方法。类似调用 +posts_path+ 这样常规的方法可能会去到一个位置的目的地如果应用程序和 engine 中都有这样的 helper 被定义。
 
 For instance, the following example would go to the application's +posts_path+ if that template was rendered from the application, or the engine's +posts_path+ if it was rendered from the engine:
+例如，随后的例子将会来到应用程序的 +posts_path+ 如果 'template' 被应用程序渲染，或者 engine 的  +posts_path+ 如果它被 engine 渲染：
 
 <erb>
 <%= link_to "Blog posts", posts_path %>
 </erb>
 
-To make this route always use the engine's +posts_path+ routing helper method, we must call the method on the routing proxy method that shares the same name as the engine.
+要使的这个路由一直使用 engine 的 +posts_path+ 路由 'helper' 方法，我们必须在这个 'helper'前调用与 engine 名称相同的前缀方法。
 
 <erb>
 <%= link_to "Blog posts", blorgh.posts_path %>
 </erb>
 
-If you wish to reference the application inside the engine in a similar way, use the +main_app+ helper:
+如果你希望在 engine 中引用应用程序，简单的方式，使用 +main_app+ 'helper':
 
 <erb>
 <%= link_to "Home", main_app.root_path %>
 </erb>
 
-If you were to use this inside an engine, it would *always* go to the application's root. If you were to leave off the +main_app+ "routing proxy" method call, it could potentially go to the engine's or application's root, depending on where it was called from.
+如果你在 engine 中使用它，它将会*总是*来到应用程序的根目录。如果你离开 +main_app+  "routing proxy" 方法调用，它将会潜在的来到 engine 或者应用程序的根目录，取决于在哪调（应该是template位置的不同）用它。
 
 If a template is rendered from within an engine and it's attempting to use one of the application's routing helper methods, it may result in an undefined method call. If you encounter such an issue, ensure that you're not attempting to call the application's routing methods without the +main_app+ prefix from within the engine.
+如果 'template' 在一个 engine 中渲染并且它的企图是使用一个应用程序的路由 'helper' 方法，它可能以一个未定义的方法调用作为结果。如果你遭遇这样的问题，请确保在 engine 中没有 +main_app+ 的方法你不打算调用应用程序的路由方法。
 
 h4. Assets
 
-Assets within an engine work in an identical way to a full application. Because the engine class inherits from +Rails::Engine+, the application will know to look up in the engine's +app/assets+ directory for potential assets.
+Engine 中的 'assets' 工作方式和一个完全的应用程序相同。因为 engine 类继承至 +Rails::Engine+，应用程序将会知道查找 engine 中的 +app/assets+ 目录（来获取）潜在的资源。
 
 Much like all the other components of an engine, the assets should also be namespaced. This means if you have an asset called +style.css+, it should be placed at +app/assets/stylesheets/[engine name]/style.css+, rather than +app/assets/stylesheets/style.css+. If this asset wasn't namespaced, then there is a possibility that the host application could have an asset named identically, in which case the application's asset would take precedence and the engine's one would be all but ignored.
+与 engine 的其他组件非常相似，'assets' 也是被名称空间化的。这里的意思是如果你有一个 +style.css+ 的 'asset' 调用，它将会被放在在 +app/assets/stylesheets/[engine name]/style.css+ 而不是 +app/assets/stylesheets/style.css+。如果这个 'asset' 没有名称空间化，那么这里有可能宿主应用程序有一个相同名称的 'asset'，在这种情况下，应用程序的 'asset'将优先考虑那么engine的会被忽略。
 
 Imagine that you did have an asset located at +app/assets/stylesheets/blorgh/style.css+ To include this asset inside an application, just use +stylesheet_link_tag+ and reference the asset as if it were inside the engine:
+试想你确实有一个 'asset' 位于 +app/assets/stylesheets/blorgh/style.css+ 要包含这个 'asset' 到一个应用程序中，仅仅使用 +stylesheet_link_tag+ 并且引用这个 'asset' 如果它在 engine中：
 
 <erb>
 <%= stylesheet_link_tag "blorgh/style.css" %>
 </erb>
 
-You can also specify these assets as dependencies of other assets using the Asset Pipeline require statements in processed files:
+你也可以指定这些 'asset' 作为其他 'asset' 的依赖在处理文件中使用 'Asset Pipeline' 调用声明：
 
-<css>
+<plain>
 /*
  *= require blorgh/style
 */
-</css>
+</plain>
 
-For more information, read the "Asset Pipeline guide":http://guides.rubyonrails.org/asset_pipeline.html
+h4. Separate Assets & Precompiling
+
+这里是些解决方案，你的 engine 的 'asset' 不被宿主应用程序需要的。例如，这样说你仅仅在你的 engine 创建了一个管理员功能。这个情况下，宿主应用程序不需要 +admin.css+ 或者 +admin.js+。仅仅是 gem 的 'admin' 'layout' 需要这些 'asset'.宿主应用程序去'include' +"blorg/admin.css"+ 这样没有意义。在这个解决方案中你需要准确的定义这些 'asset' 来 'precompilation'。
+这里告诉 'sprockets' 在 +rake assets:precompile+运行的时候添加你的 engine 'asset'。
+
+你可以在 +engine.rb+ 定义 'asset' 来进行预编译
+
+<ruby>
+initializer do |app|
+  app.config.assets.precompile += %w(admin.css admin.js)
+end
+</ruby>
+
+更多的信息，阅读 "Asset Pipeline guide":http://guides.rubyonrails.org/asset_pipeline.html
 
 h4. Other gem dependencies
 
-Gem dependencies inside an engine should be specified inside the +.gemspec+ file that's at the root of the engine. The reason for this is because the engine may be installed as a gem. If dependencies were to be specified inside the +Gemfile+, these would not be recognised by a traditional gem install and so they would not be installed, causing the engine to malfunction.
+在一个 engine 中的 Gem 依赖应该在 +.gemspec+ 文件中指定，那在 engine 的根目录中。这样做的原因是 engine 可能会作为一个 gem 来安装。如果依赖被指定在 +Gemfile+ 中，这些将不会被传统安装的 gem 认可因此他们将不会被安装，导致 engine 故障。
 
-To specify a dependency that should be installed with the engine during a traditional +gem install+, specify it inside the +Gem::Specification+ block inside the +.gemspec+ file in the engine:
+要指定一个依赖其应该在和传统方式 +gem install+ 安装 engine 安装期间安装，在 engine中的 +.gemspec+ 文件的的 +Gem::Specification+ 代码块中指定它：
 
 <ruby>
 s.add_dependency "moo"
 </ruby>
 
-To specify a dependency that should only be installed as a development dependency of the application, specify it like this:
+要指定一个依赖仅仅作为一个应用程序的 'development dependency'，这样指定：
 
 <ruby>
 s.add_development_dependency "moo"
 </ruby>
 
-Both kinds of dependencies will be installed when +bundle install+ is run inside the application. The development dependencies for the gem will only be used when the tests for the engine are running.
+当运行 +bundle install+ 各种依赖将会被安装的时候。这个 gem 的开发模式依赖仅仅在当这个 engine 运行测试的时候使用。
