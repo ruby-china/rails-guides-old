@@ -30,6 +30,8 @@ Rails 是一个基于 Ruby 程序语言的 web 程序框架。如果你没有预
 * "Programming Ruby":http://www.ruby-doc.org/docs/ProgrammingRuby/
 * "Why's (Poignant) Guide to Ruby":http://mislav.uniqpath.com/poignant-guide/
 
+同样，你可以在 "rails github":https://github.com/rails/rails 仓库找到这个教程的示例代码，本教程在（rails/railties/guides/code/getting_started）。
+
 h3. Rails 是什么
 
 TIP: 这个章节开始就 Rails 框架的背景和来源做一个详细的描述。你可以安全的跳过这个章节并且在以后再回过头来看它。第三节你会开始你的的 Rails 之旅上的第一个 Rails 应用程序。
@@ -85,6 +87,10 @@ h5. Action Controller
 
 Action Controller 是在 Rails 中管理控制的组件。 The Action Controller 框架进程收到 Rails 应用程序的请求，提取参数，以及调度他们到具有相应义务的动作。这些服务是由 Action Controller 提供，包含会话管理、模板渲染、重定向功能。
 
+h5. Action View
+
+Action View 管理你的 Rails 应用程序的视图。它可以创建 HTML 和 XML 作为默认输出。Action View 管理模板渲染，包含嵌套和局部模板，以及内置的 AJAX 支持。View templates 更多的更详细的内容在 "Layouts and Rendering":http://guides.rubyonrails.org/layouts_and_rendering.html 被提及。
+
 h5. Action Dispatch
 
 Action Dispatch 处理了你和其他部分的应用程序的路由——一些Web请求以及你的配置。Rack applications 是更高级的模块，你可以到 "Rails on Rack":http://guides.rubyonrails.org/rails_on_rack.html 了解它。
@@ -128,17 +134,17 @@ DELETE /photos/14
 
 如果你想要了解更多关于 REST 架构风格, 以下这些资源可能比 Fielding 的论文更平易近人一些。  
 
-* A Brief Introduction to REST by Stefan Tilkov 
+* "A Brief Introduction to REST":http://www.infoq.com/articles/rest-introduction by Stefan Tilkov 
 
-* An Introduction to REST (video tutorial) by Joe Gregorio 
+* "An Introduction to REST":http://bitworking.org/news/373/An-Introduction-to-REST (video tutorial) by Joe Gregorio 
 
-* Representational State Transfer article in Wikipedia 
+* "Representational State Transfer":http://en.wikipedia.org/wiki/Representational_State_Transfer article in Wikipedia 
 
-* How to GET a Cup of Coffee by Jim Webber, Savas Parastatidis & Ian Robinson 
+* "How to GET a Cup of Coffee":http://www.infoq.com/articles/webber-rest-workflow by Jim Webber, Savas Parastatidis & Ian Robinson 
 
 h3. 建立一个新的 Rails 应用程序
 
-学习（使用）本指导的最好方式是跟随这里描述的每一步，不写代码或者没有例子所需的步骤会使得这个例子被冷落，你可以根据文字描述的步骤一步接着一步的操作。如果你需要完整的代码你可以从这里下载 "Getting Started Code":https://github.com/mikel/getting-started-code 。
+学习（使用）本指导的最好方式是跟随这里描述的每一步，不写代码或者没有例子所需的步骤会使得这个例子被冷落，你可以根据文字描述的步骤一步接着一步的操作。如果你需要完整的代码你可以从这里下载 "Getting Started Code":https://github.com/lifo/docrails/tree/master/guides/code/getting_started 。
 
 如果你跟随这个指导，你将会创建一个叫做 blog 的 Rails 项目——一个非常简单的网络博客。当你准备开始构建这个项目之前你需要确保 Rails 已经完全安装。
  
@@ -152,7 +158,7 @@ h4. 安装 Rails
 $ gem install rails
 </shell>
 
-提示: 如果你在 Window 下面工作，你可以使用 "Rails Installer":http://railsinstaller.org 快速安装 Ruby and Rails。
+TIP: 如果你在 Window 下面工作，你可以使用 "Rails Installer":http://railsinstaller.org 快速安装 Ruby and Rails。
 
 确认所有的（依赖）安装正确，你应该运行如下命令：
 
@@ -172,7 +178,7 @@ $ rails new blog #--skip-bundle    # Don't run bundle install这样在国内就�
 
 这里将创建一个名叫 Blog 的 Rails 应用程序在名称为 blog 的目录中。
 
-提示: 你可以通过运行 rails new -h，查看 Rails 应用程序创建器的所有命令（开关）。
+TIP: 你可以通过运行 rails new -h，查看 Rails 应用程序创建器的所有命令（开关）。
  
 当你创建了这个 blog 程序，跳转到它所在的文件夹中（直接对这个程序编辑）.
 
@@ -180,13 +186,13 @@ $ rails new blog #--skip-bundle    # Don't run bundle install这样在国内就�
 $ cd blog
 </shell>
 
-命令 +rails new blog+ 将会创建一个名为 <tt>blog</tt> 的文件夹在你的工作目录中。目录 <tt>blog</tt> 一些自动生成的文件它构成了 Rails  应用程序的结构。在这个体验中的大多数的工作都是在 app/ 这个文件夹中完成的，这里对 Rails 创建的新应用中的每一个文件夹的功能做出了一个概述：
+命令 +rails new blog+ 将会创建一个名为 <tt>blog</tt> 的文件夹在你的工作目录中。目录 <tt>blog</tt> 包含一些自动生成的文件它构成了 Rails  应用程序的结构。在这个体验中的大多数的工作都是在 app/ 这个文件夹中完成的，这里对 Rails 默认创建的每一个文件和文件夹的功能做出了一个概述：
 
 |_.File/Folder|_.Purpose|
 |app/|包含 controllers, models, views 和 你应用程序的 assets（资源），再接下面的手册中你主要的注意力应该放在这里。|
-|config/|配置你的应用程序的运行的规则，（url）路由，数据库和其他。|
-|config.ru|基于 Rack 服务器使用这个应用程序的 Rack 配置|
-|db/|显示你当前的数据表，同样也显示数据迁移。你将会简单的了解关于（数据）迁移。|
+|config/|配置你的应用程序的运行的规则，（url）路由，数据库和其他，更多的信息查看 "Configuring Rails Applications":http://guides.rubyonrails.org/configuring.html|
+|config.ru|基于 Rack 服务器使用这个应用程序的 Rack 配置用于开始应用程序（Rack configuration for Rack based servers used to start the application）|
+|db/|显示你当前的数据库结构（database schema），同样也显示数据迁移。|
 |doc/|应用程序的（深入）全面的文档。|
 |Gemfile<BR />Gemfile.lock|这个文件让你可以（添加）你的 Rails 所需要的特殊的 Gem 依赖关系。这个文件被 Bundler gem 使用，更多的信息查看 "the Bundler website":http://gembundler.com |
 |lib/|应用程序用到的扩展库（本手册没有涉及）|
@@ -195,9 +201,92 @@ $ cd blog
 |Rakefile|这个文件定位和载入能够在命令行中运行的任务。这个任务定义贯穿整个 Rails 的组件。除了修改 Rakefile，你更应该添加你自己的任务的文件到你的应用程序的 lib/tasks 目录。|
 |README.rdoc|这是一个简单的说明手册。你需要编辑这个文件告诉其他人你的应用程序可以做什么，怎么安装等等。|
 |script/|包含运行你的 app 的 rails 脚本，或者其他用来配置或运行你的应用程序的 scripts。|
-|test/|单元测试， fixtures，或者其他 test 工具。他们在 Testing Rails Applications 里面有完整的讲述。|
+|test/|单元测试， fixtures，或者其他 test 工具。他们在 "Testing Rails Applications":http://guides.rubyonrails.org/testing.html 里面有完整的讲述。|
 |tmp/|临时文件|
 |vendor/|放置第三方代码的地方。在一个典型的 Rails 应用程序中，这里包含 Ruby Gems，Rails 源代码（如果你把 Rails 安装到你的项目中）还包含一些预先包装好的额外的插件|
+
+h3. 配置一个数据库
+
+几乎每个 Rails 应用程序都会和一个数据库交互。使用的数据库在一个配置文件 +config/database.yml+ 中被指定。如果你打开一个在新的 Rails 应用程序的中的配置文件，你将会看到默认的数据库被配置使用 SQLite3。这个文件包含 Rails 默认能够运行的三个不同环境的部分：
+
+  * development 环境被使用在你的开发/本地计算机作为你与应用程序的手动交互。
+  * test 环境被使用来运行自动测试。
+  * production 环境在你部署你的应用程序给所有人使用的时候使用。
+
+TIP: 你不需要必须手动的更新数据库配置。如果你查看应用程序创建器的选项，你将会发现其中一个选项叫—— database。这个选项允许你从最常使用的关系数据库列表中选择一个适配器。你甚至可以反复运行创建器命令： +cd .. && rails new blog —database=mysql+。当你确认重写 +config/database.yml+ 文件，你的应用程序将会被配置为 MySQL 替代 SQLite。这些一般数据库连接的详细的例子在下面。
+
+h4. 配置一个 SQLite3 数据库
+
+Rails 内置支持 "SQLite":http://www.sqlite.org/ ，这是一个轻量级的非服务器，（serverless）数据库应用程序。即使一个繁忙的产品环境可能会超出 SQLite （所能），它在开发和测试环境能够很好的工作。Rails 在创建一个新的项目的时候默认使用一个 SQLite 数据库，但是你总是可以在以后改变它。
+
+这里是一个开发环境（数据库）连接信息默认配置文件(+config/database.yml+)的节选：
+
+<yml>
+development:
+  adapter: sqlite3
+  database: db/development.sqlite3
+  pool: 5
+  timeout: 5000
+</yml>
+
+TIP: 在这个教程中我们使用一个 SQLite3 数据库来存储数据，因为它是一个零配置数据库其就可以工作。Rails 同样也支持 MySQL 和 PostgreSQL “开箱即用的”，以及很多数据库系统的插件。如果你正在产品环境中使用一个数据库大多数情况下 Rails 都有一个与之相应的插件。
+
+h4. 配置一个 MySQL 数据库
+
+如果你选择使用一个 MySQL 替代（项目初始化）附带的 SQLite3 数据库，你的 +config/database.yml+ 将会看起来有些不同。这里是 development 部分：
+
+<yml>
+development:
+  adapter: mysql2
+  encoding: utf8
+  database: blog_development
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+</yml>
+
+如果你的开发电脑的 MySQL 安装的时候包含了一个名叫 'root' 的用户以及一个空密码，这个配置文件应该会为你工作。否则，在 development 部分模式更改为合适的用户名和密码。
+
+h4. 配置一个 PostgreSQL 数据库
+
+如果你选择使用 PostgreSQL，你的 +config/database.yml+ 将会定制来使用 PostgreSQL 数据库：
+
+<yml>
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: blog_development
+  pool: 5
+  username: blog
+  password:
+</yml>
+
+h4. 配置一个用于 JRuby 平台的 SQLite3 数据库
+
+如果你选择使用 SQLite3 并且使用 JRuby，你的 +config/database.yml+ 将会看起来有点不同。这里是 development 部分：
+
+<yml>
+development:
+  adapter: jdbcmysql
+  database: blog_development
+  username: root
+  password:
+</yml>
+
+h4. 配置一个用于 JRuby 平台的 PostgreSQL 数据库
+
+最后如果你选择使用 PostgreSQL 并且正在使用 JRuby，你的 +config/database.yml+将会看起来有点不同。这里是 development 部分：
+
+<yml>
+development:
+  adapter: jdbcpostgresql
+  encoding: unicode
+  database: blog_development
+  username: blog
+  password:
+</yml>
+
 
 h3. Hello, Rails!
 
@@ -211,7 +300,7 @@ h4. 启动web服务
 $ rails server
 </shell>
 
-提示: 编译 CoffeeScript 到 JavaScript需要一个 JavaScript 运行库，确实一个运行库将会给出一个 +execjs+ error。通常 Mac OS X 和 Windows 自带了一个 JavaScript 运行库。Rails 添加了 +therubyracer+  gem 到 Gemfile 的注释行中如果你需要可以取消对它的注释。+therubyrhino+ 推荐 JRuby 使用并且默认添加到 Gemfile 中如果应用程序在 JRuby 中创建。你可以查看所有的支持的运行库 "ExecJS":https://github.com/sstephenson/execjs#readme。
+TIP: 编译 CoffeeScript 到 JavaScript需要一个 JavaScript 运行库，确实一个运行库将会给出一个 +execjs+ error。通常 Mac OS X 和 Windows 自带了一个 JavaScript 运行库。Rails 添加了 +therubyracer+  gem 到 Gemfile 的注释行中如果你需要可以取消对它的注释。+therubyrhino+ 推荐 JRuby 使用并且默认添加到 Gemfile 中如果应用程序在 JRuby 中创建。你可以查看所有的支持的运行库 "ExecJS":https://github.com/sstephenson/execjs#readme。
 
 这里默认将开启一个 WEBrick 服务器的的实例（Rails 也可能使用一些其他的 web 服务器）。查看你的应用程序的行为，打开一个浏览器并且导航到 127.0.0.0：3000 你将会看到一个 Rails 默认的信息页面。
 
@@ -266,19 +355,19 @@ Blog::Application.routes.draw do
 
 NOTE. 更多的信息请参见 "Rails Routing from the Outside In":routing.html.
 
-h3. 使用Scaffolding快速创建并运行
+h3. 使用 Scaffolding 快速创建并运行
 
 是一个快速的方法产生应用程序的一些重要组成。如果你想使用一种简单的操作为新资源创建models,views和controllers，Scaffolding是一个不错的工具。
 
 h3. 创建一个资源
 
-在本示例中的blog应用程序，你可以使用scaffolded产生post资源：它表现为一个简单的blog posting。要完成这些，在终端输入如下命令：
+在本示例中的 blog 应用程序，你可以使用 scaffolded 产生 post 资源：它表现为一个简单的 blog posting。要完成这些，在终端输入如下命令：
 
 <ruby>
 rails generate scaffold Post name:string title:string content:text
 </ruby>
 
-创建器将会在应用程序中的一些文件夹中生成一些文件，并且还会编辑 config/routes.rb。下面这些产生的文件的大概说明：
+创建器将会在应用程序中的一些文件夹中生成一些文件，并且还会编辑 +config/routes.rb+。下面这些产生的文件的大概说明：
 
 |_.File/Folder|_.Purpose|
 |db/migrate/20100207214725_create_posts.rb |将创建的posts表单迁移到你的数据库（会在你的命名前面加上时间）|
@@ -299,13 +388,13 @@ rails generate scaffold Post name:string title:string content:text
 |app/assets/stylesheets/posts.css.scss|Cascading style sheet for the posts controller|
 |app/assets/stylesheets/scaffolds.css.scss |Cascading style sheet#层叠样式 to make the scaffolded views look better|
 
-即便是scaffolding使你创建和运行非常快捷，但是产生的代码不可能完美的适合你的应用程序。你大多数都需要定制产生的代码。很多有经验的Rails开发人员完全不使用scaffolding，宁愿从头编写全部的代码。Rails，无论如何，使得为生成的models，controllers，views或者其他代码编定制模板非常简单。你可以在 "Creating and Customizing Rails Generators & Templates":http://guides.rubyonrails.org/generators.html 看到更多信息。
+NOTE. 即便是scaffolding使你创建和运行非常快捷，但是产生的代码不可能完美的适合你的应用程序。你大多数都需要定制产生的代码。很多有经验的Rails开发人员完全不使用scaffolding，宁愿从头编写全部的代码。Rails，无论如何，使得为生成的models，controllers，views或者其他代码编定制模板非常简单。你可以在 "Creating and Customizing Rails Generators & Templates":http://guides.rubyonrails.org/generators.html 看到更多信息。
 
 h4. 执行数据迁移
 
 +rails generate scaffold+ 命令的一个产物就是数据迁移。Migrations是一个ruby类被设计用来使数据库表单的创建和修改变得简单。Rails使用rake命令来执行迁移，它还可以撤销已经应用的修改。 迁移文件名包含了一个时间戳确保了迁移能够完成。
 
-如果你查看+db/migrate/20100207214725_create_posts.rb+ 这个文件(记住，你得到的可能会有略微不同),你将会发现：
+如果你查看 +db/migrate/20100207214725_create_posts.rb+ 这个文件(记住，你得到的可能会有略微不同),你将会发现：
 
 <ruby>
 class CreatePosts < ActiveRecord::Migration
@@ -321,47 +410,47 @@ class CreatePosts < ActiveRecord::Migration
 end
 </ruby>
 
-整个migration创建了一个名叫change的方法，该方法在你运行这个migration的时候被调用。这个方法中定义的行为也是可逆的，那就是说Rails知道怎样逆向改变这个migration，如果你需要恢复到上一次数据。默认情况下，当你运行这个migration，他将会创建一个包含两个字符串列和一个text列的表单。关于Rails migration的更多信息请阅读 "Rails Database Migrations":http://guides.rubyonrails.org/migrations.html 手册。
+整个 migration 创建了一个名叫 change 的方法，该方法在你运行这个 migration 的时候被调用。这个方法中定义的行为也是可逆的，那就是说 Rails 知道怎样逆向改变这个migration，如果你需要恢复到上一次数据。默认情况下，当你运行这个 migration，他将会创建一个包含两个字符串列和一个 text 列的表单。关于 Rails migration 的更多信息请阅读 "Rails Database Migrations":http://guides.rubyonrails.org/migrations.html 手册。
 
-这个时候，你可以使用rake命令运行migration了：
+这个时候，你可以使用 rake 命令运行 migration 了：
 
 <shell>
 rake db:migrate
 </shell>
 
-Rails将会执行这个migration命令并且通知你它创建了Post表单。
+Rails 将会执行这个 migration 命令并且通知你它创建了 Post 表单。
 
 <shell>
-==  CreatePosts: migrating ====================================================
+==  CreatePosts: migrating ====================================================
 -- create_table(:posts)
-   -> 0.0019s
-==  CreatePosts: migrated (0.0020s) ===========================================
+   -> 0.0019s
+==  CreatePosts: migrated (0.0020s) ===========================================
 </shell>
 
-TIP: 由于你默认工作在开发环境中，这个命令将会应用于开发环境会话的数据库位于你的config/database.yml 中。如果你想执行migration在其他环境中，比如以产品（环境）为实例，你必须明确调用的通过命令行中执行：rake db:migrate RAILS_ENV=production。
+TIP: 由于你默认工作在开发环境中，这个命令将会应用于开发环境会话的数据库位于你的+config/database.yml+ 中。如果你想执行 migration 在其他环境中，比如以产品（环境）为实例，你必须明确调用的通过命令行中执行：+rake db:migrate RAILS_ENV=production+。
 
 h4. 添加一个 Link
 
-你已经创建好的post挂到主页上，你可以通过添加一个link到主页。打开 app/views/home/index.html.erb并且按照下面所示更改：
+你已经创建好的 post 挂到主页上，你可以通过添加一个 link 到主页。打开 +app/views/home/index.html.erb+ 并且按照下面所示更改：
 
 <erb>
 <h1>Hello, Rails!</h1>
 <%= link_to "My Blog", posts_path %>
 </erb>
 
-这个链接方法是Rails在 view helpers 的内建方法之一 。它创建一个基于文字的超级链接并显示到哪里，在这个实例中（跳转）到posts。
+这个链接方法是 Rails 在 view helpers 的内建方法之一 。它创建一个基于文字的超级链接并显示到哪里，在这个实例中（跳转）到 posts。
 
 h4. Working with Posts in the Browser
 
-现在你已经准备好在posts中工作了。导航至 http://localhost:3000，并且点击“My Blog”链接。
+现在你已经准备好在 posts 中工作了。导航至 "http://localhost:3000":http://localhost:3000，并且点击 “My Blog” 链接。
 
 !images/posts_index.png(Posts Index screenshot)!
 
-这就是Rails渲染你的posts视图后的结果。在你点击“New Post”链接并创建一个新的post之前，数据库里面是没有任何post的。随后你可以编辑，查看详细内容，或者删除他们。post的所有的logic和HTML都是通过 +rails generate scaffold+ 命令生成的。
+这就是 Rails 渲染你的 posts 视图后的结果。在你点击 “New Post” 链接并创建一个新的 post 之前，数据库里面是没有任何 post 的。随后你可以编辑，查看详细内容，或者删除他们。post 的所有的 logic 和 HTML 都是通过 +rails generate scaffold+ 命令生成的。
 
-TIP: 在开发模式中（你的默认工作模式），Rails会在每个浏览器请求的时候重新载入你的应用程序，因此你不需要停止或者重启web服务。
+TIP: 在开发模式中（你的默认工作模式），Rails 会在每个浏览器请求的时候重新载入你的应用程序，因此你不需要停止或者重启 web 服务。
 
-恭喜，你已经驯服了rails！现在是时候去看看它的所有工作了
+恭喜，你已经驯服了 rails！现在是时候去看看它的所有工作了
 
 h4. The Model
 
@@ -372,11 +461,11 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-这里有可能不一致——但是切记 +Post+ 类继承于+ActiveRecord::Base+。Active Record免费为你的models提供了强大的功能，包括基本数据库的CRUD（创建，读取，更新，删除）操作，数据验证，以及复杂的的查询与其它数据表单多关联的字段的支持能力。
+这里有可能不一致——但是注意 +Post+ 类继承于 +ActiveRecord::Base+。Active Record 免费为你的 models 提供了强大的功能，包括基本数据库的 CRUD（创建，读取，更新，删除）操作，数据验证，以及复杂的的查询与其它数据表单多关联的字段的支持能力。
 
 h4. 添加一些验证
 
-Rails包含一些帮助你验证发送到models的数据的方法。打开app/models/post.rb+并编辑：
+Rails 包含一些帮助你验证发送到models的数据的方法。打开 +app/models/post.rb+ 并编辑：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -386,20 +475,20 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-这些更改会确保所有的post都有一个name和titile并且title长度至少五个字符。Rails可以验证很多种字段，比如字段能否为空和独特性，字段的格式，以及字段的关联。验证详细描述在 "Active Record Validations and Callbacks":active_record_validations_callbacks.html#validations-overview
+这些更改会确保所有的 post 都有一个 name 和 titile 并且 title 长度至少五个字符。Rails 可以验证很多种字段，比如字段能否为空和独特性，字段的格式，以及字段的关联。验证详细描述在 "Active Record Validations and Callbacks":active_record_validations_callbacks.html#validations-overview
 
 h4. 使用控制台
 
-要想在action里面查看你的验证你可以使用console。console是一个可以让你在你的应用程序的上下文中执行Ruby代码的命令行工具：
+要想在action里面查看你的验证你可以使用 console。console 是一个可以让你在你的应用程序的上下文中执行 Ruby 代码的命令行工具：
 
 <shell>
 $ rails console
 </shell>
 
-TIP: 默认的console将会改变你的数据库。你可以通过运行<tt>rails console
+TIP: 默认的 console 将会改变你的数据库。你可以通过运行 <tt>rails console
 --sandbox</tt>,这样你可以（在退出控制台后）回滚你的任何操作
 
-在启动控制台后，你可以使用它来对你应用程序的models进行工作：
+在载入控制台后，你可以使用它来对你应用程序的models进行工作：
 
 <shell>
 >> p = Post.new(:content => "A new post")
@@ -412,7 +501,7 @@ TIP: 默认的console将会改变你的数据库。你可以通过运行<tt>rail
 => ["Name can't be blank", "Title can't be blank", "Title is too short (minimum is 5 characters)"]
 </shell>
 
-这段代码演示了创建一个Post实例，并企图保存到数据库并得到一个 +false+ 的返回值（说明保存失败的原因），检查post的错误信息。
+这段代码演示了创建一个 +Post+ 实例，并企图保存到数据库并得到一个 +false+ 的返回值（说明保存失败的原因），检查 post 的错误信息。
 
 当你操作完成，输入 +exit+ 并回车退出 console。
 
@@ -434,12 +523,12 @@ def index
 end
 </ruby>
 
-+Post.all+ 调用Post model并返回当前在数据库中的所有 post 为一个 +Post+ 记录的数组。并且我们将这个数组存储在一个叫做@posts的实例变量中。
++Post.all+ 调用 Post model 并返回当前在数据库中的所有 post 为一个 +Post+ 记录的数组。并且我们将这个数组存储在一个叫做@posts的实例变量中。
 
-TIP: 找有关Active Record更多的信息，可以查看 "Active
+TIP: 有关 Active Record 更多的信息，可以查看 "Active
 Record Query Interface":active_record_querying.html 相关记录。
 
-这个 +respond_to+ 块处理了这个动作的HTML和JSON请求。如果你浏览 "http://localhost:3000/posts.json":http://localhost:3000/posts.json，你将会看到一个JSON包含着所有的post。这个HTML格式在+app/views/posts/+ 的view中查找相对应的动作名称。Rails使来自action的所有的（可用的）实例变量对应到view。
+这个 +respond_to+ 块处理了这个动作的 HTML 和 JSON 请求。如果你浏览 "http://localhost:3000/posts.json":http://localhost:3000/posts.json，你将会看到一个 JSON 包含着所有的 post。这个 HTML 格式在+app/views/posts/+ 的 view 中查找相对应的动作名称。Rails 使来自 action 的所有的（可用的）实例变量对应到view。
 
 <erb>
 <h1>Listing posts</h1>
@@ -472,19 +561,19 @@ Record Query Interface":active_record_querying.html 相关记录。
 <%= link_to 'New post', new_post_path %>
 </erb>
 
-这个view迭代 +@posts+ 数组所有的内容并显示相关的内容和链接。关于视图备注一些信息：
+这个 view 迭代 +@posts+ 数组所有的内容并显示相关的内容和链接。关于视图备注一些信息：
 
 * +link_to+ 创建一个超链接到一个地方
-* +edit_post_path+ 和 +new_post_path+ 是Rails提供的 RESTful路由向导。你将会在不同 controller看到一系列的不同的actions helpers。
+* +edit_post_path+ 和 +new_post_path+ 是 Rails 提供的 RESTful 路由向导。你将会在不同 controller 看到一系列的不同的 actions helpers。
 
-NOTE: 在以前的版本的Rails中，你必须使用 +&lt;%=h post.name %&gt;+ 以避免一些HTML可能会在插入到页面之前转义。在Rails 3.0，作为默认。得到一个非转义的HTML，你现在使用 <tt>&lt;%= raw post.name %&gt;</tt>。
+NOTE: 在以前的版本的 Rails 中，你必须使用 +&lt;%=h post.name %&gt;+ 以避免一些HTML可能会在插入到页面之前转义。在 Rails 3.0，作为默认。得到一个非转义的 HTML，你现在使用 <tt>&lt;%= raw post.name %&gt;</tt>。
 
 TIP: 了解更过关于渲染处理流程，阅读 "Layouts and Rendering in
 Rails":layouts_and_rendering.html.
 
 h4. 定制布局
 
-view仅仅告诉HTML在你的web浏览器里面要显示什么（内容）。Rails也有关于 +layouts+ 的概念（定义），那就是布局是对view的包装。当Rails渲染一个view到浏览器，它通常是这样做： 把view的HTML放进布局的HTML中。在以前的版本中，+rails generate scaffold+ 命令将会自动创建controller对应指定的布局，就像 +app/views/layouts/posts.html.erb+ 对应于posts controller。 然而在rails3.0中有所不同了。一个应用程序指定的布局适用于所有的controllers，可以在 +app/views/layouts/application.html.erb+ 中找到(这就好像是django的base.html)。打开这个 layout 在你的编辑器中并且修改 +body+ 标签：
+view 仅仅告诉 HTML 在你的 web 浏览器里面要显示什么（内容）。Rails 也有关于 +layouts+ 的概念（定义），那就是布局是对 view 的包装。当 Rails 渲染一个 view 到浏览器，它通常是这样做： 把 view 的 HTML 放进布局的 HTML 中。在以前的版本中，+rails generate scaffold+ 命令将会自动创建 controller 对应指定的布局，就像 +app/views/layouts/posts.html.erb+ 对应于 posts controller。 然而在 rails3.0中有所不同了。一个应用程序指定的布局适用于所有的 controllers，可以在 +app/views/layouts/application.html.erb+ 中找到(这就好像是django的base.html)。打开这个 layout 在你的编辑器中并且修改 +body+ 标签：
 
 <erb>
 <!DOCTYPE html>
@@ -503,11 +592,11 @@ view仅仅告诉HTML在你的web浏览器里面要显示什么（内容）。Rai
 
 
 
-现在你刷新 +/posts+ 页面，你将会看到一个灰色的页面背景。并且相同的灰色背景将会使用在posts的所有视图中。
+现在你刷新 +/posts+ 页面，你将会看到一个灰色的页面背景。并且相同的灰色背景将会使用在 posts 的所有视图中。
 
 h4. 建立新文章
 
-创建一个new post 包含两个actions。首先是 +new+ action，它会实例化一个空的 +Post+ 对象：
+创建一个 new post 包含两个 actions。首先是 +new+ action，它会实例化一个空的 +Post+ 对象：
 
 <ruby>
 def new
@@ -520,7 +609,7 @@ def new
 end
 </ruby>
 
-这个 +new.html.erb+ 视图显示这个空的post给用户：
+这个 +new.html.erb+ 视图显示这个空的 post 给用户：
 
 <erb>
 <h1>New post</h1>
@@ -530,8 +619,8 @@ end
 <%= link_to 'Back', posts_path %>
 </erb>
 
-+&lt;%= render 'form' %&gt;+ 是我们第一个介绍的Rails的partials。一个partial是一个HTML代码片段和Ruby代码的组合可以在多目标对象中重用。（类似于django的include 'other.html'）。
-在本例中， form 用于创建 new post，它相当于一个用于编辑一个post的表单，这个表单有一个name text fields 和 title text fields 以及一个 content 的 text area还有一个用于添加一个新的 post 或者更新已经存在的 post 的按钮。
++&lt;%= render 'form' %&gt;+ 是我们第一个介绍的 Rails 的 partials。一个 partial 是一个 HTML 代码片段和 Ruby 代码的组合可以在多目标对象中重用。（类似于django的include 'other.html'）。
+在本例中， form 用于创建 new post，它相当于一个用于编辑一个 post 的表单，这个表单有一个 name text fields 和 title text fields 以及一个 content 的 text area 还有一个用于添加一个新的 post 或者更新已经存在的 post 的按钮。
 
 如果你看一下 +views/posts/_form.html.erb+ 这个文件，你将会发现下面的内容：
 
@@ -567,17 +656,16 @@ end
 <% end %>
 </erb>
 
-这个partial接收在view文件中定义的所有的实例变量。因此在本例中，controller申请新的Post对象给@post，@post在viewi和partial都是可用的。
+这个 partial 接收在 view 文件中定义的所有的实例变量。因此在本例中，controller 申请新的 Post 对象给@post，@post 在 view 和 partial 都是可用的。
 
-有关partials的更多信息，参考 "Layouts and Rendering in
+有关 partials 的更多信息，参考 "Layouts and Rendering in
 Rails":layouts_and_rendering.html#using-partials guide 指导。
 
-+form_for+ 代码块用于创建一个HTML表单。在这个代码块中你可以在访问方法的基础上在表单上创建各种控制。比如，+f.text_field :name+ 告诉 Rails 在表单中创建一个text input 并且对应于显示实例的 +name+ 属性。form使用的方法基于model的相对应的字段属性（类型如text_field or text_area）（例如本例中的+name+, +title+, and +content+）。Rails 偏好于使用（偏向于使用）+form_for+ 列出你要输入的HTML行因为这样代码更加简洁，并且这样使得form和particular model实例关系更加明显。
++form_for+ 代码块用于创建一个HTML表单。在这个代码块中你可以在访问方法的基础上在表单上创建各种控制。比如，+f.text_field :name+ 告诉 Rails 在表单中创建一个 text input 并且对应于显示实例的 +name+ 属性。form 使用的方法基于 model 的相对应的字段属性（类型如 text_field 或 text_area）（例如本例中的 +name+, +title+, and +content+）。Rails 偏好于使用（偏向于使用）+form_for+ 列出你要输入的 HTML 行因为这样代码更加简洁，并且这样使得 form 和 particular model 实例关系更加明显。
 
-+form_for+代码块同样也足够你定制你的 _New
-Post_ 和 _Edit Post_ action,并且将会设置form +action+ 标签以及在HTML输出中显示的提交按钮的名称。
++form_for+ 代码块同样也足够你定制你的 _New Post_ 和 _Edit Post_ action,并且将会设置 form +action+ 标签以及在 HTML 输出中显示的提交按钮的名称。
 
-TIP: 如果你需要创建一个HTML表单显示任意的域，而不绑定到model字段中，你应该使用 +form_tag+ 方法，它快捷的保证了建立forms不必在绑定到一个model实例。
+TIP: 如果你需要创建一个 HTML 表单显示任意的域，而不绑定到 model 字段中，你应该使用 +form_tag+ 方法，它快捷的保证了建立 forms 不必在绑定到一个 model 实例。
 
 当用户点击这张表单上面的 +Create Post+ 按钮，浏览器将会发回信息到controller的 +create+ action（Rails知道调用 +create+ 方法，因为form是以HTTP POST请求发送，这是我随后提到的一种协议之一）：
 
@@ -600,11 +688,11 @@ def create
 end
 </ruby>
 
-+create+ action 实例化一个新的Post对象，这个对象给form提供数据支持，Rails 会生成有效的 +params+ hash。当成功的保存了新post，+create+ 返回用户请求的适当的格式（在本例中是HTML）。然后重定向用户页面到结果显示的post show action页面并且给出提示Post成功的创建了。
++create+ action 实例化一个新的 Post 对象，这个对象给 form 提供数据支持，Rails 会生成有效的 +params+ hash。当成功的保存了新 post，+create+ 返回用户请求的适当的格式（在本例中是 HTML）。然后重定向用户页面到结果显示的 post show action页面并且给出提示 Post 成功的创建了。
 
-如果post没有保存成功，是因为（数据）验证错误，然后controller控制用户页面回到 +new+ action（包含验证错误新息）给用户，以便用户更改错误并重新提交。
+如果 post 没有保存成功，是因为（数据）验证错误，然后 controller 控制用户页面回到 +new+ action（包含验证错误新息）给用户，以便用户更改错误并重新提交。
 
- “Post was successfully created.” 这条消息被存储在Rails的flash的hash表中，（通常之叫它 _the flash_ ）因此消息可以转载到另一个action，在请求状态中提供有用的信息给用户。在这个新建例子（数据验证失败）中，用户实际上从来不看任何在页面创建进程中的渲染页面，因为它立刻重定向页面到new Post当Rails保存了这个记录。”Flash装载消息到接下来的action，因此当用户被重定向到了show action，他们立刻收到了一条消息“Post was successfully created.”。
+ “Post was successfully created.” 这条消息被存储在 Rails 的 flash 的 hash 表中，（通常之叫它 _the flash_ ）因此消息可以转载到另一个 action，在请求状态中提供有用的信息给用户。在这个新建例子（数据验证失败）中，用户实际上从来不看任何在页面创建进程中的渲染页面，因为它立刻重定向页面到 new Post当 Rails 保存了这个记录。”Flash装载消息到接下来的 action，因此当用户被重定向到了 show action，他们立刻收到了一条消息“Post was successfully created.”。
 
 h4. 显示一条 Post
 
@@ -648,7 +736,7 @@ end
 
 h4. 编辑Posts
 
-类似创建一个新的 post，编辑一个 post 分为两部分。首先是到 +edit_post_path(@post)+ 请求一个特定的post。这里是调用的在 controller 中的 +edit+ action：
+类似创建一个新的 post，编辑一个 post 分为两部分。首先是到 +edit_post_path(@post)+ 请求一个特定的 post。这里是调用的在 controller 中的 +edit+ action：
 
 <ruby>
 def edit
@@ -656,7 +744,7 @@ def edit
 end
 </ruby>
 
-再找到了请求的post， Rails 试图使用 +edit.html.erb+ 来显示它：
+再找到了请求的 post， Rails 试图使用 +edit.html.erb+ 来显示它：
 
 <erb>
 <h1>Editing post</h1>
@@ -689,7 +777,7 @@ def update
 end
 </ruby>
 
-在 +update+ action中，Rails首先使用 +:id+ 参数从edit view（传值到）数据库记录下刚才编辑的内容。当获取了请求的+post+ parameter（一个hash字典）就会 call +update_attributes+ 并且 应用 hash 字典的值到相应的记录。如果一切成功，用户会被重定向到post的show视图。如果期间发生了任何错误，它将回到edit视图并（要求）改正他们。
+在 +update+ action中，Rails 首先使用 +:id+ 参数从 edit view（传值到）数据库记录下刚才编辑的内容。当获取了请求的 +post+ parameter（一个hash字典）就会 call +update_attributes+ 并且 应用 hash 字典的值到相应的记录。如果一切成功，用户会被重定向到 post 的 show 视图。如果期间发生了任何错误，它将回到 edit 视图并（要求）改正他们。
 
 h4. 删除一个post
 
@@ -707,7 +795,7 @@ def destroy
 end
 </ruby>
 
-这个 +destroy+ 是Active Recordmodel的实例（功能是）从数据库中移除相应的记录。当这个（操作）完成，这里没有任何记录显示，因此Rails重定向用户的浏览器到model的index view。
+这个 +destroy+ 是 Active Recordmodel 的实例（功能是）从数据库中移除相应的记录。当这个（操作）完成，这里没有任何记录显示，因此 Rails 重定向用户的浏览器到 model 的index view。
 
 h3. 添加第二个Model（comment）
 
@@ -737,9 +825,9 @@ class Comment < ActiveRecord::Base
 end
 </ruby>
 
-这和你刚刚看到post.rb很近似。不同的是这行belongs_to :post，他会设定一个 Active Record association。你将会在接下来的guide学习一点有关associations的内容。
+这和你刚刚看到 post.rb 很近似。不同的是这行 belongs_to :post，他会设定一个 Active Record association。你将会在接下来的 guide 学习一点有关 associations 的内容。
 
-除了模型，Rails同样也产生了一个migration来创建相应的数据库表单：
+除了模型，Rails 同样也产生了一个 migration 来创建相应的数据库表单：
 
 <ruby>
 class CreateComments < ActiveRecord::Migration
@@ -757,7 +845,7 @@ class CreateComments < ActiveRecord::Migration
 end
 </ruby>
 
-对于 +t.references+ 这行，会在两个models之间生成一个外键列从而形成一个关系（组合）。而且 +add_index+ line生成一个索引关联到这个关系行：
+对于 +t.references+ 这行，会在两个 models 之间生成一个外键列从而形成一个关系（组合）。而且 +add_index+ line生成一个索引关联到这个关系行：
 
 <shell>
 $ rake db:migrate
@@ -801,16 +889,15 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-These two declarations enable a good bit of automatic behavior. For example, if
-you have an instance variable +@post+ containing a post, you can retrieve all
-the comments belonging to that post as an array using +@post.comments+.
+These two declarations enable a good bit of automatic behavior. For example, if you have an instance variable +@post+ containing a post, you can retrieve all the comments belonging to that post as an array using +@post.comments+.
+这两个声明启用了一个很好的自动关联功能。例如 如果你有一个包含一 post 的实例变量 +@post+，你可以使用 +@post.comments+ 以数组的形式取回属于这一 post 的所有评论。
 
 TIP: 更多关于Active Record associations的信息查看 "Active Record
 Associations":association_basics.html guide 。
 
 h4. 给Comments添加路由
 
-作为 +welcome+ controller，我们将还需要添加一个路由让Rails知道我们导航到哪里可以看到 +comments+。再次打开 config/routes.rb文件，你将会看到scaffold创建器在顶部为 +posts+ 自动添加的入口，<tt>resources
+作为 +welcome+ controller，我们将还需要添加一个路由让 Rails 知道我们导航到哪里可以看到 +comments+。再次打开 +config/routes.rb+ 文件，你将会看到 scaffold 创建器在顶部为 +posts+ 自动添加的入口，<tt>resources
 :posts</tt>，把它改成如下：
 
 <ruby>
@@ -819,12 +906,12 @@ resources :posts do
 end
 </ruby>
 
-这里把 creates +comments+ 作为一个嵌套资源放在 +posts+ 中。这正是posts和comments的分层关系的表现。
+这里把 creates +comments+ 作为一个嵌套资源放在 +posts+ 中。这正是 posts 和comments 的分层关系的表现。
 
-TIP: 关于routing的更多的信息，查看 "Rails Routing from the Outside
+TIP: 关于 routing 的更多的信息，查看 "Rails Routing from the Outside
 In":routing.html guide。
 
-h4. 构造一个Controller
+h4. 构造一个 Controller
 
 Model 已经到手了，你可以把你的注意力放到创建一个匹配的 controller 上了。类似的，像这样构造：
 
@@ -843,9 +930,9 @@ $ rails generate controller Comments
 | app/assets/javascripts/comment.js.coffee    | CoffeeScript for the controller          |
 | app/assets/stylesheets/comment.css.scss     | Cascading style sheet for the controller |
 
-就像大多数blog，我们的读者将会直接发表他们的评论在他们阅读post的时候，并且一旦他们添加评论成功，将会回到postshow页面去查看他们刚刚列出的评论。正因为这样(的考虑)，我们的 CommentsController如下，它提供一个方法来创建comments和删除垃圾评论。
+就像大多数 blog，我们的读者将会直接发表他们的评论在他们阅读 post 的时候，并且一旦他们添加评论成功，将会回到 postshow 页面去查看他们刚刚列出的评论。正因为这样(的考虑)，我们的 CommentsController如下，它提供一个方法来创建 comments 和删除垃圾评论。
 
-因此首先，我们来到Post show template(+/app/views/posts/show.html.erb+)，创建一个新的 comment：
+因此首先，我们来到 Post show template(+/app/views/posts/show.html.erb+)，创建一个新的 comment：
 
 <erb>
 <p id="notice"><%= notice %></p>
@@ -898,11 +985,11 @@ class CommentsController < ApplicationController
 end
 </ruby>
 
-这里你看到的会比你在controller中为posts做的要复杂点。那就是你刚刚你刚补充的副作用；每个面向comment的请求都保持了它所依附的post的踪迹(id)，因此这样初始化 +find+ 的时候匹配相应的 +Post+ model（时）得到了答案。
+这里你看到的会比你在 controller 中为 posts 做的要复杂点。那就是你刚刚你刚补充的副作用；每个面向 comment 的请求都保持了它所依附的 post 的踪迹(id)，因此这样初始化 +find+ 的时候匹配相应的 +Post+ model（时）得到了答案。
 
-此外，上面的代码带来的好处就是使得一些对于association的方法可用。我们使用 +@post.comments+ 中的 +create+ 方法来新建和保存 comment。这里将会自动连接link使得comment依附于对应的post。
+此外，上面的代码带来的好处就是使得一些对于 association 的方法可用。我们使用 +@post.comments+ 中的 +create+ 方法来新建和保存 comment。这里将会自动连接link使得 comment 依附于对应的 post。
 
-一旦我们评论过后，我们使用 +post_path(@post)+ 导引用户到先前的post。正如我们已经看到的，这里调用 +PostsController+ 的 +show+ action它将返回并渲染show.html.erb 模板。这里也是我们想让comment显示的地方，因此让我们添加（那些代码）到 +app/views/posts/show.html.erb+。
+一旦我们评论过后，我们使用 +post_path(@post)+ 导引用户到先前的 post。正如我们已经看到的，这里调用 +PostsController+ 的 +show+ action它将返回并渲染show.html.erb 模板。这里也是我们想让 comment 显示的地方，因此让我们添加（那些代码）到 +app/views/posts/show.html.erb+。
 
 <erb>
 <p id="notice"><%= notice %></p>
@@ -956,15 +1043,15 @@ end
 <%= link_to 'Back to Posts', posts_path %> |
 </erb>
 
-现在你可以添加posts和comments到你的blog同时随后他们会在相应的地方显示出来。
+现在你可以添加 posts 和 comments 到你的 blog 同时随后他们会在相应的地方显示出来。
 
 h3. 重构
 
-现在我们已经有Posts和Comments开始工作了，如果我们注意一下+app/views/posts/show.html.erb+ 模板，发现它变得太长而且很别扭。我们可以使用partials来整理它。
+现在我们已经有Posts和Comments开始工作了，如果我们注意一下 +app/views/posts/show.html.erb+ 模板，发现它变得太长而且很别扭。我们可以使用 partials 来整理它。
 
 h4. Rendering Partial Collections
 
-首先我们会创建一个comment partial来专门显示post的所有的comments。创建文件 +app/views/comments/_comment.html.erb+ 并输入如下内容：
+首先我们会创建一个 comment partial 来专门显示 post 的所有的 comments。创建文件 +app/views/comments/_comment.html.erb+ 并输入如下内容：
 
 <erb>
 <p>
@@ -1022,11 +1109,11 @@ h4. Rendering Partial Collections
 <%= link_to 'Back to Posts', posts_path %> |
 </erb>
 
-这里会把 +@post.comments+ 集合的每一个comment在+app/views/comments/_comment.html.erb+ 模板中渲染。当渲染方法迭代完 <tt>@post.comments</tt> 集合时候，它分配每个comment为与partial名相同的本地变量（这里为comment），通过这样在 partial 中的 +comment+ 就可以显示给我们的用户了。
+这里会把 +@post.comments+ 集合的每一个 comment 在 +app/views/comments/_comment.html.erb+ 模板中渲染。当渲染方法迭代完 <tt>@post.comments</tt> 集合时候，它分配每个 comment 为与 partial 名相同的本地变量（这里为comment），通过这样在 partial 中的 +comment+ 就可以显示给我们的用户了。
 
 h4. Rendering a Partial Form
 
-同样让我们移动new comment部分到它自己的地方吧。类似的，创建一个文件 +app/views/comments/_form.html.erb+ 并且在里面放入下面代码：
+同样让我们移动 new comment 部分到它自己的地方吧。类似的，创建一个文件 +app/views/comments/_form.html.erb+ 并且在里面放入下面代码：
 
 <erb>
 <%= form_for([@post, @post.comments.build]) do |f| %>
@@ -1104,8 +1191,8 @@ h3. Deleting Comments
 </p>
 </erb>
 
-点击“Destroy Comment”，link将会发送 <tt>DELETE
-/posts/:id/comments/:id</tt> 到我们的 +CommentsController+，+CommentsController+将会利用刚刚收到的（消息）找到我们想删除哪条评论，因此让我们接着添加一个destroy action到我们的controller：
+点击 “Destroy Comment”，link 将会发送 <tt>DELETE
+/posts/:id/comments/:id</tt> 到我们的 +CommentsController+，+CommentsController+将会利用刚刚收到的（消息）找到我们想删除哪条评论，因此让我们接着添加一个 destroy action 到我们的 controller：
 
 <ruby>
 class CommentsController < ApplicationController
@@ -1126,12 +1213,12 @@ class CommentsController < ApplicationController
 end
 </ruby>
 
-+destroy+ action将会找到那个我们正在阅读的post，并且定位comment在 <tt>@post.comments</tt> 集合，然后从数据库 remove 它，最后传回消息到post的show action。
++destroy+ action 将会找到那个我们正在阅读的 post，并且定位 comment 在 <tt>@post.comments</tt> 集合，然后从数据库 remove 它，最后传回消息到 post 的 show action。
 
 
 h4. Deleting Associated Objects
 
-如果你删除一个了post，那么与之相关联的comments也需要被删除。否则他们将会只是在数据库中占用空间（别无它用）。Rails允许你通过关系的依赖选项完成（上述功能）。修改Post model，+app/models/post.rb+，像这样：
+如果你删除一个了 post，那么与之相关联的 comments 也需要被删除。否则他们将会只是在数据库中占用空间（别无它用）。Rails 允许你通过关系的依赖选项完成（上述功能）。修改Post model，+app/models/post.rb+，像这样：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -1144,9 +1231,9 @@ end
 
 h3. Security
 
-如果你就这样publish你的blog在互联网，任何人都可以添加，编辑和删除post或者删除comments。
+如果你就这样 publish 你的 blog 在互联网，任何人都可以添加，编辑和删除 post 或者删除 comments。
 
-Rails提供了一个非常简单的HTTP认证系统在这样的情况下会非常适合。
+Rails 提供了一个非常简单的 HTTP 认证系统在这样的情况下会非常适合。
 
 在 +PostsController+ 中我们需要一个方法来阻止没有通过认证的用户的操作，这里我们可以使用Rails的  <tt>http_basic_authenticate_with</tt> 这个方法，运行访问请求如果这个方法是允许的。
 
@@ -1177,21 +1264,21 @@ class CommentsController < ApplicationController
 # snipped for brevity
 </ruby>
 
-现在如果你尝试创建一个新的post，你将会迎来一个基于HTTP认证的挑战。
+现在如果你尝试创建一个新的 post，你将会迎来一个基于 HTTP 认证的挑战。
 
 !images/challenge.png(Basic HTTP Authentication Challenge)!
 
 h3. Building a Multi-Model Form
 
-另一个功能来平衡你的blog是能够给posts添加tag。要想在你的程序中实现这个功能需要在一个form中与超过一个model互动。Rails提供了嵌套forms。
+另一个功能来平衡你的 blog 是能够给 posts 添加 tag。要想在你的程序中实现这个功能需要在一个 form 中与超过一个 model 互动。Rails 提供了嵌套 forms。
 
-为了演示这个（功能），你将会在你创建post的form中添加post的多tag支持。首先创建一个new model来存放tags：
+为了演示这个（功能），你将会在你创建 post 的 form 中添加 post 的多 tag支持。首先创建一个 new model来存放 tags：
 
 <shell>
 $ rails generate model Tag name:string post:references
 </shell>
 
-再次运行migration来创建数据库表单：
+再次运行 migration 来创建数据库表单：
 
 <shell>
 $ rake db:migrate
@@ -1213,7 +1300,7 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-对于 +:allow_destroy+ 嵌套属性的声明是告诉Rails显示一个“remove”复选框在视图中那样你可以快速创建（tags）。对于 +:reject_if+ 保证不保存没有任何内容的tags。
+对于 +:allow_destroy+ 嵌套属性的声明是告诉 Rails 显示一个 “remove” 复选框在视图中那样你可以快速创建（tags）。对于 +:reject_if+ 保证不保存没有任何内容的tags。
 
 我们将要修改 +views/posts/_form.html.erb+ 来render（form的）一部分来创建tag：
 
@@ -1254,9 +1341,9 @@ end
 
 注意：我们已经更改 +form_for(@post) do |f|+ 中的 +f+ 为 +post_form+ 这样会更加容易明白是怎么回事。
 
-这个例子在render helper中使用另个方式，是为了说明我们希望的是在 +form+ 中使用局部变量指向的 +post_form+ 对象。
+这个例子在 render helper 中使用另个方式，是为了说明我们希望的是在 +form+ 中使用局部变量指向的 +post_form+ 对象。
 
-我们还在form的顶部添加 <tt>@post.tags.build</tt>。这里是为了确保每个新的tag都被用户填上了name。如果你不创建新tag，form将不会显示它。
+我们还在form的顶部添加 <tt>@post.tags.build</tt>。这里是为了确保每个新的 tag 都被用户填上了 name。如果你不创建新 tag，form 将不会显示它。
 
 现在创建一个 <tt>app/views/tags</tt> 文件夹并且在里面新建一个 <tt>_form.html.erb</tt> 它包含tag form：
 
@@ -1275,7 +1362,7 @@ end
 <% end %>
 </erb>
 
-最后编辑 <tt>app/views/posts/show.html.erb</tt> 模板显示我们的tags：
+最后编辑 <tt>app/views/posts/show.html.erb</tt> 模板显示我们的 tags：
 
 <erb>
 <p id="notice"><%= notice %></p>
@@ -1311,13 +1398,13 @@ end
 <%= link_to 'Back to Posts', posts_path %> |
 </erb>
 
-通过这写修改，你会发现你可以直接在post form中编辑tags。
+通过这写修改，你会发现你可以直接在 post form中编辑 tags。
 
 另外， <tt>@post.tags.map { |t| t.name }.join(", ")</tt> 这个方法很别扭，我们可以通过编写一个helper method。
 
 h3. View Helpers
 
-View Helpers放置在 <tt>app/helpers</tt>，它提供了可重用的小代码片段给view。在本例，我们想要一个方法把（tag）放在一起（一个字符串中），并且使用逗号分割。要想这样在Post show模板，我们在PostHelper中写入：
+View Helpers 放置在 <tt>app/helpers</tt>，它提供了可重用的小代码片段给 view。在本例，我们想要一个方法把（tag）放在一起（一个字符串中），并且使用逗号分割。要想这样在Post show 模板，我们在 PostHelper 中写入：
 
 现在你可以在 <tt>app/helpers/posts_helper.rb</tt> 中更改：
 
@@ -1368,16 +1455,16 @@ this:
 
 h3. What's Next?
 
-现在你已经看到了你的第一个Rails应用程序，你应该可以很轻松的继续更新它或者试验一下你的想法。当你在更新和运行Rails的时候需要援助，咨询下面推荐的资源会让你感到轻松：
+现在你已经看到了你的第一个 Rails 应用程序，你应该可以很轻松的继续更新它或者试验一下你的想法。当你在更新和运行 Rails 的时候需要援助，咨询下面推荐的资源会让你感到轻松：
 
 * The "Ruby on Rails guides":index.html
 * The "Ruby on Rails Tutorial":http://railstutorial.org/book
 * The "Ruby on Rails mailing list":http://groups.google.com/group/rubyonrails-talk
 * The "#rubyonrails":irc://irc.freenode.net/#rubyonrails channel on irc.freenode.net
 
-Rails同样也带有内置的帮助你可以使用rake命令实用工具在你的应用程序中创建帮助文档：
+Rails 同样也带有内置的帮助你可以使用 rake 命令实用工具在你的应用程序中创建帮助文档：
 
-* 运行 +rake doc:guides+ 将会输出所有Rails Guides的文档到你的应用程序中的 +doc/guides+ 中。在你的浏览器中打开/guides/index.html浏览Guides。
+* 运行 +rake doc:guides+ 将会输出所有 Rails Guides 的文档到你的应用程序中的 +doc/guides+ 中。在你的浏览器中打开/guides/index.html浏览 Guides。
 * 运行 +rake doc:rails+ 将会输出所有Rails API 的文档到你的应用程序中的 +doc/api+ 中。在你的浏览器中打开 +doc/api/index.html+ 浏览API documentation。
 
 h3. Configuration Gotchas配置陷阱
@@ -1386,7 +1473,7 @@ The easiest way to work with Rails is to store all external data as UTF-8. If
 you don't, Ruby libraries and Rails will often be able to convert your native
 data into UTF-8, but this doesn't always work reliably, so you're better off
 ensuring that all external data is UTF-8.
-Rails使用Rails最简单的工作方式是存储所有的外部数据为 UTF-8编码。如果不那样做，Ruby libraries和Rails通才会转换你的自然数据成 UTF-8编码，但是这样不是很可靠，因此你最好保证所有的外部数据是 UTF-8编码。如果你在这里犯了错误，一般的症状就是在浏览器中出现钻石符号（可能是^）变成了问号。 另一个普遍症状是“ü”变成了 “Ã¼”。
+使用 Rails 最简单的工作方式是存储所有的外部数据为 UTF-8编码。如果不那样做，Ruby libraries 和 Rails 通才会转换你的自然数据成 UTF-8 编码，但是这样不是很可靠，因此你最好保证所有的外部数据是 UTF-8 编码。如果你在这里犯了错误，一般的症状就是在浏览器中出现钻石符号（可能是^）变成了问号。 另一个普遍症状是 “ü” 变成了 “Ã¼”。
 
 Rails 在国际化上下了很多的功夫，大部分的此类错误都能够自动发现并错误，然而如果你有一些不是用 UTF-8 存储的特殊的数据恐怕就会出现一些奇怪的问题了。 
 
