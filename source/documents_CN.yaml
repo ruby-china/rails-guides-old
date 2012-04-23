@@ -42,6 +42,8 @@
     - 
       name: Action View Form Helpers
       url: form_helpers.html
+      work_in_progress: true
+      contributor: crhan
       description: Guide to using built-in Form helpers.
 -
   name: 控制器(Controllers)
