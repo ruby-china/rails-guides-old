@@ -304,7 +304,23 @@ xxx包括以下关键字：
 </table>
 
 
+还有一些特殊的标记单词也不要翻译。
+在这些标记单词后面的内容在生成 HTML 后会有特殊样式:
 
+<table>
+<tr>
+    <td>WARNING</td>
+    <td>警告</td>
+</tr>
+<tr>
+    <td>TIP</td>
+    <td>提示</td>
+</tr>
+<tr>
+    <td>NOTE</td>
+    <td>注意</td>
+</tr>
+</table>
 
 ##### 生成
 

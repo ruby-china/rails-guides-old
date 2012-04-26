@@ -60,7 +60,7 @@ end
 config.asset_path = proc { |path| "/blog/public#{path}" }
 </ruby>
 
-注意. 如果开启了 asset pipeline, +config.asset_path+ 配置会被忽略. 默认是开启 asset pipeline.
+NOTE. 如果开启了 asset pipeline, +config.asset_path+ 配置会被忽略. 默认是开启 asset pipeline.
 
 * +config.autoload_once_paths+ 接受一个路径数组, Rails将会自动加载这些路径中的常量,所以这些常量就不会在每次请求时都被清除. 如果+config.cache_classes+是 false , 这个配置将会无效, 这在开发环境下是默认的. 另外, 所有的自动加载都是发生一次. 数组里的所有元素必须同时在 +autoload_paths+ 里。这默认是空数组.
 
@@ -114,7 +114,7 @@ config.session_store :my_custom_store
 
 * +config.threadsafe!+ 激活 +allow_concurrency+, +cache_classes+, +dependency_loading+ 和 +preload_frameworks+ 来让应用程序实现线程安全。
 
-警告：线程安全操作与一般开发模式下的 Rails 不兼容的。特别要注意的是当你调用 +config.threadsafe+ 的时候，自动依赖加载和类重新加载都会被自动取消。
+WARNING: 线程安全操作与一般开发模式下的 Rails 不兼容的。特别要注意的是当你调用 +config.threadsafe+ 的时候，自动依赖加载和类重新加载都会被自动取消。
 
 * +config.time_zone+ 设置应用程序 Active Record 可用的默认时区。
 
@@ -177,7 +177,7 @@ end
 
 可以在这个代码块里使用的所有方法列表如下:
 
-* +assets+ 允许在创建一个脚手架(scaffold)时候创建资源文件。默认是 +true+
+* +assets+ 允许在创建一个 scaffold 时候创建资源文件。默认是 +true+
 * +force_plural+ 运行将数据模型(model)的名字都变成复数。默认是 +false+
 * +helper+ 指定是否要创建 helpers. 默认是 +true+
 * +integration_tool+ 指定使用哪个集成工具。默认是 +nil+
@@ -396,7 +396,7 @@ config.action_view.javascript_expansions[:prototype] = ['prototype', 'effects', 
 
 * +cofnig.action_view.embed_authenticity_token_in_remote_forms+ 让你设置具有 +:remote => true+ 属性的表单中是否默认带有 +authenticity_token+。默认情况下这个值设置为 false , 这意味着远程表单里将不包含 +authenticity_token+，这对你局部缓存表单会很有用。运程表单将通过 +meta+ 标签获得真实性(认证), 所以嵌入是必要的，除非你支持没有 Javascript 的浏览器。在这种情况下，你可以投递 +:authenticity_token => true+ 作为表单参数或者将这个配置设置为 +true+
 
-* +config.action_view.prefix_partial_path_with_controller_namespace+ 用来指定控制器是否从模板的子目录中根据控制器的命名空间搜索partial模板。例如，考虑某个命名为 +Admin::PostsController+ 的控制器，它渲染这个模板:
+* +config.action_view.prefix_partial_path_with_controller_namespace+ 用来指定控制器是否从模板的子目录中根据控制器的命名空间搜索 partial 模板。例如，考虑某个命名为 +Admin::PostsController+ 的控制器，它渲染这个模板:
 
 <erb>
 <%= render @post %>
@@ -476,7 +476,7 @@ h4. 配置数据库
 * +test+ 环境用于运行自动测试的时候。
 * +production+ 环境用于部署应用程序给全世界用的时候。
 
-提示: 你不必手动更新数据库配置文件。如果你查看应用程序生成器的选项, 你会发现其中一个选项为 <tt>--database</tt>. 这个选项允许你选择一个适配器，这个适配器可以是最常用的关系型数据库。你甚至可以重复运行生成器: <tt>cd .. && rails new blog --database=mysql</tt>. 如果你确认重写 +config/database.yml+ 文件， 你的应用程序将被配置使用 MySQL 而不是 SQLite. 常用数据库连接的详细例子会在下面说到。
+TIP: 你不必手动更新数据库配置文件。如果你查看应用程序生成器的选项, 你会发现其中一个选项为 <tt>--database</tt>. 这个选项允许你选择一个适配器，这个适配器可以是最常用的关系型数据库。你甚至可以重复运行生成器: <tt>cd .. && rails new blog --database=mysql</tt>. 如果你确认重写 +config/database.yml+ 文件， 你的应用程序将被配置使用 MySQL 而不是 SQLite. 常用数据库连接的详细例子会在下面说到。
 
 h5. 配置 SQLite3 数据库
 
@@ -492,7 +492,7 @@ development:
   timeout: 5000
 </yaml>
 
-注意: Rails 默认使用 SQLite3 数据库存储数据是因为它是一个不需要配置就能工作的数据库。Rails 也支持 MySQL 和 PostgreSQL, 并且有许多其它数据库的插件。如果你在生产环境中使用数据库，Rails 通常都能为其提供一个适配器.
+NOTE: Rails 默认使用 SQLite3 数据库存储数据是因为它是一个不需要配置就能工作的数据库。Rails 也支持 MySQL 和 PostgreSQL, 并且有许多其它数据库的插件。如果你在生产环境中使用数据库，Rails 通常都能为其提供一个适配器.
 
 h5. 配置 MySQL 数据库
 
@@ -572,13 +572,13 @@ Rails 的某些部分也可以通过设置环境变量，进行外部赋值来�
 * +ENV["RAILS_CACHE_ID"]+ 和 +ENV["RAILS_APP_VERSION"]+ 用于生成 Rails 缓存代码的扩展缓存键。这可以让同一个应用程序有多个独立分开的缓存。
 
 
-h3. 使用 Initialiezer 文件
+h3. 使用 Initializer 文件
 
 加载完框架和应用程序的所有 gems 之后，Rails 会接着去加载所有的初始化程序. 初始化程序是存放在 +config/initializers+ 里任何的一个 Ruby 文件。你可以使用 initializers 容纳所有待配置选项和设置，它们会在所有框架和 gems 加载完之后进行配置和设置，例如为这些部分配置设置的选项。
 
-注意: 你可以使用子文件夹来组织你的初始化程序， 因为 Rails 会纵向搜索整个 initializers 文件夹。
+NOTE: 你可以使用子文件夹来组织你的初始化程序， 因为 Rails 会纵向搜索整个 initializers 文件夹。
 
-提示: 如果你的 initialziers 里有一组依赖，你可以根据名字控制加载循序。例如, +01_critical.rb+ 将比 +01_normal.rb+ 先被加载。
+TIP: 如果你的 initialziers 里有一组依赖，你可以根据名字控制加载循序。例如, +01_critical.rb+ 将比 +01_normal.rb+ 先被加载。
 
 h3. 初始化事件
 
@@ -614,7 +614,7 @@ Rails.application.config.before_initialize do
 end
 </ruby>
 
-警告: 应用程序的一些部分，特别是 观察者(observers) 和 路由(routing) 在 +after_initialize+ 代码块被调用之时都还没有启动。
+WARNING: 应用程序的一些部分，特别是 观察者(observers) 和 路由(routing) 在 +after_initialize+ 代码块被调用之时都还没有启动。
 
 h4. +Rails::Railtie#initializer+
 
@@ -630,7 +630,7 @@ end
 
 通过 +initializer+ 方法定义的初始化程序会按照它们被定义的顺序运行，除了那个使用 +:before+ 或者 +:after+ 方法的。
 
-警告: 如果初始化程序运行有逻辑关系，你应该将一个初始化程序放在另一个之前或者之后。比如说有 4 个初始化程序， "one" 到 "four"(按照这个顺序定义)，并且你定义"four"在"four"_之前_ 但在"three"_之后_运行。像这种无逻辑的定义Rails将不能确定它们的顺序。
+WARNING: 如果初始化程序运行有逻辑关系，你应该将一个初始化程序放在另一个之前或者之后。比如说有 4 个初始化程序， "one" 到 "four"(按照这个顺序定义)，并且你定义"four"在"four"_之前_ 但在"three"_之后_运行。像这种无逻辑的定义Rails将不能确定它们的顺序。
 
 +initializer+ 方法的代码块参数是应用程序自身的对象，所以我们能通过它使用 +config+ 方法访问配置，就像在例子里做的那样。
 
