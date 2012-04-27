@@ -106,7 +106,10 @@
     - 
       name: Asset Pipeline
       url: asset_pipeline.html
+      work_in_progress: true
+      contributor: ichord
       description: This guide documents the asset pipeline.
+      description: 本指南记载了 asset pipline.
     - 
       name: Engine 入门
       url: engines.html

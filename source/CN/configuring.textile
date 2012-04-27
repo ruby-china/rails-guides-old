@@ -525,6 +525,13 @@ development:
   password:
 </yaml>
 
+如果你使用外部的连接池管理的话，你可以取消 Rails 的 prepared statements:
+<yaml>
+production:
+  adapter: postgresql
+  prepared_statements: false
+</yaml>
+
 h5. 为 JRuby 平台配置 SQLite3
 
 如果你选择使用 SQLite3 并且使用的是JRuby, +config/database.yml+ 将会有一点不同。这是开发环境部分：
