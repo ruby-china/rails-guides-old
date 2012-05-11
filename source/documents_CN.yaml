@@ -49,9 +49,12 @@
   name: 控制器(Controllers)
   documents:
     - 
-      name: Action Controller Overview
+      name: 行为控制器概述
       url: action_controller_overview.html
+      work_in_progress: true
+      contributor: wolflee  
       description: This guide covers how controllers work and how they fit into the request cycle in your application. It includes sessions, filters, and cookies, data streaming, and dealing with exceptions raised by a request, among other topics.
+      description: 该指南涵盖了控制器如何工作及他们如何在应用中的请求周期中协调地工作。内容包括sessions, 过滤器, cookies, 数据流, 除此之外还有处理由请求引起异常。
     - 
       name: 深入浅出说路由 
       url: routing.html
