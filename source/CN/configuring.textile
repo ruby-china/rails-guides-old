@@ -526,6 +526,7 @@ development:
 </yaml>
 
 如果你使用外部的连接池管理的话，你可以取消 Rails 的 prepared statements:
+
 <yaml>
 production:
   adapter: postgresql
