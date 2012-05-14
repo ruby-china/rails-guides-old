@@ -506,6 +506,86 @@ location ~ ^/(assets)/  {
 
 h4. 即时编译
 
+有些情况你也像使用即时编译。在这个模式下，所有的资源请求都直接由 Sprockets 处理。
+
+开启这个选项：
+
+<erb>
+config.assets.compile = true
+</erb>
+
+在第一次请求时，资源会被编译并以上面开发模式给出的方式被缓存。还有就是在 helpers 里用到的 manifest 的名字被改成含有 MD5 哈希值。
+
+Sprockets 同时会将 +Cache-Control+ HTTP 头部设置为 +max-age=31536000+. 这告诉所有在你客户端浏览器和服务器之间的缓存将会被缓存 1 年。这样做的作用是减少了向服务器对这些资源的请求数量；这些资源能很好的缓存在本地浏览器缓存或者一些中间缓存。
+
+这个模式使用更多的内存， 比默认的运行得更慢。也不建议这么做。
+
+如果你将一个产品应用程序部署到任何没有预装 JavaScript 运行时的系统上时，你应该想要加入这个到你的 Gemfile 里:
+
+<plain>
+group :production do
+  gem 'therubyracer'
+end
+</plain>
+
+h3. 自定义 Pipline
+
+h4. CSS 压缩器
+
+通常都选 YUI 压缩 CSS. "YUI CSS compressor":http://developer.yahoo.com/yui/compressor/css.html 提供最小化功能。
+
+下面几行会启用 YUI 压缩器，这需要 +yui-compressor+ gem.
+
+<erb>
+config.assets.css_compressor = :yui
+</erb>
+
++config.assets.compress+ 必须被设置为 +true+ 才能使用 CSS 压缩器
+
+h4. JavaScript 压缩器
+
+JavaScript 可选的压缩器有 +:closure+, +:uglifier+ 和 +:yui+。 它们分别需要 +closure-compiler+, +uglifier+ 或者 +yui+ gems。
+
+Gemfile 默认包括 "uglifier":https://github.com/lautis/uglifier. 这个 gem 用 Ruby 封装了 "UglifierJS":https://github.com/mishoo/UglifyJS (为 NodeJS 所编写). 它通过去除空白符去压缩你的代码。它也包括其它的可定制选项如尽可能的将 +if+ 和 +else+ 表达式改成三元表达式。
+
+如下引入 +uglifier+ JavaScript 压缩器:
+
+<erb>
+config.assets.js_compressor = :uglifier
+</erb>
+
+注意必须将 +config.assets.compress+ 设置为 +true+ 才能使用 JavaScript 压缩器
+
+NOTE: 为了使用 +uglifier+，你需要 "ExecJS":https://github.com/sstephenson/execjs#readme 支持的运行时。如果你使用 Mac OS X 或者 Windows， 你的系统已经安装有 JavaScript 运行时了。 查阅 "ExecJS":https://github.com/sstephenson/execjs#readme 文档了解支持的 JavaScript 运行时.
+
+h4. 使用你自己的压缩器
+
+CSS 和  JavaScript 的压缩器配置设置也接受任何对象。 这个对象必须有一个接受一个字符串参数的 +compress+ 方法并且必须返回一个字符串。
+
+<erb>
+class Transformer
+  def compress(string)
+    do_something_returning_a_string(string)
+  end
+end
+</erb>
+
+传递一个 +new+ 对象给 +application.rb+ 里的配置选项：
+
+<erb>
+config.assets.css_compressor = Transformer.new
+</erb>
+
+h4. 改变 _assets_ 的路径
+
+Sprockets 默认使用的公共路径为 +/assets+.
+
+它可以被改成其它的：
+
+<erb>
+config.assets.prefix = "/some_other_path"
+</erb>
+
 h4. X-Sendfile Headers
 
 X-Sendfile 头部是 web 服务器的一个指令,用于忽略来自应用程序的回应(response)而是提供磁盘里的指定文件. 这个选项默认是关闭的, 但也可以被开启,如果你的服务器支持它. 当开启时, 这将负责把文件提供给 web 服务器, 而且更快.
