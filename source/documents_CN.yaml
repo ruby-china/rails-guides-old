@@ -37,6 +37,8 @@
   documents:      
     - 
       name: Layouts and Rendering in Rails
+      work_in_progress: true
+      contributor: NaixSpirit
       url: layouts_and_rendering.html
       description: This guide covers the basic layout features of Action Controller and Action View, including rendering and redirecting, using content_for blocks, and working with partials.
     - 
