@@ -100,9 +100,10 @@
       contributor: ichord
       description: 这个指南是一份全面的 Rails 应用基本配置指南.
     - 
-      name: Rails Command Line Tools and Rake Tasks
+      name: Rails 命令行工具和 Rake 任务
       url: command_line.html
-      description: This guide covers the command line tools and rake tasks provided by Rails.
+      contributor: Fenprace
+      description: 本指南涵盖了 Rails 的命令行工具和 rake 任务。
     - 
       name: Caching with Rails 
       url: caching_with_rails.html

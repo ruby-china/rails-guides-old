@@ -1,22 +1,22 @@
-h2. A Guide to The Rails Command Line
+h2. Rails 命令行工具和 Rake 任务
 
-Rails comes with every command line tool you'll need to
+Rails 命令行工具提供了以下功能：
 
-* Create a Rails application
-* Generate models, controllers, database migrations, and unit tests
-* Start a development server
-* Experiment with objects through an interactive shell
-* Profile and benchmark your new creation
+* 创建 Rails 应用
+* 生成 models ， controllers ， migrations 以及单元测试
+* 启动开发服务器
+* 使用 shell 测试 models 对象
+* 自定义应用
 
 endprologue.
 
-NOTE: This tutorial assumes you have basic Rails knowledge from reading the "Getting Started with Rails Guide":getting_started.html.
+NOTE: 本教程假设你已阅读 "Rails 初上手指南":getting_started.html ，并掌握了 Rails 的基本知识。
 
-WARNING. This Guide is based on Rails 3.0. Some of the code shown here will not work in earlier versions of Rails.
+WARNING. 本指南基于 Rails 3.0 ，有些代码在 Rails 3.0 之前的版本上无法正常运行。
 
-h3. Command Line Basics
+h3. 命令行基础
 
-There are a few commands that are absolutely critical to your everyday usage of Rails. In the order of how much you'll probably use them are:
+下面是您经常会用到的命令：
 
 * <tt>rails console</tt>
 * <tt>rails server</tt>
@@ -25,13 +25,13 @@ There are a few commands that are absolutely critical to your everyday usage of 
 * <tt>rails dbconsole</tt>
 * <tt>rails new app_name</tt>
 
-Let's create a simple Rails application to step through each of these commands in context.
+我们一起来用上面提到的命令创建一个简单的 Rails 应用。
 
 h4. +rails new+
 
-The first thing we'll want to do is create a new Rails application by running the +rails new+ command after installing Rails.
+创建 Rails 应用的第一件事就是执行 +rails new+ 命令。
 
-WARNING: You can install the rails gem by typing +gem install rails+, if you don't have it already. Follow the instructions in the "Rails 3 Release Notes":/3_0_release_notes.html
+WARNING: 请先通过执行 +gem install rails+ 安装 rails gem 。参考 "Rails 3 Release Notes":/3_0_release_notes.html
 
 <shell>
 $ rails new commandsapp
