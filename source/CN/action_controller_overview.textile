@@ -1,30 +1,30 @@
-h2. Action Controller Overview
+h2. 动作控制器概述
 
-In this guide you will learn how controllers work and how they fit into the request cycle in your application. After reading this guide, you will be able to:
+本指南中你将学到控制器的工作原理以及它们在你的应用的请求周期中是怎样协调运行的。阅读本指南后，你将能够：
 
-* Follow the flow of a request through a controller
-* Understand why and how to store data in the session or cookies
-* Work with filters to execute code during request processing
-* Use Action Controller's built-in HTTP authentication
-* Stream data directly to the user's browser
-* Filter sensitive parameters so they do not appear in the application's log
-* Deal with exceptions that may be raised during request processing
+* 跟踪通过控制器的请求的流向
+* 理解为什么及如何在 session 或 cookies 中存储数据
+* 在请求处理中使用过滤器执行代码
+* 使用动作控制器内建的 HTTP 验证
+* 直接流式发送数据到用户的浏览器中
+* 过滤敏感参数，使其不会出现在应用的日志中
+* 处理在请求处理中抛出的异常
 
 endprologue.
 
-h3. What Does a Controller Do?
+h3. 控制器都做什么？
 
-Action Controller is the C in MVC. After routing has determined which controller to use for a request, your controller is responsible for making sense of the request and producing the appropriate output. Luckily, Action Controller does most of the groundwork for you and uses smart conventions to make this as straightforward as possible.
+动作控制器是MVC中的C。在路由决定对某次请求使用哪一个控制器之后，该控制器就负责理解该请求并生成相应的输出。幸运的是，动作控制器为你做了大部分的底层工作并且使用了聪明的约定使得这一切尽可能的简明易懂。
 
-For most conventional "RESTful":http://en.wikipedia.org/wiki/Representational_state_transfer applications, the controller will receive the request (this is invisible to you as the developer), fetch or save data from a model and use a view to create HTML output. If your controller needs to do things a little differently, that's not a problem, this is just the most common way for a controller to work.
+对于最为常规的 "RESTful":http://en.wikipedia.org/wiki/Representational_state_transfer 应用，控制器接收请求（对于开发者来说是隐形的），从某一模型中获取或者保存数据，并且使用某一视图创建 HTML 输出。如果需要控制器做一点不同的事情，也不是问题，这里所说只是最为常见的控制器工作的方式。
 
-A controller can thus be thought of as a middle man between models and views. It makes the model data available to the view so it can display that data to the user, and it saves or updates data from the user to the model.
+控制器因此可以被看作模型和视图之间的中间人。它使得视图可以使用模型的数据，视图就可以显示数据给用户，并且从用户处得到要保存或者更新的数据给到模型。
 
-NOTE: For more details on the routing process, see "Rails Routing from the Outside In":routing.html.
+NOTE: 更多关于路由过程的细节，参考"深入浅出道路由":routing.html 。
 
-h3. Methods and Actions
+h3. 方法与动作
 
-A controller is a Ruby class which inherits from +ApplicationController+ and has methods just like any other class. When your application receives a request, the routing will determine which controller and action to run, then Rails creates an instance of that controller and runs the method with the same name as the action.
+控制器是一个继承自 +ApplicationController+ 的 Ruby 类别，和其他类别一样有一些方法。当你的应用接受一个请求时，路由会决定执行哪个控制器和动作， Rails 会创建一个该控制器的实例并且执行与动作名称相同的方法。
 
 <ruby>
 class ClientsController < ApplicationController
@@ -33,7 +33,7 @@ class ClientsController < ApplicationController
 end
 </ruby>
 
-As an example, if a user goes to +/clients/new+ in your application to add a new client, Rails will create an instance of +ClientsController+ and run the +new+ method. Note that the empty method from the example above could work just fine because Rails will by default render the +new.html.erb+ view unless the action says otherwise. The +new+ method could make available to the view a +@client+ instance variable by creating a new +Client+:
+举例来说，如果用户在你的应用中使用 +/clients/new+ 来增加一个新的客户，Rails 会创建一个 +ClientsController+ 实例并执行 +new+ 方法。注意上例中的空方法也会正常工作，因为除非动作有另外的指定，Rails会默认渲染 +new.html.erb+ 视图。通过创建一个新的 +Client+ 实例，+new+ 方法可以使该视图可以使用 +@client+ 实例变量：
 
 <ruby>
 def new
@@ -41,23 +41,22 @@ def new
 end
 </ruby>
 
-The "Layouts & Rendering Guide":layouts_and_rendering.html explains this in more detail.
+"版型与渲染指南":layouts_and_rendering.html 对此有更详细的解释。
 
-+ApplicationController+ inherits from +ActionController::Base+, which defines a number of helpful methods. This guide will cover some of these, but if you're curious to see what's in there, you can see all of them in the API documentation or in the source itself.
++ApplicationController+ 继承自定义了很多实用方法的 +ActionController::Base+ ，本指南会涉及其中一些，但是如果你对都有什么方法感到好奇，你可以自行查看 API 文档或在源码中找到所有的方法。
 
-Only public methods are callable as actions. It is a best practice to lower the visibility of methods which are not intended to be actions, like auxiliary methods or filters.
+只有公有方法可以被调用为动作。这是一种最佳实践：降低那些本来设计为类似辅助方法或过滤器而不是动作的方法的可见度。
 
-h3. Parameters
+h3. 参数
 
-You will probably want to access data sent in by the user or other parameters in your controller actions. There are two kinds of parameters possible in a web application. The first are parameters that are sent as part of the URL, called query string parameters. The query string is everything after "?" in the URL. The second type of parameter is usually referred to as POST data. This information usually comes from an HTML form which has been filled in by the user. It's called POST data because it can only be sent as part of an HTTP POST request. Rails does not make any distinction between query string parameters and POST parameters, and both are available in the +params+ hash in your controller:
+你很可能会想存取用户或其他参数发来的数据。web 应用中有两种可能的参数。第一种参数是作为URL的一部分被发送来的，叫作查询字符串参数。查询字符串是"?"后的所有东西。第二种参数通常被称为 POST 数据。这些信息通常来自有一个用户填写的 HTML 表单。它被叫作 POST 数据因为它只能作为一个 HTTP POST 请求发送过来。Rails对查询字符串参数和 POST 参数并不做任何区分，在你的控制器中都可以通过 +params+ 哈希来使用。
 
 <ruby>
 class ClientsController < ActionController::Base
-  # This action uses query string parameters because it gets run
-  # by an HTTP GET request, but this does not make any difference
-  # to the way in which the parameters are accessed. The URL for
-  # this action would look like this in order to list activated
-  # clients: /clients?status=activated
+  # 此动作使用查询字符串参数因为它通过 HTTP GET 请求运行，
+  # 但不会造成参数存取方式的任何不同。
+  # 此动作的 URL 会看起来像要列出所有已激活的
+  # 用户： /clients?status=activated
   def index
     if params[:status] == "activated"
       @clients = Client.activated
@@ -66,36 +65,34 @@ class ClientsController < ActionController::Base
     end
   end
 
-  # This action uses POST parameters. They are most likely coming
-  # from an HTML form which the user has submitted. The URL for
-  # this RESTful request will be "/clients", and the data will be
-  # sent as part of the request body.
+  # 此动作使用 POST 参数。他们有很大可能来自于一个用户
+  # 提交的 HTML 表单。此 RESTful 请求的 URL 会为 "/clients"，数据
+  # 会作为请求主体的一部分被发送。
   def create
     @client = Client.new(params[:client])
     if @client.save
       redirect_to @client
     else
-      # This line overrides the default rendering behavior, which
-      # would have been to render the "create" view.
+      # 此行覆盖了默认渲染行为，本来应渲染 "create" 视图。
       render :action => "new"
     end
   end
 end
 </ruby>
 
-h4. Hash and Array Parameters
+h4. 哈希与数组参数
 
-The +params+ hash is not limited to one-dimensional keys and values. It can contain arrays and (nested) hashes. To send an array of values, append an empty pair of square brackets "[]" to the key name:
++params+ 哈希不只局限于一维键值对。它可以包含数组和（嵌套）哈希。通过在键名后附加一对空的方括号可以实现发送一组数组值：
 
 <pre>
 GET /clients?ids[]=1&ids[]=2&ids[]=3
 </pre>
 
-NOTE: The actual URL in this example will be encoded as "/clients?ids%5b%5d=1&ids%5b%5d=2&ids%5b%5d=3" as "[" and "]" are not allowed in URLs. Most of the time you don't have to worry about this because the browser will take care of it for you, and Rails will decode it back when it receives it, but if you ever find yourself having to send those requests to the server manually you have to keep this in mind.
+NOTE: 此例中实际 URL 会被编码为 "/clients?ids%5b%5d=1&ids%5b%5d=2&ids%5b%5d=3" 因为 "[" 和 "]" 不可出现在 URL 中。大多数时候你都不用担心，因为浏览器会帮你处理它，并且当收到请求后 Rails 会解码回去，但是如果你发现你必须手动发送这些请求到服务器的时候需要留意。
 
-The value of +params[:ids]+ will now be +["1", "2", "3"]+. Note that parameter values are always strings; Rails makes no attempt to guess or cast the type.
++params[:ids]+ 的值现在会是 +["1", "2", "3"]+ 。注意参数值永远是字符串；Rails不会尝试去猜或是强制转型其类型。
 
-To send a hash you include the key name inside the brackets:
+通过把键名放在方括号中发送一个哈希：
 
 <html>
 <form accept-charset="UTF-8" action="/clients" method="post">
@@ -106,137 +103,136 @@ To send a hash you include the key name inside the brackets:
 </form>
 </html>
 
-When this form is submitted, the value of +params[:client]+ will be <tt>{"name" => "Acme", "phone" => "12345", "address" => {"postcode" => "12345", "city" => "Carrot City"}}</tt>. Note the nested hash in +params[:client][:address]+.
+当这个表单被提交时，+params[:client]+ 的值会是<tt>{"name" => "Acme", "phone" => "12345", "address" => {"postcode" => "12345", "city" => "Carrot City"}}</tt>。注意在 +params[:client][:address]+ 中的嵌套哈希。
 
-Note that the +params+ hash is actually an instance of +HashWithIndifferentAccess+ from Active Support, which acts like a hash that lets you use symbols and strings interchangeably as keys.
+注意 +params+ 哈希实际上是来自 Active Support 的 +HashWithIndifferentAccess+ 的一个实例，它表现得像是一个哈希使得你可以互换地使用符号和字符串作为键。
 
-h4. JSON/XML parameters
+h4. JSON/XML 参数
 
-If you're writing a web service application, you might find yourself more comfortable on accepting parameters in JSON or XML format. Rails will automatically convert your parameters into +params+ hash, which you'll be able to access like you would normally do with form data.
+如果你在建造一个 web service 应用，你可能会发现接收 JSON 或 XML 格式的参数更加舒适。Rails 会自动地转换你的参数到 +params+ 哈希中，这样你就可以存取它就像你使用表单数据一样。
 
-So for example, if you are sending this JSON parameter:
+举例来说，如果你发送此 JSON 参数：
 
 <pre>
 { "company": { "name": "acme", "address": "123 Carrot Street" } }
 </pre>
 
-You'll get <tt>params[:company]</tt> as <tt>{ :name => "acme", "address" => "123 Carrot Street" }</tt>.
+你会得到 <tt>params[:company]</tt> as <tt>{ :name => "acme", "address" => "123 Carrot Street" }</tt> 。
 
-Also, if you've turned on +config.wrap_parameters+ in your initializer or calling +wrap_parameters+ in your controller, you can safely omit the root element in the JSON/XML parameter. The parameters will be cloned and wrapped in the key according to your controller's name by default. So the above parameter can be written as:
+同样，如果你在你的初始器中打开 +config.wrap_parameters+ 或者在控制器中调用 +wrap_parameters+ ，你可以安全地忽略 JSON/XML 参数中的根元素。默认情况下，参数会自动复制并包裹到以你控制器名字为键的哈希中。所以上面的参数也可以写为：
 
 <pre>
 { "name": "acme", "address": "123 Carrot Street" }
 </pre>
 
-And assume that you're sending the data to +CompaniesController+, it would then be wrapped in +:company+ key like this:
+这里假定你在发送数据到 +CompaniesController+ 中，数据将会被包裹进 +:company+ 键中，像这样：
 
 <ruby>
 { :name => "acme", :address => "123 Carrot Street", :company => { :name => "acme", :address => "123 Carrot Street" }}
 </ruby>
 
-You can customize the name of the key or specific parameters you want to wrap by consulting the "API documentation":http://api.rubyonrails.org/classes/ActionController/ParamsWrapper.html
+你可以定制键名或指定你想包裹的参数，参考 "API 文档":http://api.rubyonrails.org/classes/ActionController/ParamsWrapper.html 。
 
-h4. Routing Parameters
+h4. 路由参数
 
-The +params+ hash will always contain the +:controller+ and +:action+ keys, but you should use the methods +controller_name+ and +action_name+ instead to access these values. Any other parameters defined by the routing, such as +:id+ will also be available. As an example, consider a listing of clients where the list can show either active or inactive clients. We can add a route which captures the +:status+ parameter in a "pretty" URL:
++params+ 哈希总是包含 +:controller+ 和 +:action+ 键，但是你应该使用 +controller_name+ 和 +action_name+ 方法来存取这些值。其他路由定义的各项参数，比如 +:id+ 也可以被使用。举例来说，想象一列用户可以显示激活或未激活。我们可以添加一个路由来在一个 “漂亮的” URL 中获取 +:status+ 参数：
 
 <ruby>
 match '/clients/:status' => 'clients#index', :foo => "bar"
 </ruby>
 
-In this case, when a user opens the URL +/clients/active+, +params[:status]+ will be set to "active". When this route is used, +params[:foo]+ will also be set to "bar" just like it was passed in the query string. In the same way +params[:action]+ will contain "index".
+在此例中，当一个用户打开 URL +/clients/active+ ，+params["status]+ 会被设定为“激活”。当这个路由被使用时，+params[:foo]+ 也会被设定为 "bar" 就像通过查询字符串传递过来一样。+params[:action]+ 会包含 "index" 。
 
 h4. +default_url_options+
 
-You can set global default parameters that will be used when generating URLs with +default_url_options+. To do this, define a method with that name in your controller:
+你可以通过定义一个叫作 +default_url_options+ 的方法设定 URL 生成的全局默认参数。该方法必须返回一个希望默认值的哈希，键必须都为符号：
 
 <ruby>
 class ApplicationController < ActionController::Base
-  # The options parameter is the hash passed in to 'url_for'
-  def default_url_options(options)
+  def default_url_options
     {:locale => I18n.locale}
   end
 end
 </ruby>
 
-These options will be used as a starting-point when generating URLs, so it's possible they'll be overridden by +url_for+. Because this method is defined in the controller, you can define it on +ApplicationController+ so it would be used for all URL generation, or you could define it on only one controller for all URLs generated there.
+当生成 URL 时，这些选项会被用为一个起始点，因此它们可以被 +url_for+ 调用中传递的选项重写。
+
+如果你在 +ApplicationController+ 中定义了 +default_url_options+ ，如上例所示，它将会被用于所有的 URL 生成。该方法同样也可以被定义于某一具体的控制器，那样的话，它仅仅影响该控制器的 URL 生成。
 
 
 h3. Session
 
-Your application has a session for each user in which you can store small amounts of data that will be persisted between requests. The session is only available in the controller and the view and can use one of a number of different storage mechanisms:
+你的应用对每一个用户会有一个 session ，你可以在请求之间持久地存储少量数据。session 只有在控制器和视图中可用并且可以使用以下几种存储机制之一：
 
-* ActionDispatch::Session::CookieStore - Stores everything on the client.
-* ActiveRecord::SessionStore - Stores the data in a database using Active Record.
-* ActionDispatch::Session::CacheStore - Stores the data in the Rails cache.
-* ActionDispatch::Session::MemCacheStore - Stores the data in a memcached cluster (this is a legacy implementation; consider using CacheStore instead).
+* ActionDispatch::Session::CookieStore - 存储所有东西在客户端上。
+* ActiveRecord::SessionStore - 通过 Active Record 存储数据到数据库库中。
+* ActionDispatch::Session::CacheStore - 存储数据在 Rails 的缓存中。
+* ActionDispatch::Session::MemCacheStore - 存储数据到 memcached cluster 中（遗留实现；考虑使用 CacheStore 代替）。
 
-All session stores use a cookie to store a unique ID for each session (you must use a cookie, Rails will not allow you to pass the session ID in the URL as this is less secure).
+所有session 存储使用一个 cookie 为每一个 session 存储一个唯一的 ID （你必须使用 cookie，Rails 不允许你在 URL 中传递 session ID 因为不太安全）。 
 
-For most stores this ID is used to look up the session data on the server, e.g. in a database table. There is one exception, and that is the default and recommended session store - the CookieStore - which stores all session data in the cookie itself (the ID is still available to you if you need it). This has the advantage of being very lightweight and it requires zero setup in a new application in order to use the session. The cookie data is cryptographically signed to make it tamper-proof, but it is not encrypted, so anyone with access to it can read its contents but not edit it (Rails will not accept it if it has been edited).
+对于大多数存储，此 ID 用来在服务器查找 session 数据，例如在数据库表中。有一种例外，并且是默认和推荐的 session 存储 - CookieStore - 存储所有 session 数据在 cookie 本身 （如果你需要 ID， 它一样可用）。这种方法具有非常轻量级的优势并且它在新应用不需要任何设置以使用 session 。为了防止篡改， cookie 数据是经过加密签名的，但是没有经过加密编码，因此任何人可以获取到它就可以读到其内容但是不能编辑（如果它被编辑了 Rails 便不会接受它）。
 
-The CookieStore can store around 4kB of data -- much less than the others -- but this is usually enough. Storing large amounts of data in the session is discouraged no matter which session store your application uses. You should especially avoid storing complex objects (anything other than basic Ruby objects, the most common example being model instances) in the session, as the server might not be able to reassemble them between requests, which will result in an error.
+CookieStore 能存储大约 4kb 的数据 -- 相对其他方法少很多 -- 但通常够用了。在 session 中存储大量数据是不被鼓励的，无论你的应用使用的是何种 session 存储方法。你尤其应该避免在session 中存储复杂对象（任何除基本 Ruby 对象的对象，最常见的例子即模型的实例），因为服务器可能会在请求之间无法重建它们而引起错误。
 
-If your user sessions don't store critical data or don't need to be around for long periods (for instance if you just use the flash for messaging), you can consider using ActionDispatch::Session::CacheStore. This will store sessions using the cache implementation you have configured for your application. The advantage of this is that you can use your existing cache infrastructure for storing sessions without requiring any additional setup or administration. The downside, of course, is that the sessions will be ephemeral and could disappear at any time.
+如果你的用户的 session 不存储关键数据或不需要长时间存在（例如你只是使用 flash 显示提示信息），你可以考虑使用 ActionDispatch::Session::CacheStore。这种方法将会使用你为你的应用配置好的 cache 实现存储 session。这样做的好处是你可以使用已有的cache 基础来存储 session 而不需要任何额外设置或管理。当然坏处是，session 会是昙花一现的并且很可能随时消失。
 
-Read more about session storage in the "Security Guide":security.html.
+在"安全指南":security.html 中阅读更多有关 session 存储的内容。
 
-If you need a different session storage mechanism, you can change it in the +config/initializers/session_store.rb+ file:
+如果你需要不同的 session 存储机制，你可以在 +config/initializers/session_store.rb+ 文件中改变它：
 
 <ruby>
-# Use the database for sessions instead of the cookie-based default,
-# which shouldn't be used to store highly confidential information
-# (create the session table with "script/rails g session_migration")
+# 为 session 使用数据库代替默认的基于 cookie 的，不应用于存储高度机密的信息
+# （通过 "script/rails g session_migration" 创建 session 表）
 # YourApp::Application.config.session_store :active_record_store
 </ruby>
 
-Rails sets up a session key (the name of the cookie) when signing the session data. These can also be changed in +config/initializers/session_store.rb+:
+Rails 在签名 session 数据时会设定一个 session 键（cookie的名称）。这也可以在 +config/initializers/session_store.rb+ 中改变：
 
 <ruby>
-# Be sure to restart your server when you modify this file.
+# 当你修改此文件后确定重启你的服务器。
 
 YourApp::Application.config.session_store :cookie_store, :key => '_your_app_session'
 </ruby>
 
-You can also pass a +:domain+ key and specify the domain name for the cookie:
+你也可以传入一个 +：domain+ 键来指定 cookie 的域名：
 
 <ruby>
-# Be sure to restart your server when you modify this file.
+# 当你修改此文件后确定重启你的服务器。
 
 YourApp::Application.config.session_store :cookie_store, :key => '_your_app_session', :domain => ".example.com"
 </ruby>
 
-Rails sets up (for the CookieStore) a secret key used for signing the session data. This can be changed in +config/initializers/secret_token.rb+
+Rails 会设置（为CookieStore）一个密钥来签名 session 数据。可以在 +config/initializers/secret_token.rb+ 中改变
 
 <ruby>
-# Be sure to restart your server when you modify this file.
+# 当你修改此文件后确定重启你的服务器。
 
-# Your secret key for verifying the integrity of signed cookies.
-# If you change this key, all old signed cookies will become invalid!
-# Make sure the secret is at least 30 characters and all random,
-# no regular words or you'll be exposed to dictionary attacks.
+# 你的用来验证已签名的 cookie 完整性的密钥。
+# 如果你更改密钥，所有旧的已签名 cookie 会无效！
+# 确定密钥最少 30 个字符且全部随机，
+# 别使用常规词否则你会暴露在字典攻击之下。
 YourApp::Application.config.secret_token = '49d3f3de9ed86c74b94ad6bd0...'
 </ruby>
 
-NOTE: Changing the secret when using the +CookieStore+ will invalidate all existing sessions.
+NOTE: 在使用 +CookieStore+ 时改变密钥会使所有已有 session 无效化。
 
-h4. Accessing the Session
+h4. 存取 Session
 
-In your controller you can access the session through the +session+ instance method.
+在你的控制器中你可以通过 +session+ 实例方法存取 session。
 
-NOTE: Sessions are lazily loaded. If you don't access sessions in your action's code, they will not be loaded. Hence you will never need to disable sessions, just not accessing them will do the job.
+NOTE: Session 都是惰性加载的。如果你在你的动作代码中没有存取 session ，它们不会被加载的。因此你永远不需要屏蔽 session，只要不存取它们就可以了。
 
-Session values are stored using key/value pairs like a hash:
+Session 值是像哈希一样的键/值对。
 
 <ruby>
 class ApplicationController < ActionController::Base
 
   private
 
-  # Finds the User with the ID stored in the session with the key
-  # :current_user_id This is a common way to handle user login in
-  # a Rails application; logging in sets the session value and
-  # logging out removes it.
+  # 通过键 :current_user_id 查找含有存储在 session 中的 ID 的 User 。
+  # 这是一种在 Rails 应用中处理用户登录的常见方式；登录时设置几组 session 值
+  # 然后登出时移除之。
   def current_user
     @_current_user ||= session[:current_user_id] &&
       User.find_by_id(session[:current_user_id])
@@ -244,15 +240,15 @@ class ApplicationController < ActionController::Base
 end
 </ruby>
 
-To store something in the session, just assign it to the key like a hash:
+在session中存储某事物，像使用哈希一样把它赋给某键：
 
 <ruby>
 class LoginsController < ApplicationController
-  # "Create" a login, aka "log the user in"
+  # “创建”一个登录，也称“将用户登入” 
   def create
     if user = User.authenticate(params[:username], params[:password])
-      # Save the user ID in the session so it can be used in
-      # subsequent requests
+      # 保存用户 ID 于 session 中于是
+      # 就可以在之后的请求中使用它了
       session[:current_user_id] = user.id
       redirect_to root_url
     end
@@ -260,24 +256,24 @@ class LoginsController < ApplicationController
 end
 </ruby>
 
-To remove something from the session, assign that key to be +nil+:
+在session中移除某事物，赋值给改键 +nil+ ：
 
 <ruby>
 class LoginsController < ApplicationController
-  # "Delete" a login, aka "log the user out"
+  # “删除” 一个登录，也称“将用户登出”
   def destroy
-    # Remove the user id from the session
+    # 从 session 中移除用户 id
     @_current_user = session[:current_user_id] = nil
     redirect_to root_url
   end
 end
 </ruby>
 
-To reset the entire session, use +reset_session+.
+要重置整个 session, 使用 +reset_session+ 。
 
-h4. The Flash
+h4. 闪存
 
-The flash is a special part of the session which is cleared with each request. This means that values stored there will only be available in the next request, which is useful for storing error messages etc. It is accessed in much the same way as the session, like a hash. Let's use the act of logging out as an example. The controller can send a message which will be displayed to the user on the next request:
+闪存是session的特殊部分，它在每次请求后清空。这意味着存储的值仅在下一次请求中可用，对于存储错误信息等非常有用。它的存取方式和session大体相同，就像使用哈希。让我们来使用登出动作作为例子。控制器可以发送一条显示在用户的下一次请求中的信息：
 
 <ruby>
 class LoginsController < ApplicationController
@@ -289,14 +285,14 @@ class LoginsController < ApplicationController
 end
 </ruby>
 
-Note it is also possible to assign a flash message as part of the redirection.
+注意使用闪存信息来作为重定向也是可以的。
 
 <ruby>
 redirect_to root_url, :notice => "You have successfully logged out"
 </ruby>
 
 
-The +destroy+ action redirects to the application's +root_url+, where the message will be displayed. Note that it's entirely up to the next action to decide what, if anything, it will do with what the previous action put in the flash. It's conventional to display eventual errors or notices from the flash in the application's layout:
++destroy+ 动作会重定向到应用的 +root_url+ 处，在那里闪存信息会显示。注意将由下一个动作来完全决定对之前的动作放到闪存中的事物做什么。显示最终错误，在应用的版型中提醒闪存信息是一种惯例：
 
 <ruby>
 <html>
@@ -313,22 +309,22 @@ The +destroy+ action redirects to the application's +root_url+, where the messag
 </html>
 </ruby>
 
-This way, if an action sets an error or a notice message, the layout will display it automatically.
+通过这种方法，如果一个动作设置了一条错误或提示信息，版型会自动显示它。
 
-If you want a flash value to be carried over to another request, use the +keep+ method:
+如果你想使一个闪存值被带到另一个请求中，使用 +keep+ 方法：
 
 <ruby>
 class MainController < ApplicationController
-  # Let's say this action corresponds to root_url, but you want
-  # all requests here to be redirected to UsersController#index.
-  # If an action sets the flash and redirects here, the values
-  # would normally be lost when another redirect happens, but you
-  # can use 'keep' to make it persist for another request.
+  # 让我们假设此动作对应 root_url ，但是你想要
+  # 重定向所有请求到 UsersController#index 。
+  # 如果在这里一个动作设置闪存并重定向，
+  # 当另一个重定向发生时，值正常情况下会丢失，
+  # 但是你可以使用 'keep' 来使其持续到另一个请求。
   def index
-    # Will persist all flash values.
+    # 将保持所有闪存值。
     flash.keep
 
-    # You can also use a key to keep only some kind of value.
+    # 你也可以使用键名指定仅保存某类值。
     # flash.keep(:notice)
     redirect_to users_url
   end
@@ -337,7 +333,7 @@ end
 
 h5. +flash.now+
 
-By default, adding values to the flash will make them available to the next request, but sometimes you may want to access those values in the same request. For example, if the +create+ action fails to save a resource and you render the +new+ template directly, that's not going to result in a new request, but you may still want to display a message using the flash. To do this, you can use +flash.now+ in the same way you use the normal +flash+:
+默认情况下，添加值到闪存会是它们在下次请求中可用，但是有时你可能想要在同一请求中存取那些值。举例来说，如果 +create+ 动作没能保存一个 resource 而你立即渲染了 +new+ 模版，这不会产生一个新的请求，但是你可能仍然想要使用闪存显示一条信息。要做到这一点，你可以按你使用普通的 +flash+ 的方式使用 +flash.now+ ：
 
 <ruby>
 class ClientsController < ApplicationController
@@ -355,12 +351,12 @@ end
 
 h3. Cookies
 
-Your application can store small amounts of data on the client -- called cookies -- that will be persisted across requests and even sessions. Rails provides easy access to cookies via the +cookies+ method, which -- much like the +session+ -- works like a hash:
+你的应用可以在客户端存储少量数据 -- 叫作 cookie -- 会在请求间甚至 session间持久存在。Rails 提供了简单的 +cookie+ 存取途径通过 +cookies+ 方法 -- 很像 +session+ -- 像一个哈希一样工作：
 
 <ruby>
 class CommentsController < ApplicationController
   def new
-    # Auto-fill the commenter's name if it has been stored in a cookie
+    # 如果之前在 cookie 中存储过，则自动填充评论者的名字
     @comment = Comment.new(:name => cookies[:commenter_name])
   end
 
@@ -369,10 +365,10 @@ class CommentsController < ApplicationController
     if @comment.save
       flash[:notice] = "Thanks for your comment!"
       if params[:remember_name]
-        # Remember the commenter's name.
+        # 记住评论者的名字。
         cookies[:commenter_name] = @comment.name
       else
-        # Delete cookie for the commenter's name cookie, if any.
+        # 删除评论者名字 cookie，如果有的话。
         cookies.delete(:commenter_name)
       end
       redirect_to @comment.article
@@ -383,11 +379,11 @@ class CommentsController < ApplicationController
 end
 </ruby>
 
-Note that while for session values you set the key to +nil+, to delete a cookie value you should use +cookies.delete(:key)+.
+注意删除值时 session 你设置键为 +nil+，删除一个 cookie 值你要使用 +cookies.delete(:key)+。
 
-h3. Rendering xml and json data
+h3. 渲染 xml 和 json 数据
 
-ActionController makes it extremely easy to render +xml+ or +json+ data. If you generate a controller using scaffold then your controller would look something like this.
+ActionController 使得渲染 +xml+ 或 +json+ 数据极为简单。如果你使用鹰架生成一个控制器则你的控制器看起来会像这样。
 
 <ruby>
 class UsersController < ApplicationController
@@ -402,16 +398,16 @@ class UsersController < ApplicationController
 end
 </ruby>
 
-Notice that in the above case code is <tt>render :xml => @users</tt> and not <tt>render :xml => @users.to_xml</tt>. That is because if the input is not string then rails automatically invokes +to_xml+ .
+注意到上例代码中是 <tt>render :xml => @users</tt> 而不是 <tt>render :xml => @users.to_xml</tt>。这是因为如果输入不是字符串的话，那么 rails 会自动调用 +to_xml+ 。
 
 
-h3. Filters
+h3. 过滤器
 
-Filters are methods that are run before, after or "around" a controller action.
+过滤器是运行在控制器动作之前，之后，或前后(”around")的方法。
 
-Filters are inherited, so if you set a filter on +ApplicationController+, it will be run on every controller in your application.
+过滤器是被继承的，因此如果你设置一个过滤器在 +ApplicationController+ ，它会在你的应用的每一个过滤器中运行。
 
-Before filters may halt the request cycle. A common before filter is one which requires that a user is logged in for an action to be run. You can define the filter method this way:
+前过滤器可能会终止请求周期。一种常见的前过滤器是需要用户登录后动作才会运行。你可以如此定义过滤器方法：
 
 <ruby>
 class ApplicationController < ActionController::Base
@@ -426,20 +422,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # The logged_in? method simply returns true if the user is logged
-  # in and false otherwise. It does this by "booleanizing" the
-  # current_user method we created previously using a double ! operator.
-  # Note that this is not common in Ruby and is discouraged unless you
-  # really mean to convert something into true or false.
+  # logged_in? 方法简单地返回 true 如果用户已登录，否则返回 false 。
+  # 它通过使用一个双 ! 操作符来“布尔化”我们之前创建的 current_user 方法。
+  # 注意在 Ruby 中者不常见也不鼓励，除非你真的想要转换某物到 true 或 false 。
   def logged_in?
     !!current_user
   end
 end
 </ruby>
 
-The method simply stores an error message in the flash and redirects to the login form if the user is not logged in. If a before filter renders or redirects, the action will not run. If there are additional filters scheduled to run after that filter they are also cancelled.
+如果用户没有登录，该方法简单地存储一条错误信息在闪存中然后重定向到登录表单。如果在该过滤器之后还有其他更多的过滤器，它们也会被取消。
 
-In this example the filter is added to +ApplicationController+ and thus all controllers in the application inherit it. This will make everything in the application require the user to be logged in in order to use it. For obvious reasons (the user wouldn't be able to log in in the first place!), not all controllers or actions should require this. You can prevent this filter from running before particular actions with +skip_before_filter+:
+在此例中过滤器被添加到 +ApplicationController+ 中因此应用中的所有控制器都要继承它。这将使得应用中的所有操作都需要用户已登录才能使用。基于明显的原因（用户最初无法登录），不是所有控制器或动作都应该需要它。在特定的动作中使用 +skip_before_filter+ 你可以阻止这个过滤器运行：
 
 <ruby>
 class LoginsController < ApplicationController
@@ -447,17 +441,17 @@ class LoginsController < ApplicationController
 end
 </ruby>
 
-Now, the +LoginsController+'s +new+ and +create+ actions will work as before without requiring the user to be logged in. The +:only+ option is used to only skip this filter for these actions, and there is also an +:except+ option which works the other way. These options can be used when adding filters too, so you can add a filter which only runs for selected actions in the first place.
+现在，+LoginController+ 的 +new+ 和 +create+ 动作将会不需要用户已登录也能工作。+:only+ 选项是指仅在指定的动作中跳过过滤器，还有一个 +:except+ 选项正好相反。这些选项也可以被用在添加过滤器时，所以你可以添加一个在建立是就只在选择的动作中运行的过滤器。
 
-h4. After Filters and Around Filters
+h4. 后过滤器与前后过滤器
 
-In addition to before filters, you can also run filters after an action has been executed, or both before and after.
+除了前过滤器以外，你也可以在一个动作被执行之后运行过滤器，或之前和之后都运行。
 
-After filters are similar to before filters, but because the action has already been run they have access to the response data that's about to be sent to the client. Obviously, after filters cannot stop the action from running.
+后过滤器和前过滤器相似，但因为动作已经被运行，它们已经存取过准备发送给客户的响应数据。后过滤器显然不能阻止动作运行。
 
-Around filters are responsible for running their associated actions by yielding, similar to how Rack middlewares work.
+前后过滤器通过yield来负责运行它们协助的动作，类似 Rack 中间件的工作方式。Around filters are responsible for running their associated actions by yielding, similar to how Rack middlewares work.
 
-For example, in a website where changes have an approval workflow an administrator could be able to preview them easily, just apply them within a transaction:
+举例来说，管理员能轻松预览在一个网站中哪里改变了的一个批准流程 ，只要应用它们到一个事务中:
 
 <ruby>
 class ChangesController < ActionController::Base
@@ -477,15 +471,15 @@ class ChangesController < ActionController::Base
 end
 </ruby>
 
-Note that an around filter wraps also rendering. In particular, if in the example above the view itself reads from the database via a scope or whatever, it will do so within the transaction and thus present the data to preview.
+注意前后过滤器也包裹了渲染。在实践中，如果上例的视图本身通过一个 scope 或是什么从数据库读取，它会在事务中这么做以呈现数据来预览。
 
-They can choose not to yield and build the response themselves, in which case the action is not run.
+也可以选择不 yield 并自己构建响应，这样动作不会被运行。
 
-h4. Other Ways to Use Filters
+h4. 使用过滤器的其他方式
 
-While the most common way to use filters is by creating private methods and using *_filter to add them, there are two other ways to do the same thing.
+尽管使用过滤器最为常见的方式是创建私有方法然后使用 *_filter 方法添加它们，还有两种其他的方式可以做到同样的事情。
 
-The first is to use a block directly with the *_filter methods. The block receives the controller as an argument, and the +require_login+ filter from above could be rewritten to use a block:
+第一种方法是在 *_filter 方法中直接使用一个 block 。 block 接受 controller 为一个参数，使用 block 上例中 +require_login+ 过滤器也可以重写成：
 
 <ruby>
 class ApplicationController < ActionController::Base
@@ -495,9 +489,9 @@ class ApplicationController < ActionController::Base
 end
 </ruby>
 
-Note that the filter in this case uses +send+ because the +logged_in?+ method is private and the filter is not run in the scope of the controller. This is not the recommended way to implement this particular filter, but in more simple cases it might be useful.
+注意此例中过滤器使用 +send+ 因为 +logged_in?+ 方法是私有的，而过滤器不是运行于控制器的作用域中。此过滤器的这种实现是不被推荐的，但是对于简单一些的情况，它可能很有用。
 
-The second way is to use a class (actually, any object that responds to the right methods will do) to handle the filtering. This is useful in cases that are more complex and can not be implemented in a readable and reusable way using the two other methods. As an example, you could rewrite the login filter again to use a class:
+第二种方式是使用一个类别（事实上，响应正确方法的任何对象就可以）来处理过滤。在更复杂并且在使用其他两种方式时无法做到可读性和重用性时，它非常有用。举例来说，你可以使用类别重写登录过滤器：
 
 <ruby>
 class ApplicationController < ActionController::Base
@@ -514,17 +508,17 @@ class LoginFilter
 end
 </ruby>
 
-Again, this is not an ideal example for this filter, because it's not run in the scope of the controller but gets the controller passed as an argument. The filter class has a class method +filter+ which gets run before or after the action, depending on if it's a before or after filter. Classes used as around filters can also use the same +filter+ method, which will get run in the same way. The method must +yield+ to execute the action. Alternatively, it can have both a +before+ and an +after+ method that are run before and after the action.
+再一次，对于这个过滤器，它不是一个理想的例子，因为它不运行于控制器的作用域中而是通过参数传递得到控制器。过滤器类别有一个运行在动作之前或之后的类别方法 +filter+ ，取决于它是一个前过滤器还是后过滤器。被用于前后过滤器的类别也可以使用相同的 +filter+ 方法，它也会同样运行。该方法必须 +yield+ 来执行动作。或者，它可以有一个 +before+ 和一个 +after+ 方法运行于动作之前和之后。
 
-h3. Request Forgery Protection
+h3. 请求伪造保护
 
-Cross-site request forgery is a type of attack in which a site tricks a user into making requests on another site, possibly adding, modifying or deleting data on that site without the user's knowledge or permission.
+跨站请求伪造是一种一个站点欺骗用户生成在另一个站点的请求的攻击方式，可能会在未经用户知晓或同意的情况下添加，修改或删除站上数据。
 
-The first step to avoid this is to make sure all "destructive" actions (create, update and destroy) can only be accessed with non-GET requests. If you're following RESTful conventions you're already doing this. However, a malicious site can still send a non-GET request to your site quite easily, and that's where the request forgery protection comes in. As the name says, it protects from forged requests.
+避免此攻击的第一步是确保所有“破坏性的”动作（增，改，删）只能通过非 GET 请求来实现。如果你遵循 RESTful 约定那么你已经在这么做了。然而，恶意站点仍然可以轻易发送一个非 GET 请求到你的站点，这就是请求伪造保护介入的时候了。顾名思义，它保护你免受伪造的请求的欺骗。
 
-The way this is done is to add a non-guessable token which is only known to your server to each request. This way, if a request comes in without the proper token, it will be denied access.
+它做到这个的方法是对每个请求增加一个只被你的服务器知道的、不可猜的标志。这样，如果一个请求没有合适的标志，它会被拒绝接入。
 
-If you generate a form like this:
+如果你像这样生成一个表单：
 
 <ruby>
 <%= form_for @user do |f| %>
@@ -533,7 +527,7 @@ If you generate a form like this:
 <% end %>
 </ruby>
 
-You will see how the token gets added as a hidden field:
+你会看到标志作为一个隐藏的 field 被加到其中:
 
 <html>
 <form accept-charset="UTF-8" action="/users/1" method="post">
@@ -544,67 +538,66 @@ You will see how the token gets added as a hidden field:
 </form>
 </html>
 
-Rails adds this token to every form that's generated using the "form helpers":form_helpers.html, so most of the time you don't have to worry about it. If you're writing a form manually or need to add the token for another reason, it's available through the method +form_authenticity_token+:
+Rails 使用 form helpers 添加这个标志到每一个表单，所以大部分时间你都不用担心它。如果你手工书写一个表单或是因为其他原因需要添加标志，可以通过 +form_authenticity_token+ 方法:
 
-The +form_authenticity_token+ generates a valid authentication token. That's useful in places where Rails does not add it automatically, like in custom Ajax calls.
++form_authenticity_token+ 生成一个合法的验证标志。对于 Rails 无法自动添加它的地方非常有用，比如定制 Ajax 调用。
 
-The "Security Guide":security.html has more about this and a lot of other security-related issues that you should be aware of when developing a web application.
+"安全指南":security.html 有更多关于此及很多其他你应该关注的在开发网络应用时的安全相关问题。
 
-h3. The Request and Response Objects
+h3. 请求与响应对象
 
-In every controller there are two accessor methods pointing to the request and the response objects associated with the request cycle that is currently in execution. The +request+ method contains an instance of +AbstractRequest+ and the +response+ method returns a response object representing what is going to be sent back to the client.
+在每一个控制器中有两个存取器方法指向与请求周期相关的请求和响应对象正在执行中。+request+ 方法包含一个 +AbstractRequest+ 实例，+response+ 方法返回一个代表什么会被发送回去客户端的响应对象。
 
-h4. The +request+ Object
+h4. +request+ 对象
 
-The request object contains a lot of useful information about the request coming in from the client. To get a full list of the available methods, refer to the "API documentation":http://api.rubyonrails.org/classes/ActionDispatch/Request.html. Among the properties that you can access on this object are:
+请求对象包含很多关于来自客户端的请求的有用信息。参考"API 文档":http://api.rubyonrails.org/classes/ActionDispatch/Request.html 获得一份可用方法的完整列表。你可以在这个对象的这些属性中存储：
 
-|_.Property of +request+|_.Purpose|
-|host|The hostname used for this request.|
-|domain(n=2)|The hostname's first +n+ segments, starting from the right (the TLD).|
-|format|The content type requested by the client.|
-|method|The HTTP method used for the request.|
-|get?, post?, patch?, put?, delete?, head?|Returns true if the HTTP method is GET/POST/PATCH/PUT/DELETE/HEAD.|
-|headers|Returns a hash containing the headers associated with the request.|
-|port|The port number (integer) used for the request.|
-|protocol|Returns a string containing the protocol used plus "://", for example "http://".|
-|query_string|The query string part of the URL, i.e., everything after "?".|
-|remote_ip|The IP address of the client.|
-|url|The entire URL used for the request.|
+|_.+request+ 的属性|_.意图|
+|host|请求的主机名。|
+|domain(n=2)|主机名的前 +n+ 个片段，从右开始（顶级域）。|
+|format|客户端请求的内容类型。|
+|method|请求使用的 HTTP 方法.|
+|get?, post?, patch?, put?, delete?, head?|如果 HTTP 方法是 GET/POST/PATCH/PUT/DELETE/HEAD 返回真。|
+|headers|返回一个包含请求相关头部信息的哈希。|
+|port|请求使用的端口号（整数）.|
+|protocol|返回一个包含协议加 "://" 的字符串，例如 "http://" 。|
+|query_string|URL 的查询字符串部分，例如 "?" 后的所有东西。|
+|remote_ip|客户端的 IP 地址。|
+|url|请求使用的整个 URL 。|
 
-h5. +path_parameters+, +query_parameters+, and +request_parameters+
+h5. +path_parameters+，+query_parameters+，及 +request_parameters+
 
-Rails collects all of the parameters sent along with the request in the +params+ hash, whether they are sent as part of the query string or the post body. The request object has three accessors that give you access to these parameters depending on where they came from. The +query_parameters+ hash contains parameters that were sent as part of the query string while the +request_parameters+ hash contains parameters sent as part of the post body. The +path_parameters+ hash contains parameters that were recognized by the routing as being part of the path leading to this particular controller and action.
+Rails 收集所有随请求发送来的参数到 +params+ 哈希中，无论它们是被作为查询字符串或是 POST 主体。请求对象有三个存取器给予你存取这些参数，取决于它们来自哪里。+query_parameters+ 哈希包含作为查询字符串发送来的参数，而 +request+parameters+ 哈希包含作为 POST主体发送来的参数。 +path_parameters+ 哈希包含被路由所识别的、引到特定控制器和动作的路径的参数。
 
-h4. The +response+ Object
+h4. +response+ 对象
 
-The response object is not usually used directly, but is built up during the execution of the action and rendering of the data that is being sent back to the user, but sometimes - like in an after filter - it can be useful to access the response directly. Some of these accessor methods also have setters, allowing you to change their values.
+响应对象通常不被直接使用，但是它在动作执行中构建并且染发送回用户的数据，不过有时 - 就像一个后过滤器一样 - 直接存取响应可能会有用。一些存取器方法也可以设置，允许你改变它们的值。
+|_.+response+ 的属性|_.意图|
+|body|被发送回客户端的数据的字符串。通常是 HTML 。|
+|status|响应的 HTTP 状态代码，像是 200 表示一个成功的请求或是 404 表示文件未找到。|
+|location|客户端被重定向到的 URL， 如果有的话。|
+|content_type|响应的内容类型。|
+|charset|响应使用的字符集。默认为 "utf-8" 。|
+|headers|响应使用的头部信息。|
 
-|_.Property of +response+|_.Purpose|
-|body|This is the string of data being sent back to the client. This is most often HTML.|
-|status|The HTTP status code for the response, like 200 for a successful request or 404 for file not found.|
-|location|The URL the client is being redirected to, if any.|
-|content_type|The content type of the response.|
-|charset|The character set being used for the response. Default is "utf-8".|
-|headers|Headers used for the response.|
+h5. 设置定制头部信息
 
-h5. Setting Custom Headers
-
-If you want to set custom headers for a response then +response.headers+ is the place to do it. The headers attribute is a hash which maps header names to their values, and Rails will set some of them automatically. If you want to add or change a header, just assign it to +response.headers+ this way:
+如果你想要为一个响应设置定制头部信息，那么 +response.headers+ 就是做这个用的。头部属性是一个映射头部名称到它们值的哈希，Rails 会自动设定其中一些。如果你想要添加或改变一个头部信息，按这种如下方式分配它到 +response.headers+ ：
 
 <ruby>
 response.headers["Content-Type"] = "application/pdf"
 </ruby>
 
-h3. HTTP Authentications
+h3. HTTP 验证
 
-Rails comes with two built-in HTTP authentication mechanisms:
+Rails 自带两种内建 HTTP 验证机制：
 
-* Basic Authentication
-* Digest Authentication
+* 基本验证
+* 摘要验证
 
-h4. HTTP Basic Authentication
+h4. HTTP 基本验证
 
-HTTP basic authentication is an authentication scheme that is supported by the majority of browsers and other HTTP clients. As an example, consider an administration section which will only be available by entering a username and a password into the browser's HTTP basic dialog window. Using the built-in authentication is quite easy and only requires you to use one method, +http_basic_authenticate_with+.
+HTTP 基本验证是一种被大部分浏览器和其他 HTTP 客户端支持的验证方案。举例来说，考虑一种情况，管理员区域只能通过在浏览器的HTTP基本对话框窗口输入用户名和密码来进入。使用内建验证十分简单，只需要你使用一个方法，+http_basic_authenticate_with+。
 
 <ruby>
 class AdminController < ApplicationController
@@ -612,11 +605,11 @@ class AdminController < ApplicationController
 end
 </ruby>
 
-With this in place, you can create namespaced controllers that inherit from +AdminController+. The filter will thus be run for all actions in those controllers, protecting them with HTTP basic authentication.
+把它放到适当的位置，你可以创建继承自 +AdminController+ 使用命名空间的控制器。过滤器会为所有那些控制器中的动作运行，使用 HTTP 基本验证保护它们。
 
-h4. HTTP Digest Authentication
+h4. HTTP 摘要验证
 
-HTTP digest authentication is superior to the basic authentication as it does not require the client to send an unencrypted password over the network (though HTTP basic authentication is safe over HTTPS). Using digest authentication with Rails is quite easy and only requires using one method, +authenticate_or_request_with_http_digest+.
+HTTP 摘要验证是优于基本验证的因为它不需要客户端发送明文密码经过网络（尽管使用HTTPS的 HTTP 基本验证是安全的）。在 Rails 中使用摘要验证十分简单，只需要使用一个方法，+authenticate_or_request_with_http_digest+。
 
 <ruby>
 class AdminController < ApplicationController
@@ -634,19 +627,19 @@ class AdminController < ApplicationController
 end
 </ruby>
 
-As seen in the example above, the +authenticate_or_request_with_http_digest+ block takes only one argument - the username. And the block returns the password. Returning +false+ or +nil+ from the +authenticate_or_request_with_http_digest+ will cause authentication failure.
+如上例中所示，+authenticate_or_request_with_http_digest+ block 只接受一个引数 - 用户名。block会返回密码。 从 +authenticate_or_request_with_http_digest+ 返回 +false+ 或 +nil+ 会导致验证失败。
 
-h3. Streaming and File Downloads
+h3. 流与文件下载
 
-Sometimes you may want to send a file to the user instead of rendering an HTML page. All controllers in Rails have the +send_data+ and the +send_file+ methods, which will both stream data to the client. +send_file+ is a convenience method that lets you provide the name of a file on the disk and it will stream the contents of that file for you.
+有时候你可能想要发送一个文件到用户以代替渲染一个 HTML 页面。Rails 中所有的控制器都有 +send_data+ 和 +send_file+ 方法，它们都可以流式发送数据到客户端。+send_file+ 是一个方便的方法，它让你提供磁盘上的一个文件名，它会为你流式发送内容到文件。
 
-To stream data to the client, use +send_data+:
+要流式发送数据到客户端，使用 +send_data+ :
 
 <ruby>
 require "prawn"
 class ClientsController < ApplicationController
-  # Generates a PDF document with information on the client and
-  # returns it. The user will get the PDF as a file download.
+  # 生成一个包含客户信息的 PDF 文档并返回。
+  # 用户将使用文件下载得到该 PDF
   def download_pdf
     client = Client.find(params[:id])
     send_data generate_pdf(client),
@@ -666,15 +659,15 @@ class ClientsController < ApplicationController
 end
 </ruby>
 
-The +download_pdf+ action in the example above will call a private method which actually generates the PDF document and returns it as a string. This string will then be streamed to the client as a file download and a filename will be suggested to the user. Sometimes when streaming files to the user, you may not want them to download the file. Take images, for example, which can be embedded into HTML pages. To tell the browser a file is not meant to be downloaded, you can set the +:disposition+ option to "inline". The opposite and default value for this option is "attachment".
+上例中 +download_pdf+ 动作会调用一个实际生成 PDF 文档并返回为字符串的私有方法。该字符串会被流式发送到客户端，成为文件下载并且文件名会建议给用户。有时当发送文件到用户时，你可能不会想让他们下载文件。以图片为例，它可以被内嵌在 HTML 页面中。告知浏览器一个文件意图不是为了下载，你可以设置 +:disposition+ 选项来 "inline" （内嵌）。该选项与之相反的值且为默认值是 "attachment" （附件）。
 
-h4. Sending Files
+h4. 发送文件
 
-If you want to send a file that already exists on disk, use the +send_file+ method.
+如果你想要发送一个已在磁盘存在的文件，使用 +send_file+ 方法。
 
 <ruby>
 class ClientsController < ApplicationController
-  # Stream a file that has already been generated and stored on disk.
+  # 流式发送一个已生成并存储在磁盘上的文件。
   def download_pdf
     client = Client.find(params[:id])
     send_file("#{Rails.root}/files/clients/#{client.id}.pdf",
@@ -684,21 +677,21 @@ class ClientsController < ApplicationController
 end
 </ruby>
 
-This will read and stream the file 4kB at the time, avoiding loading the entire file into memory at once. You can turn off streaming with the +:stream+ option or adjust the block size with the +:buffer_size+ option.
+这将会一次读取并发送流 4kB，避免立即载入整个文件到内存中。你可以关闭流发送通过 +:stream+ 选项或者通过 +:buffer_size+ 选项调整块大小。
 
-If +:type+ is not specified, it will be guessed from the file extension specified in +:filename+. If the content type is not registered for the extension, <tt>application/octet-stream</tt> will be used.
+如果 +:type+ 未被指定，会从指定的 +:filname+ 中的文件扩展名猜出。如果内容类型不是注册为该扩展名，<tt>application/octet-stream</tt> 会被使用。
 
-WARNING: Be careful when using data coming from the client (params, cookies, etc.) to locate the file on disk, as this is a security risk that might allow someone to gain access to files they are not meant to see.
+WARNING: 当心使用从客户端而来的数据（params, cookies，其他）来定位文件，因为会有允许某些人取得某些他们不应该看到的文件的权限的安全风险。
 
-TIP: It is not recommended that you stream static files through Rails if you can instead keep them in a public folder on your web server. It is much more efficient to let the user download the file directly using Apache or another web server, keeping the request from unnecessarily going through the whole Rails stack.
+TIP: 通过 Rails 流式发送静态文件来代替把它们放在你的 web 服务器的公共文件夹中是不推荐的。让用户直接使用 Apache 或者其他 web 服务器下载文件更有效率，保证请求不会不必要地经过整个 Rails 栈。
 
-h4. RESTful Downloads
+h4. RESTful 下载
 
-While +send_data+ works just fine, if you are creating a RESTful application having separate actions for file downloads is usually not necessary. In REST terminology, the PDF file from the example above can be considered just another representation of the client resource. Rails provides an easy and quite sleek way of doing "RESTful downloads". Here's how you can rewrite the example so that the PDF download is a part of the +show+ action, without any streaming:
+尽管 +send_data+ 可以工作，如果你正在创建一个有一些文件下载动作的 RESTful 应用，它通常不是必须的。在 REST 术语中，上例中的 PDF 文件可以认为是另一种client 资源的表现。Rails 提供一种简单和十分平滑的方式来实现 "RESTful 下载"。这里是你如何重写该例，使得 PDF 下载是 +show+ 动作的一部分，不需要任何流传输:
 
 <ruby>
 class ClientsController < ApplicationController
-  # The user can request to receive this resource as HTML or PDF.
+  # 用户可以请求来接受该资源为 HTML 或 PDF 。
   def show
     @client = Client.find(params[:id])
 
@@ -710,45 +703,45 @@ class ClientsController < ApplicationController
 end
 </ruby>
 
-In order for this example to work, you have to add the PDF MIME type to Rails. This can be done by adding the following line to the file +config/initializers/mime_types.rb+:
+为使此例工作，你必须添加 PDF MIME 类型到 Rails 中。添加下面一行到 +config/initializers/mime_types.rb+ 中：
 
 <ruby>
 Mime::Type.register "application/pdf", :pdf
 </ruby>
 
-NOTE: Configuration files are not reloaded on each request, so you have to restart the server in order for their changes to take effect.
+NOTE: 配置文件不会在每次请求被重载，所以你必须重启服务器来使它们的改动生效。
 
-Now the user can request to get a PDF version of a client just by adding ".pdf" to the URL:
+现在用户可以请求来获得一个 client 的 PDF 版本，只要通过添加 ".pdf" 到 URL中：
 
 <shell>
 GET /clients/1.pdf
 </shell>
 
-h3. Parameter Filtering
+h3. 参数过滤
 
-Rails keeps a log file for each environment in the +log+ folder. These are extremely useful when debugging what's actually going on in your application, but in a live application you may not want every bit of information to be stored in the log file. You can filter certain request parameters from your log files by appending them to <tt>config.filter_parameters</tt> in the application configuration. These parameters will be marked [FILTERED] in the log.
+Rails 为每套环境在 +log+ 文件夹中保留一个日志文件。在 debug 时，对你想知道在你的应用中真正发生了什么极为有用，但是在一个线上的应用中你可能不想每一点点信息都被存入日志文件中。你可以通过添加到应用配置中的 <tt>config.filter_parameters</tt> 后过滤掉特定的请求参数到你的日志文件中。这些参数在日志中会被标记 [FILTERED] 。
 
 <ruby>
 config.filter_parameters << :password
 </ruby>
 
-h3. Rescue
+h3. 异常处理
 
-Most likely your application is going to contain bugs or otherwise throw an exception that needs to be handled. For example, if the user follows a link to a resource that no longer exists in the database, Active Record will throw the +ActiveRecord::RecordNotFound+ exception.
+很有可能你的应用将会包含 bug 或是抛出一个需要被处理的异常。举例来说，如果用户跟随一个链接到一个数据库中不再存在的 resource ，Active Record 会抛出 +ActiveRecord::RecordNotFound+ 异常。
 
-Rails' default exception handling displays a "500 Server Error" message for all exceptions. If the request was made locally, a nice traceback and some added information gets displayed so you can figure out what went wrong and deal with it. If the request was remote Rails will just display a simple "500 Server Error" message to the user, or a "404 Not Found" if there was a routing error or a record could not be found. Sometimes you might want to customize how these errors are caught and how they're displayed to the user. There are several levels of exception handling available in a Rails application:
+Rails 的默认异常处理对所有异常会显示一个 "500 Server Error" 信息。如果请求是在本地创建的，一个详细的回溯和一些附加信息会被显示那样你就可以找出什么出错了然后处理它。如果请求是远程的，Rails 会仅仅显示一个简单的 "500 Server Error" 信息给用户，或一个 "404 Not Found" 如果是路由错误或一条记录无法被找到。有时你可能想要定制这些信息如何被捕捉以及它们如何被显示给用户。在一个 Rails 应用中有几个等级的错误处理可用：
 
-h4. The Default 500 and 404 Templates
+h4. 默认 500 和 404 模版
 
-By default a production application will render either a 404 or a 500 error message. These messages are contained in static HTML files in the +public+ folder, in +404.html+ and +500.html+ respectively. You can customize these files to add some extra information and layout, but remember that they are static; i.e. you can't use RHTML or layouts in them, just plain HTML.
+一个生产环境应用默认情况会渲染不是一个 404 就是一个 500 错误信息。这些信息包含在 +public+ 文件夹里的静态 HTML 文件中，分别是 +404.html+ 和 +500.html+。你可以定制这些文件以添加一些额外信息和版型，但是记住它们是静态的；例如，你不能在它们中使用 RHTML 或 版型，只能是简单 HTML。
 
 h4. +rescue_from+
 
-If you want to do something a bit more elaborate when catching errors, you can use +rescue_from+, which handles exceptions of a certain type (or multiple types) in an entire controller and its subclasses.
+如果你在捕捉错误时想要做一些更具体一点，你可以使用 +rescue_from+，在整个控制器和它的子类别中处理某一种特定类型（或多种）异常。
 
-When an exception occurs which is caught by a +rescue_from+ directive, the exception object is passed to the handler. The handler can be a method or a +Proc+ object passed to the +:with+ option. You can also use a block directly instead of an explicit +Proc+ object.
+当一个异常发生时，它会被一个 +rescue_from+ 指令捕捉到，这个异常对象会被传递到处理者那里。处理者可以是一个方法或一个通过 +:with+ 选项传递的 +Proc+ 对象。你也可以直接使用一个 block 来代替一个显式的 +Proc+ 对象。
 
-Here's how you can use +rescue_from+ to intercept all +ActiveRecord::RecordNotFound+ errors and do something with them.
+下面是如何使用 +rescue_from+ 来拦截所有 +ActiveRecore::RecordNotFound+ 错误并做一些处理。
 
 <ruby>
 class ApplicationController < ActionController::Base
@@ -762,7 +755,7 @@ class ApplicationController < ActionController::Base
 end
 </ruby>
 
-Of course, this example is anything but elaborate and doesn't improve on the default exception handling at all, but once you can catch all those exceptions you're free to do whatever you want with them. For example, you could create custom exception classes that will be thrown when a user doesn't have access to a certain section of your application:
+当然，此例除了更详尽以外并未对默认的异常处理做任何改进，但是一旦你可以捕捉到所有这些异常，你就可以对它们随心所欲了。举例来说，你可以创建当一个用户对应用的特定区域没有权限是抛出的异常类别：
 
 <ruby>
 class ApplicationController < ActionController::Base
@@ -777,28 +770,28 @@ class ApplicationController < ActionController::Base
 end
 
 class ClientsController < ApplicationController
-  # Check that the user has the right authorization to access clients.
+  # 检查该用户具有正确的授权来存取客户。
   before_filter :check_authorization
 
-  # Note how the actions don't have to worry about all the auth stuff.
+  # 注意动作如何不用担心所有这些验证的东西。
   def edit
     @client = Client.find(params[:id])
   end
 
   private
 
-  # If the user is not authorized, just throw the exception.
+  # 如果该用户未被授权，就抛出异常。
   def check_authorization
     raise User::NotAuthorized unless current_user.admin?
   end
 end
 </ruby>
 
-NOTE: Certain exceptions are only rescuable from the +ApplicationController+ class, as they are raised before the controller gets initialized and the action gets executed. See Pratik Naik's "article":http://m.onkey.org/2008/7/20/rescue-from-dispatching on the subject for more information.
+NOTE: 某些特定的异常只能被 +ApplicationController+ 类别捕获，因为它们是在控制器被初始化和动作被执行之前抛出的。参考 Pratik Naik 在该主题的"文章":http://m.onkey.org/2008/7/20/rescue-from-dispatching 获得更多信息。
 
-h3. Force HTTPS protocol
+h3. 强制 HTTPS 协议
 
-Sometime you might want to force a particular controller to only be accessible via an HTTPS protocol for security reasons. Since Rails 3.1 you can now use +force_ssl+ method in your controller to enforce that:
+有时由于安全原因，你可能想要强制指定的控制器只可通过 HTTPS 协议获得权限。Rails 3.1 之后你可以在你的控制器中使用 +force_ssl+ 方法来强制执行它：
 
 <ruby>
 class DinnerController
@@ -806,7 +799,7 @@ class DinnerController
 end
 </ruby>
 
-Just like the filter, you could also passing +:only+ and +:except+ to enforce the secure connection only to specific actions.
+就像过滤器一样，你也可以传递 +:only+ 和 +:except+ 来只对特定动作使用强制安全连接。
 
 <ruby>
 class DinnerController
@@ -816,4 +809,4 @@ class DinnerController
 end
 </ruby>
 
-Please note that if you found yourself adding +force_ssl+ to many controllers, you may found yourself wanting to force the whole application to use HTTPS instead. In that case, you can set the +config.force_ssl+ in your environment file.
+请注意如果你发现你自己添加 +force_ssl+ 到很多控制器，你可能发现自己想要强制整个应用使用 HTTPS。那样的话，你可以设置 +config.force_ssl+ 在你的环境文件中。
