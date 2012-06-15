@@ -66,7 +66,7 @@ class AddReceiveNewsletterToUsers < ActiveRecord::Migration
 end
 </ruby>
 
-NOTE: 在迁移任务中使用 Models 的一些"警告":#using-models-in-your-migrations
+NOTE: 在迁移任务中使用 Models 的一些 "警告":#using-models-in-your-migrations
 
 这个迁移为 +users+ 表添加了一个 +receive_newsletter+ 字段，并设定新的 user 创建
 时它的默认值为 +false+ ，对于数据库中已存在的 users 我们使用 User 模型来把他们的这个
@@ -293,11 +293,11 @@ class AddDetailsToProducts < ActiveRecord::Migration
 end
 </ruby>
 
-通常来说，这些自动生成的迁移任务只是起点，我们接下来可以直接修改文件直到我们满意。
+通常来说，这些自动生成的迁移任务只是用来初始化，我们接下来可以直接修改文件直到我们满意。
 
-NOTE: The generated migration file for destructive migrations will still be
-old-style using the +up+ and +down+ methods. This is because Rails needs to know
-the original data types defined when you made the original changes.
+
+NOTE: 这些生成出来的migration文件往往还是使用 +up+ 和 +down+ 方法的旧写法。这是因为Rails需要
+知道在我们做最初的改变时原始的数据类型有没有被定义。
 
 h3. 编写一个迁移任务
 
