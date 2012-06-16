@@ -1,21 +1,38 @@
-h2. Caching with Rails: An overview
+h2.Caching with Rails: An overview
+
+h2. Rails中使用缓存：概述
 
 This guide will teach you what you need to know about avoiding that expensive round-trip to your database and returning what you need to return to the web clients in the shortest time possible.
 
+本指南中你将会教你怎么去避免高成本的数据库读取和尽可能花最短的时间返回你所需要内容的到 web 客户端。
+
 After reading this guide, you should be able to use and configure:
+
+阅读本指南后，你将能够使用和配置：
 
 * Page, action, and fragment caching
 * Sweepers
 * Alternative cache stores
 * Conditional GET support
 
+* 页面，action，和片段的缓存
+* Sweepers
+* 可选择的 cache 存储方式
+* 有条件的 GET 支持
+
 endprologue.
 
 h3. Basic Caching
 
+h3. 基本的缓存
+
 This is an introduction to the three types of caching techniques that Rails provides by default without the use of any third party plugins.
 
+这是一份关于三种 Rails 提供的不需要第三方插件支持的缓存技术的介绍。
+
 To start playing with caching you'll want to ensure that +config.action_controller.perform_caching+ is set to +true+, if you're running in development mode. This flag is normally set in the corresponding +config/environments/*.rb+ and caching is disabled by default for development and test, and enabled for production.
+
+如果在开发模式下，使用缓存首先要确保 +config.action_controller.perform_caching+ 设置为 +true+。通常是在对应的 +config/environments/*.rb+ 下设置，在开发和测试模式下通常缓存默认为不可用，在生产环境下为可用的。
 
 <ruby>
 config.action_controller.perform_caching = true
@@ -23,9 +40,15 @@ config.action_controller.perform_caching = true
 
 h4. Page Caching
 
+h4. 页面缓存
+
 Page caching is a Rails mechanism which allows the request for a generated page to be fulfilled by the webserver (i.e. Apache or nginx), without ever having to go through the Rails stack at all. Obviously, this is super-fast. Unfortunately, it can't be applied to every situation (such as pages that need authentication) and since the webserver is literally just serving a file from the filesystem, cache expiration is an issue that needs to be dealt with.
 
+页面缓存是一种 Rails 的机制，它允许请求已经由 webserver （如：Apache 或 nginx）生成的页面 ，而不需要通过 Rails 的栈。很明显地这很快，然而不幸地是，这不能在所有的情况下应用（例如需要 authentication 的页面）。而且因为 webserver 是直接的从文件系统中请求文件，cache 失效也是一个需要处理的问题。 
+
 To enable page caching, you need to use the +caches_page+ method.
+
+使用页面缓存，你需要使用 +caches_page+ 方法。
 
 <ruby>
 class ProductsController < ActionController
@@ -40,11 +63,19 @@ end
 
 Let's say you have a controller called +ProductsController+ and an +index+ action that lists all the products. The first time anyone requests +/products+, Rails will generate a file called +products.html+ and the webserver will then look for that file before it passes the next request for +/products+ to your Rails application.
 
+假如有个控制器为 +ProductsController+ 然后有个 +index+ 的 action 列出所有的产品 （products），任何第一次请求 +/products+ 时 Rails 会生成一个文件：+products.html+ 而且 webserver 会查找那个文件直到下次向 Rails 应用程序请求 +/products+。 
+
 By default, the page cache directory is set to +Rails.public_path+ (which is usually set to the +public+ folder) and this can be configured by changing the configuration setting +config.action_controller.page_cache_directory+. Changing the default from +public+ helps avoid naming conflicts, since you may want to put other static html in +public+, but changing this will require web server reconfiguration to let the web server know where to serve the cached files from.
+
+页面的缓存目录默认设置为 +Rails.public_path+ （这就是通常设置的 +public+ 文件夹)，可以通过修改配置选项 +config.action_controller.page_cache_directory+ 来设置。由于你可能在 +public+ 目录下放其他静态 html 文件，所以修改掉默认的 +public+ 可以避免命名冲突。但是这就需要重新配置 web server 以使它知道从哪里来获取已经缓存的文件。
 
 The Page Caching mechanism will automatically add a +.html+ extension to requests for pages that do not have an extension to make it easy for the webserver to find those pages and this can be configured by changing the configuration setting +config.action_controller.page_cache_extension+.
 
+页面缓存机制会自动添加 +.html+ 后缀名到请求的没有后缀的页面，以使 webserver 更加容易的请求到这些页面。可以通过修改配置选项  +config.action_controller.page_cache_extension+ 来改变。
+
 In order to expire this page when a new product is added we could extend our example controller like this:
+
+当添加一个新的产品（ product ）时，为了使页面失效，可以这样修改控制器：
 
 <ruby>
 class ProductsController < ActionController
@@ -64,9 +95,15 @@ end
 
 If you want a more complicated expiration scheme, you can use cache sweepers to expire cached objects when things change. This is covered in the section on Sweepers.
 
+如果想使用一个更复杂的失效机制，可以使用缓存清理器（ cache sweepers ）在改变发生时使已缓存的对象失效。
+
 By default, page caching automatically gzips files (for example, to +products.html.gz+ if user requests +/products+) to reduce the size of data transmitted (web servers are typically configured to use a moderate compression ratio as a compromise, but since precompilation happens once, compression ratio is maximum).
 
+页面缓存默认会自动压缩文件，（例如用户请求 +/products+ 会使用 +products.html.gz+ )为了减少数据传输的大小（ web 服务器一般配置为使用合适的压缩比例，但因为已经有一次预编译了，压缩比例是最大的了）。
+
 Nginx is able to serve compressed content directly from disk by enabling +gzip_static+:
+
+Nginx 可以通过开启 +gzip_statis+ 来直接使用硬盘上的已压缩的内容。
 
 <plain>
 location /  {
@@ -76,11 +113,15 @@ location /  {
 
 You can disable gzipping by setting +:gzip+ option to false (for example, if action returns image):
 
+也可以通过将 +:gzip+ 选项设置为 false 来关闭使用压缩文件，（例如，action 返回图片时则不需要压缩）。
+
 <ruby>
 caches_page :image, :gzip => false
 </ruby>
 
 Or, you can set custom gzip compression level (level names are taken from +Zlib+ constants):
+
+或者设置特定的压缩级别（级别名称可以使用 +Zlib+ 中的常量）：
 
 <ruby>
 caches_page :image, :gzip => :best_speed
@@ -88,7 +129,11 @@ caches_page :image, :gzip => :best_speed
 
 NOTE: Page caching ignores all parameters. For example +/products?page=1+ will be written out to the filesystem as +products.html+ with no reference to the +page+ parameter. Thus, if someone requests +/products?page=2+ later, they will get the cached first page. A workaround for this limitation is to include the parameters in the page's path, e.g. +/productions/page/1+.
 
+NOTE: 页面缓存会忽略所有的参数。如 +/products?page=1+ 将会在文件系统中生成没有关于 +page+ 参数的 +/products.html+ 。这样如果之后有人请求 +/products?page=2+ ，将会获取到缓存的第一页。能采取的措施就是把参数包含在页面的路径中，如： +/productions/page/1+ 。
+
 INFO: Page caching runs in an after filter. Thus, invalid requests won't generate spurious cache entries as long as you halt them. Typically, a redirection in some before filter that checks request preconditions does the job.
+
+INFO: 页面缓存在过滤器之后运行。这样，只要你中断无效的请求就不会生成伪造的缓存纪录。通常在一些检验请求的 before filter 中的跳转会做这项工作。
 
 h4. Action Caching
 

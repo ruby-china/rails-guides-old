@@ -108,6 +108,8 @@
       name: Caching with Rails 
       url: caching_with_rails.html
       description: Various caching techniques provided by Rails.
+      work_in_progress: true
+      contributor: sunny0425
     - 
       name: Asset Pipeline
       url: asset_pipeline.html
