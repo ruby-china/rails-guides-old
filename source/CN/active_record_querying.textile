@@ -1,24 +1,24 @@
-h2. Active Record Query Interface
+h2. Active Record 查询接口
 
-This guide covers different ways to retrieve data from the database using Active Record. By referring to this guide, you will be able to:
+本指导手册涉及了如何使用 Active Record 从数据库中检索数据。通过本指导手册，你可以了解到：
 
-* Find records using a variety of methods and conditions
-* Specify the order, retrieved attributes, grouping, and other properties of the found records
-* Use eager loading to reduce the number of database queries needed for data retrieval
-* Use dynamic finders methods
-* Check for the existence of particular records
-* Perform various calculations on Active Record models
-* Run EXPLAIN on relations
+* 使用多种方法和条件表达式来查找数据
+* 对查找到的数据进行排序，分组，取用字段值或者其它属性值
+* 利用预加载来减少数据检索时执行的数据库查询次数
+* 使用动态查找方法
+* 检查记录的存在性
+* 针对 Active Record 的 model 对象的统计方法
+* 在 relation 实例对象上执行 EXPLAIN
 
 endprologue.
 
-WARNING. This Guide is based on Rails 3.0. Some of the code shown here will not work in other versions of Rails.
+WARNING. 这个指导手册是基于 Rails 3.0 的。这里提到的某些代码在其它版本中可能不能工作。
 
-If you're used to using raw SQL to find database records, then you will generally find that there are better ways to carry out the same operations in Rails. Active Record insulates you from the need to use SQL in most cases.
+如果你过去常常使用原始的 SQL 语句来从数据库中查找数据，那你会发现在 Rails 中，你可以使用更好的方式来达到这个目的。Active Record 使你可以在大多数情况下都避免使用原始的 SQL 语句。
 
-Code examples throughout this guide will refer to one or more of the following models:
-
-TIP: All of the following models use +id+ as the primary key, unless specified otherwise.
+本指导手册中的示例代码会使用如下几个 model ：
+ 
+TIP: 除非具体指明，否则以下所有的 model 都使用 +id+ 作为主键。
 
 <ruby>
 class Client < ActiveRecord::Base
@@ -46,13 +46,14 @@ class Role < ActiveRecord::Base
 end
 </ruby>
 
-Active Record will perform queries on the database for you and is compatible with most database systems (MySQL, PostgreSQL and SQLite to name a few). Regardless of which database system you're using, the Active Record method format will always be the same.
+Active Record 可以帮你执行数据库查询并且兼容大多数数据库系统（ MySQL ， PostgreSQL 和  SQLite 等等）。不管你使用的是什么数据库系统， Active Record 提供的方法的使用方式都是一样的。
 
-h3. Retrieving Objects from the Database
+h3. 从数据库中取对象
 
-To retrieve objects from the database, Active Record provides several finder methods. Each finder method allows you to pass arguments into it to perform certain queries on your database without writing raw SQL.
+为了从数据库中取得对象， Active Record 提供了很多查询方法。每个查询方法都可以通过传递参数来精确控制查询而不需要书写原始 SQL 语句。
 
-The methods are:
+这些方法有：
+
 * +where+
 * +select+
 * +group+
@@ -68,147 +69,148 @@ The methods are:
 * +from+
 * +having+
 
-All of the above methods return an instance of <tt>ActiveRecord::Relation</tt>.
+上面的所有方法都返回一个 <tt>ActiveRecord::Relation</tt> 实例。
 
-The primary operation of <tt>Model.find(options)</tt> can be summarized as:
+<tt>Model.find(options)</tt> 的主要操作可以概括如下：
 
-* Convert the supplied options to an equivalent SQL query.
-* Fire the SQL query and retrieve the corresponding results from the database.
-* Instantiate the equivalent Ruby object of the appropriate model for every resulting row.
-* Run +after_find+ callbacks, if any.
+* 根据参数生成相应的 SQL 查询语句。
+* 执行 SQL 查询并返回符合条件的结果。
+* 为每个结果行实例化成该 Model 的对象。
+* 如果有的话，执行 +after_find+ 的回调函数。
 
-h4. Retrieving a Single Object
+h4. 查询单个对象
 
-Active Record provides five different ways of retrieving a single object.
+Active Record 提供了五种方式来查询单个对象。
 
-h5. Using a Primary Key
+h5. 使用主键
 
-Using <tt>Model.find(primary_key)</tt>, you can retrieve the object corresponding to the specified _primary key_ that matches any supplied options. For example:
+使用 <tt>Model.find(primary_key)</tt> ，你可以找到主键等于 _primay key_ 的记录。比如：
 
 <ruby>
-# Find the client with primary key (id) 10.
+# 查找主键（ id ）等于 10 的 client 记录。
 client = Client.find(10)
 # => #<Client id: 10, first_name: "Ryan">
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
 SELECT * FROM clients WHERE (clients.id = 10) LIMIT 1
 </sql>
 
-<tt>Model.find(primary_key)</tt> will raise an +ActiveRecord::RecordNotFound+ exception if no matching record is found.
+如果找不到匹配的记录， <tt>Model.find(primary_key)</tt> 会抛出一个 +ActiveRecord::RecordNotFound+ 异常。
 
 h5. +first+
 
-<tt>Model.first</tt> finds the first record matched by the supplied options, if any. For example:
+如果存在， <tt>Model.first</tt> 会返回该 Model 的第一条记录（根据主键升序排列）。比如：
 
 <ruby>
 client = Client.first
 # => #<Client id: 1, first_name: "Lifo">
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
 SELECT * FROM clients LIMIT 1
 </sql>
 
-<tt>Model.first</tt> returns +nil+ if no matching record is found. No exception will be raised.
+如果没找到匹配的记录， <tt>Model.first</tt> 会返回 nil 。它不会抛出异常。
 
 h5. +last+
 
-<tt>Model.last</tt> finds the last record matched by the supplied options. For example:
+如果存在， <tt>Model.last</tt> 返回该 Model 的最后一条记录（根据主键升序排列）。 比如：
 
 <ruby>
 client = Client.last
 # => #<Client id: 221, first_name: "Russel">
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
-SELECT * FROM clients ORDER BY clients.id DESC LIMIT 1
+SELECT * FROM clients ORDER  BY clients.id DESC LIMIT 1
 </sql>
 
-<tt>Model.last</tt> returns +nil+ if no matching record is found. No exception will be raised.
+如果没找到匹配的记录， <tt>Model.last</tt> 会返回 nil 。它不会抛出异常。
 
 h5(#first_1). +first!+
 
-<tt>Model.first!</tt> finds the first record. For example:
+<tt>Model.first!</tt> 返回第一条记录。比如：
 
 <ruby>
 client = Client.first!
 # => #<Client id: 1, first_name: "Lifo">
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
 SELECT * FROM clients LIMIT 1
 </sql>
 
-<tt>Model.first!</tt> raises +RecordNotFound+ if no matching record is found.
+如果没有找到匹配的记录， <tt>Model.first!</tt> 会抛出 +RecordNotFound+ 异常。
+
 
 h5(#last_1). +last!+
 
-<tt>Model.last!</tt> finds the last record. For example:
+<tt>Model.last!</tt> 返回第一条记录。比如：
 
 <ruby>
 client = Client.last!
 # => #<Client id: 221, first_name: "Russel">
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
 SELECT * FROM clients ORDER BY clients.id DESC LIMIT 1
 </sql>
 
-<tt>Model.last!</tt> raises +RecordNotFound+ if no matching record is found.
+如果没有找到匹配的记录， <tt>Model.last!</tt> 会抛出 +RecordNotFound+ 异常。
 
-h4. Retrieving Multiple Objects
+h4. 查询多条记录
 
-h5. Using Multiple Primary Keys
+h5. 使用多个主键
 
-<tt>Model.find(array_of_primary_key)</tt> accepts an array of _primary keys_, returning an array containing all of the matching records for the supplied _primary keys_. For example:
+<tt>Model.find(array_of_primary_key)</tt> 接受一组 _primary keys_ 作为参数，返回一个包含所有匹配的记录的数组。比如：
 
 <ruby>
-# Find the clients with primary keys 1 and 10.
-client = Client.find([1, 10]) # Or even Client.find(1, 10)
-# => [#<Client id: 1, first_name: "Lifo">, #<Client id: 10, first_name: "Ryan">]
+# 查找主键是 1 或者 10 的 clients 。
+client = Client.find([1, 10]) # 甚至可以这样写 Client.find(1, 10)
+# => [#<Client id: 1, first_name: "Lifo">, #<Client id: 10, fist_name: "Ryan">]
 </ruby>
 
-The SQL equivalent of the above is:
+等价的 SQL 语句是：
 
 <sql>
-SELECT * FROM clients WHERE (clients.id IN (1,10))
+SELECT * FROM clients WHERE (clients.id in (1, 10))
 </sql>
 
-WARNING: <tt>Model.find(array_of_primary_key)</tt> will raise an +ActiveRecord::RecordNotFound+ exception unless a matching record is found for <strong>all</strong> of the supplied primary keys.
+WARNING: 除非所有的主键都找到匹配的记录，否则 <tt>Model.find(array_of_primary_key)</tt> 将会抛出一个 +ActiveRecord::RecordNotFound+ 异常。
 
-h4. Retrieving Multiple Objects in Batches
+h4. 按组查询多条记录
 
-We often need to iterate over a large set of records, as when we send a newsletter to a large set of users, or when we export data.
+我们经常需要同时处理大量数据，比如说当我们需要实时通知一群用户，或者载入大量数据的时候。
 
-This may appear straightforward:
+你可能直接这样写：
 
 <ruby>
-# This is very inefficient when the users table has thousands of rows.
+# 当 users 这个表有几千条数据时，效率会很低。
 User.all.each do |user|
   NewsLetter.weekly_deliver(user)
 end
 </ruby>
 
-But this approach becomes increasingly impractical as the table size increases, since +User.all.each+ instructs Active Record to fetch _the entire table_ in a single pass, build a model object per row, and then keep the entire array of model objects in memory. Indeed, if we have a large number of records, the entire collection may exceed the amount of memory available.
+但是随着表的规模的增大，这种处理方式的时间也会随之增长。因为 +User.all.each+ 一次性地将整个表都实例化了，为每一条记录生成了一个 model ，并把这个结果数组保存在内存中。其实，当我们有一堆非常巨大的对象时，这个集合将会导致内存溢出。
 
-Rails provides two methods that address this problem by dividing records into memory-friendly batches for processing. The first method, +find_each+, retrieves a batch of records and then yields _each_ record to the block individually as a model. The second method, +find_in_batches+, retrieves a batch of records and then yields _the entire batch_ to the block as an array of models.
+Rails 提供了两种方法来把记录分割成组进行处理。第一种方法是 +find_each+ ，检索出一组数据并对将每条记录作为一个 model 传给 block 代码块。第二种方法是 +find_in_batches+ ，检索出一组数据然后将整组数据作为一个 model 的数组传给 block 代码块。
 
-TIP: The +find_each+ and +find_in_batches+ methods are intended for use in the batch processing of a large number of records that wouldn't fit in memory all at once. If you just need to loop over a thousand records the regular find methods are the preferred option.
+TIP: 这里的 +find_each+ 和 +find_in_batches+ 方法适用于那种大量数据不能够一次加载到内存中的情况分组处理情况。如果你只是想遍历一千条数据，那一般的查找方法会更好。
 
 h5. +find_each+
 
-The +find_each+ method retrieves a batch of records and then yields _each_ record to the block individually as a model. In the following example, +find_each+ will retrieve 1000 records (the current default for both +find_each+ and +find_in_batches+) and then yield each record individually to the block as a model. This process is repeated until all of the records have been processed:
+这个 +find_each+ 方法检索出一组数据并对将每条记录作为一个 model 传给 block 代码块。在下面的例子中， +find_each+ 方法会检索出 1000 条数据（当前的 +find_each+ 和 +find_in_batches+ 方法的默认值）然后将每条记录作为一个 model 传给 block 代码块。
 
 <ruby>
 User.find_each do |user|
@@ -216,15 +218,15 @@ User.find_each do |user|
 end
 </ruby>
 
-h6. Options for +find_each+
+h6. +find_each+ 的参数
 
-The +find_each+ method accepts most of the options allowed by the regular +find+ method, except for +:order+ and +:limit+, which are reserved for internal use by +find_each+.
++find_each+ 方法可以接受除了 +:order+ 和 +:limit+ 之外的普通的 +find+ 方法的所有参数，因为 +:order+ 和 +:limit+ 参数已用于 +find_each+ 方法的内部实现了。
 
-Two additional options, +:batch_size+ and +:start+, are available as well.
+另外，+find_each+ 还可以接受两个额外的参数 +:batch_size+ 和 +:start+ 。
 
 *+:batch_size+*
 
-The +:batch_size+ option allows you to specify the number of records to be retrieved in each batch, before being passed individually to the block. For example, to retrieve records in batches of 5000:
++:batch_size+ 这个参数可以让你在传递给 block 语句块之前指定检索到的每组数据的记录数目。比如说，检索一个 5000 条数据的组：
 
 <ruby>
 User.find_each(:batch_size => 5000) do |user|
@@ -234,307 +236,305 @@ end
 
 *+:start+*
 
-By default, records are fetched in ascending order of the primary key, which must be an integer. The +:start+ option allows you to configure the first ID of the sequence whenever the lowest ID is not the one you need. This would be useful, for example, if you wanted to resume an interrupted batch process, provided you saved the last processed ID as a checkpoint.
+默认情况下，我们根据主键的递增顺序取数据，因为主键肯定是一个正整数。当你不需要低于某个 ID 值以下的记录时， +:start+ 这个参数让你可以指定开始的 ID 值，比如说：如果你想继续一个中断的处理进程，你就可以提供你最后一个保存的记录 ID 来实现。
 
-For example, to send newsletters only to users with the primary key starting from 2000, and to retrieve them in batches of 5000:
+比如说： 只对记录 ID 大于 2000 的用户发送新闻信件（ newsletters ），并且按照每组 5000 条记录查询：
 
 <ruby>
 User.find_each(:start => 2000, :batch_size => 5000) do |user|
-  NewsLetter.weekly_deliver(user)
+  NewLetter.weekly_deliver(user)
 end
 </ruby>
 
-Another example would be if you wanted multiple workers handling the same processing queue. You could have each worker handle 10000 records by setting the appropriate <tt>:start</tt> option on each worker.
+另外一个例子是如果你想多个机器（ workers ）共同执行一个查询。你可以在每个机器（ worker ）上设置 <tt>:start</tt> 属性来各自处理 10000 条数据。
 
-NOTE: The +:include+ option allows you to name associations that should be loaded alongside with the models.
+NOTE: +:include+ 可以让你定义与该记录一起加载的关联记录（ associations ）。
 
 h5. +find_in_batches+
 
-The +find_in_batches+ method is similar to +find_each+, since both retrieve batches of records. The difference is that +find_in_batches+ yields _batches_ to the block as an array of models, instead of individually. The following example will yield to the supplied block an array of up to 1000 invoices at a time, with the final block containing any remaining invoices:
++find_in_batches+ 和 +find_each+ 很像，因为它们都是按组检索记录的。不同点在于 +find_in_batches+ 将整组数据作为一个 model 数组传给 block 语句块，而不是分开传递。下面的例子一次性将最多 1000 个 invoice 记录作为一个数组传递给 block 语句块，最后语句块包含所有剩下的 invoice 记录。
 
 <ruby>
-# Give add_invoices an array of 1000 invoices at a time
+# 一次性传递 1000 个 invoices 记录给 add_invoices 方法。
 Invoice.find_in_batches(:include => :invoice_lines) do |invoices|
   export.add_invoices(invoices)
 end
 </ruby>
 
-NOTE: The +:include+ option allows you to name associations that should be loaded alongside with the models.
+NOTE: +:include+ 可以让你定义与该记录一起加载的关联记录（ associations ）。
 
-h6. Options for +find_in_batches+
+h6. +find_in_batches+ 的参数
 
-The +find_in_batches+ method accepts the same +:batch_size+ and +:start+ options as +find_each+, as well as most of the options allowed by the regular +find+ method, except for +:order+ and +:limit+, which are reserved for internal use by +find_in_batches+.
++find_in_batches+ 方法也像 +find_each+ 方法一样接受 +:batch_size+ 和 +:start+ 这两个参数，同时也接受大部分普通 +find+ 方法的参数，除了 +:order+ 和 +:limit+ 这两个 +find_in_batches+ 内部实现时已经使用了的参数。
 
-h3. Conditions
+h3. 条件表达式
 
-The +where+ method allows you to specify conditions to limit the records returned, representing the +WHERE+-part of the SQL statement. Conditions can either be specified as a string, array, or hash.
++where+ 方法让你可以限制返回的结果集，它代表了 SQL 语句的 +where+ 部分。条件可以是一个字符串、一个数组或者是一个映射表。
 
-h4. Pure String Conditions
+h4. 仅含有字符串的条件表达式
 
-If you'd like to add conditions to your find, you could just specify them in there, just like +Client.where("orders_count = '2'")+. This will find all clients where the +orders_count+ field's value is 2.
+如果你想在普通查找方法里面加上条件表达式，那你可以直接这样写， +Client.where("orders_count = '2'")+ 。它会返回所有的 +orders_counts+ 为 2 的 client 记录。
 
-WARNING: Building your own conditions as pure strings can leave you vulnerable to SQL injection exploits. For example, +Client.where("first_name LIKE '%#{params[:first_name]}%'")+ is not safe. See the next section for the preferred way to handle conditions using an array.
+WARNING: 直接用字符串构造你的条件表达式可能会让你遭受到 SQL 注入攻击。比如说： +Client.where("first_name LIKE '%#{params[:first_name]}'")+ 就是不安全的。请看下一节如何使用数组来更好地构造条件表达式。
 
-h4. Array Conditions
+h4. 数组式条件表达式
 
-Now what if that number could vary, say as an argument from somewhere? The find would then take the form:
+假如数字会发生变化或者从其它地方传入，那该怎么办呢？那方法可能会写成如下形式：
 
 <ruby>
-Client.where("orders_count = ?", params[:orders])
+Client.where("orders_count =?", params[:orders])
 </ruby>
 
-Active Record will go through the first element in the conditions value and any additional elements will replace the question marks +(?)+ in the first element.
+Active Record 会先检查第一个元素，并用后面的元素代替 +(?)+ 中的问号。
 
-If you want to specify multiple conditions:
+如果你需要多个条件表达式：
 
 <ruby>
 Client.where("orders_count = ? AND locked = ?", params[:orders], false)
 </ruby>
 
-In this example, the first question mark will be replaced with the value in +params[:orders]+ and the second will be replaced with the SQL representation of +false+, which depends on the adapter.
+在这个例子中，第一个问号会被 +params[:orders]+ 替代，第二个问号会被 +false+ 的的等价值代替，具体值取决于数据库适配器。
 
-This code is highly preferable:
+所以，下面这种写法
 
 <ruby>
 Client.where("orders_count = ?", params[:orders])
 </ruby>
 
-to this code:
+比这种写法要好。
 
 <ruby>
 Client.where("orders_count = #{params[:orders]}")
 </ruby>
 
-because of argument safety. Putting the variable directly into the conditions string will pass the variable to the database *as-is*. This means that it will be an unescaped variable directly from a user who may have malicious intent. If you do this, you put your entire database at risk because once a user finds out he or she can exploit your database they can do just about anything to it. Never ever put your arguments directly inside the conditions string.
+因为它是变量安全的。如果你直接把变量写在条件表达式里面，那数据库适配器会直接把变量传递给数据库 *as-is* 。这就意味着数据库可能得到某些来自于某个恶意用户的不安全的变量。如果你这样做了，那你的数据库就危险了，因为一旦某个用户发现了他可以入侵你的数据库，他就可以对它做任何事。所以千万不要直接把变量写在条件表达式里面。
 
-TIP: For more information on the dangers of SQL injection, see the "Ruby on Rails Security Guide":security.html#sql-injection.
+h5. 条件表达式中的占位符
 
-h5. Placeholder Conditions
-
-Similar to the +(?)+ replacement style of params, you can also specify keys/values hash in your array conditions:
+就像 +(?)+ 代替变量一样，你也可以在数组形式的条件表达式里面使用键值对：
 
 <ruby>
-Client.where("created_at >= :start_date AND created_at <= :end_date",
+Client.where("created_at >= :start_date AND created_at <= :end_date", 
   {:start_date => params[:start_date], :end_date => params[:end_date]})
 </ruby>
 
-This makes for clearer readability if you have a large number of variable conditions.
+当你有一大堆变量时，这样的写法更有可读性。
 
-h5(#array-range_conditions). Range Conditions
+h5(#array-range_conditions). 数列式条件表达式
 
-If you're looking for a range inside of a table (for example, users created in a certain timeframe) you can use the conditions option coupled with the +IN+ SQL statement for this. If you had two dates coming in from a controller you could do something like this to look for a range:
+如果你要查找一个表中的一段连续的记录（比如说，在确定的一段时间内创建的用户），你可以在原始 SQL 语句中直接使用 +in+ 配合条件表达式来达到目的。如果知道两个日期值，你也可以这样查找这些连续的记录。
 
 <ruby>
 Client.where(:created_at => (params[:start_date].to_date)..(params[:end_date].to_date))
 </ruby>
 
-This query will generate something similar to the following SQL:
+这个查询会产生类似于如下的 SQL 语句：
 
 <sql>
   SELECT "clients".* FROM "clients" WHERE ("clients"."created_at" BETWEEN '2010-09-29' AND '2010-11-30')
 </sql>
 
-h4. Hash Conditions
+h4. 映射表式条件表达式
 
-Active Record also allows you to pass in hash conditions which can increase the readability of your conditions syntax. With hash conditions, you pass in a hash with keys of the fields you want conditionalised and the values of how you want to conditionalise them:
+Active Record 还支持传递一个映射表式条件表达式来提高你的条件表达式的可读性。在映射表式的条件表达式中，你把想比较的字段作为键，要用来比较的变量作为值。
 
-NOTE: Only equality, range and subset checking are possible with Hash conditions.
+NOTE: 映射表式的条件表达式只用于相等比较，排序和子集查找中。
 
-h5. Equality Conditions
+h5. 等价条件表达式
 
 <ruby>
 Client.where(:locked => true)
 </ruby>
 
-The field name can also be a string:
+字段名也可以是一个字符串：
 
 <ruby>
 Client.where('locked' => true)
 </ruby>
 
-h5(#hash-range_conditions). Range Conditions
+h5(#hash-range_conditions). 数列式条件表达式
 
-The good thing about this is that we can pass in a range for our fields without it generating a large query as shown in the preamble of this section.
+这种写法的好处是我们可以直接传一串变量而不需要像本节开头一样生成一个大大的查询语句。
 
 <ruby>
-Client.where(:created_at => (Time.now.midnight - 1.day)..Time.now.midnight)
+Client.where(:created_at => (Time.now.midnight -1.day)..Time.now.midnight)
 </ruby>
 
-This will find all clients created yesterday by using a +BETWEEN+ SQL statement:
+它会用以下含有 +BETWEEN+ 的 SQL 语句来找出所有昨天创建的 client 记录：
 
 <sql>
 SELECT * FROM clients WHERE (clients.created_at BETWEEN '2008-12-21 00:00:00' AND '2008-12-22 00:00:00')
 </sql>
 
-This demonstrates a shorter syntax for the examples in "Array Conditions":#array-conditions
+这个表达式是数组式条件表达式中的那个范例的更简单的写法。
 
-h5. Subset Conditions
+h5. 子集条件表达式
 
-If you want to find records using the +IN+ expression you can pass an array to the conditions hash:
+如果你想使用 +IN+ 来查找记录，你可以传一个数组给映射表条件表达式：
 
 <ruby>
 Client.where(:orders_count => [1,3,5])
 </ruby>
 
-This code will generate SQL like this:
+以上代码会产生类似于如下语句的的 SQL 表达式。
 
 <sql>
-SELECT * FROM clients WHERE (clients.orders_count IN (1,3,5))
+SELECT * FROM clients WHERE (clients.orders_count in (1,3,5)
 </sql>
 
-h3. Ordering
+h3. 排序
 
-To retrieve records from the database in a specific order, you can use the +order+ method.
+如果你想按照某种特定顺序返回检索的记录，可以使用 +order+ 方法。
 
-For example, if you're getting a set of records and want to order them in ascending order by the +created_at+ field in your table:
+比如：如果你有一组记录并且希望它们能够按照 +created_at+ 的升序排列：
 
 <ruby>
 Client.order("created_at")
 </ruby>
 
-You could specify +ASC+ or +DESC+ as well:
+你还可以指定 +ASC+ 或者 +DESC+ 。
 
 <ruby>
 Client.order("created_at DESC")
-# OR
+# 或者
 Client.order("created_at ASC")
 </ruby>
 
-Or ordering by multiple fields:
+又或者是按照多个字段排序：
 
 <ruby>
 Client.order("orders_count ASC, created_at DESC")
-# OR
+# 或者
 Client.order("orders_count ASC", "created_at DESC")
 </ruby>
 
-h3. Selecting Specific Fields
+h3. 选择返回的字段（投影）
 
-By default, <tt>Model.find</tt> selects all the fields from the result set using +select *+.
+默认情况下， <tt>Model.find</tt> 方法使用 +select *+ 来返回结果记录的所有字段。
 
-To select only a subset of fields from the result set, you can specify the subset via the +select+ method.
+如果你要返回结果集的一个子集，那你可以通过 +select+ 方法来指定这个子集。
 
-NOTE: If the +select+ method is used, all the returning objects will be "read only":#readonly-objects.
+NOTE: 如果你使用了 +select+ 方法，那返回的集合是"只读的":#10 。
 
 <br />
 
-For example, to select only +viewable_by+ and +locked+ columns:
+比如：我们只需要 +viewable_by+ 和 +locked+ 两个字段：
 
 <ruby>
 Client.select("viewable_by, locked")
 </ruby>
 
-The SQL query used by this find call will be somewhat like:
+最终生成的 SQL 就会像下面一样：
 
 <sql>
-SELECT viewable_by, locked FROM clients
+SELECT viewableby, locked FROM clients
 </sql>
 
-Be careful because this also means you're initializing a model object with only the fields that you've selected. If you attempt to access a field that is not in the initialized record you'll receive:
+请特别小心，因为你这样只是初始化了一个 model 对象的一些字段。所以当你操作那些你还未初始化的字段时，就会得到一个异常：
 
 <shell>
 ActiveModel::MissingAttributeError: missing attribute: <attribute>
 </shell>
 
-Where +&lt;attribute&gt;+ is the attribute you asked for. The +id+ method will not raise the +ActiveRecord::MissingAttributeError+, so just be careful when working with associations because they need the +id+ method to function properly.
+其中 +&lt;attribute&gt;+ 是你要操作的属性名。+id+ 方法不会抛出 +ActiveRecord::MissingAttributeError+ ，所以在使用 model 的 associations 时要小心，因为它依赖于 +id+ 方法。
 
-If you would like to only grab a single record per unique value in a certain field, you can use +uniq+:
+如果你想对于某个字段只返回不同的记录，你可以使用 +uniq+：
 
 <ruby>
 Client.select(:name).uniq
 </ruby>
 
-This would generate SQL like:
+它会生成如下 SQL 语句：
 
 <sql>
 SELECT DISTINCT name FROM clients
 </sql>
 
-You can also remove the uniqueness constraint:
+你也可以移除这个唯一性约束：
 
 <ruby>
 query = Client.select(:name).uniq
-# => Returns unique names
+# => 返回唯一的 name 字段
 
 query.uniq(false)
-# => Returns all names, even if there are duplicates
+# => 返回所有 name ，即使有重复
 </ruby>
 
-h3. Limit and Offset
+h3. 限制和偏移量
 
-To apply +LIMIT+ to the SQL fired by the +Model.find+, you can specify the +LIMIT+ using +limit+ and +offset+ methods on the relation.
+如果你想在 +Model.find+ 中使用 +LIMIT+ 来限制结果，那你可以直接在 relation 实例对象上面结合使用 +limit+ 和 +offset+ 方法来指定 +LIMIT+ 。
 
-You can use +limit+ to specify the number of records to be retrieved, and use +offset+ to specify the number of records to skip before starting to return the records. For example
+你可以使用 +limit+ 来指定返回的结果集中记录数量，然后使用 +offset+ 来指定偏移的记录数目。比如：
 
 <ruby>
 Client.limit(5)
 </ruby>
 
-will return a maximum of 5 clients and because it specifies no offset it will return the first 5 in the table. The SQL it executes looks like this:
+将会最多返回 5 条记录，并且因为没有偏移量，所以它会返回最前面的 5 条记录。它执行的 SQL 语句如下：
 
 <sql>
 SELECT * FROM clients LIMIT 5
 </sql>
 
-Adding +offset+ to that
+然后在其基础上增加 +offset+
 
 <ruby>
-Client.limit(5).offset(30)
+Clients.limit(5).offset(30)
 </ruby>
 
-will return instead a maximum of 5 clients beginning with the 31st. The SQL looks like:
+它会返回从第 31 条记录开始的最多 5 条记录。它相当于如下 SQL 语句：
 
 <sql>
 SELECT * FROM clients LIMIT 5 OFFSET 30
 </sql>
 
-h3. Group
+h3. 分组
 
-To apply a +GROUP BY+ clause to the SQL fired by the finder, you can specify the +group+ method on the find.
+为了在查找记录的 SQL 语句中时指定 +GROUP BY+ ，你可以直接使用 +group+ 方法。
 
-For example, if you want to find a collection of the dates orders were created on:
+比如你想找一组记录并按照创建的时间排序：
 
 <ruby>
-Order.select("date(created_at) as ordered_date, sum(price) as total_price").group("date(created_at)")
+Order.select("data(created_at) as ordered_date, sum(price) as total_price").group("date(created_at)“)
 </ruby>
 
-And this will give you a single +Order+ object for each date where there are orders in the database.
+它会为每个有 orders 的日期的返回一个 +Order+ 对象。
 
-The SQL that would be executed would be something like this:
+他将会生成如下一样的 SQL 语句：
 
 <sql>
 SELECT date(created_at) as ordered_date, sum(price) as total_price FROM orders GROUP BY date(created_at)
 </sql>
 
-h3. Having
+h3. Having 语句
 
-SQL uses the +HAVING+ clause to specify conditions on the +GROUP BY+ fields. You can add the +HAVING+ clause to the SQL fired by the +Model.find+ by adding the +:having+ option to the find.
+SQL 使用者利用 +HAVING+ 来指定 +GROUP BY+ 字段的需要满足的条件。你可以在 +Model.find+ 中将 +:having+ 作为一个参数传递给查找方法。
 
-For example:
+比如说：
 
 <ruby>
 Order.select("date(created_at) as ordered_date, sum(price) as total_price").group("date(created_at)").having("sum(price) > ?", 100)
 </ruby>
 
-The SQL that would be executed would be something like this:
+他将会生成如下 SQL 语句：
 
 <sql>
 SELECT date(created_at) as ordered_date, sum(price) as total_price FROM orders GROUP BY date(created_at) HAVING sum(price) > 100
 </sql>
 
-This will return single order objects for each day, but only those that are ordered more than $100 in a day.
+它会为每天返回一个 order 对象，但是仅限于那些一天订单总额大于 $100 的日子。
 
-h3. Overriding Conditions
+h3. 覆盖条件表达式
 
-h4. +except+
+h4. +expect+
 
-You can specify certain conditions to be excepted by using the +except+ method. For example:
+你可以使用 +expect+ 来忽略一些特定的条件表达式。比如说：
 
 <ruby>
-Post.where('id > 10').limit(20).order('id asc').except(:order)
+Post.where('id > 10').limit(20).order('id asc').expect(:order)
 </ruby>
 
-The SQL that would be executed:
+类似于如下的 SQL 将会被执行：
 
 <sql>
 SELECT * FROM posts WHERE id > 10 LIMIT 20
@@ -542,13 +542,13 @@ SELECT * FROM posts WHERE id > 10 LIMIT 20
 
 h4. +only+
 
-You can also override conditions using the +only+ method. For example:
+你还可以使用 +only+ 方法来覆盖一些条件表达式。比如说：
 
 <ruby>
 Post.where('id > 10').limit(20).order('id desc').only(:order, :where)
 </ruby>
 
-The SQL that would be executed:
+它会生成如下 SQL 语句：
 
 <sql>
 SELECT * FROM posts WHERE id > 10 ORDER BY id DESC
@@ -556,7 +556,7 @@ SELECT * FROM posts WHERE id > 10 ORDER BY id DESC
 
 h4. +reorder+
 
-The +reorder+ method overrides the default scope order. For example:
++reorder+ 方法会覆盖默认的排序方法。 比如说：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -568,13 +568,13 @@ end
 Post.find(10).comments.reorder('name')
 </ruby>
 
-The SQL that would be executed:
+它会产生如下 SQL 语句：
 
 <sql>
 SELECT * FROM posts WHERE id = 10 ORDER BY name
 </sql>
 
-In case the +reorder+ clause is not used, the SQL executed would be:
+如果没有使用 +reorder+ 方法，那对应的 SQL 语句就会变为：
 
 <sql>
 SELECT * FROM posts WHERE id = 10 ORDER BY posted_at DESC
@@ -582,42 +582,42 @@ SELECT * FROM posts WHERE id = 10 ORDER BY posted_at DESC
 
 h4. +reverse_order+
 
-The +reverse_order+ method reverses the ordering clause if specified.
++reverse_order+ 方法会按照指定的排序方式倒序排列。
 
 <ruby>
 Client.where("orders_count > 10").order(:name).reverse_order
 </ruby>
 
-The SQL that would be executed:
+如下 SQL 语句将会执行：
 
 <sql>
 SELECT * FROM clients WHERE orders_count > 10 ORDER BY name DESC
 </sql>
 
-If no ordering clause is specified in the query, the +reverse_order+ orders by the primary key in reverse order.
+如果没有特别指定排序方式，那 +reverse_order+ 方法会按照主键的倒序排列。
 
 <ruby>
 Client.where("orders_count > 10").reverse_order
 </ruby>
 
-The SQL that would be executed:
+它将会产生如下 SQL 语句：
 
 <sql>
 SELECT * FROM clients WHERE orders_count > 10 ORDER BY clients.id DESC
 </sql>
 
-This method accepts *no* arguments.
+这个方法还接受 *no* 参数。
 
-h3. Null Relation
+h3. 空实例对象
 
-The +none+ method returns a chainable relation with no records. Any subsequent conditions chained to the returned relation will continue generating empty relations. This is useful in scenarios where you need a chainable response to a method or a scope that could return zero results.
++none+ 方法会返回一个代表没有记录的 relation 实例对象。随后的条件表达式会根据这个 relation 实例对象继续返回空的 relation 实例对象而不是空结果。这在你需要级联多个方法调用时非常有用。
 
 <ruby>
-Post.none # returns an empty Relation and fires no queries.
+Post.none # 返回一个空实例对象并且不执行任何查询。
 </ruby>
 
 <ruby>
-# The visible_posts method below is expected to return a Relation.
+# 以下的 visible_posts 方法期望返回一个关系对象。
 @posts = current_user.visible_posts.where(:name => params[:name])
 
 def visible_posts
@@ -627,14 +627,14 @@ def visible_posts
   when 'Reviewer'
     Post.published
   when 'Bad User'
-    Post.none # => returning [] or nil breaks the caller code in this case
+    Post.none # => 这里会返回一个 [] 或者 nil 并且结束调用
   end
 end
 </ruby>
 
-h3. Readonly Objects
+h3. 只读对象
 
-Active Record provides +readonly+ method on a relation to explicitly disallow modification of any of the returned objects. Any attempt to alter a readonly record will not succeed, raising an +ActiveRecord::ReadOnlyRecord+ exception.
+Active Record 提供了在 relation 实例对象上调用 +readonly+ 方法的方式来明确指定不允许修改返回的对象。任何尝试修改只读对象的行为都会失败，并抛出一个 +ActiveRecord::ReadOnlyRecord+ 异常。
 
 <ruby>
 client = Client.readonly.first
@@ -642,41 +642,41 @@ client.visits += 1
 client.save
 </ruby>
 
-As +client+ is explicitly set to be a readonly object, the above code will raise an +ActiveRecord::ReadOnlyRecord+ exception when calling +client.save+ with an updated value of _visits_.
+因为 +client+ 已经被明确指定为一个只读的对象，所以以上的代码在执行 +client.save+ 时候更新 _visits_ 时会抛出一个 +ActiveRecord::ReadOnlyRecord+ 异常。
 
-h3. Locking Records for Update
+h3. 为更新对象加锁
 
-Locking is helpful for preventing race conditions when updating records in the database and ensuring atomic updates.
+加锁可以有效防止更新数据库记录时条件表达式竞争而保证更新操作的原子性。
 
-Active Record provides two locking mechanisms:
+Active Record 提供了两种加锁机制：
 
-* Optimistic Locking
-* Pessimistic Locking
+* 乐观锁
+* 悲观锁
 
-h4. Optimistic Locking
+h4. 乐观锁
 
-Optimistic locking allows multiple users to access the same record for edits, and assumes a minimum of conflicts with the data. It does this by checking whether another process has made changes to a record since it was opened. An +ActiveRecord::StaleObjectError+ exception is thrown if that has occurred and the update is ignored.
+乐观锁允许多个用户同时修改同一个对象，它假定数据冲突发生的可能性极小。它检查是否有另外的进程在这个记录打开后修改了这个对象来实现加锁的目地。如果有，那他会抛出一个 +ActiveRecord::StaleObjectError+ 异常并且忽略更新操作。
 
-<strong>Optimistic locking column</strong>
+<strong>乐观锁在列上加锁</strong>
 
-In order to use optimistic locking, the table needs to have a column called +lock_version+. Each time the record is updated, Active Record increments the +lock_version+ column. If an update request is made with a lower value in the +lock_version+ field than is currently in the +lock_version+ column in the database, the update request will fail with an +ActiveRecord::StaleObjectError+. Example:
+为了使用乐观锁，数据表中必须有一个叫做 +lock_version+ 的字段。每次记录更新之后， Active Record 都会增加 +lock_version+ 的数值。如果一个更新请求的 +lock_version+ 数值小于数据库中的 +lock_version+ ，那更新就会失败，并且抛出一个 +ActiveRecord::StaleObjectError+ 。比如说：
 
 <ruby>
-c1 = Client.find(1)
+ca = Client.find(1)
 c2 = Client.find(1)
 
 c1.first_name = "Michael"
 c1.save
 
 c2.name = "should fail"
-c2.save # Raises an ActiveRecord::StaleObjectError
+c2.save # 抛出一个 ActiveRecord::StaleObjectError
 </ruby>
 
-You're then responsible for dealing with the conflict by rescuing the exception and either rolling back, merging, or otherwise apply the business logic needed to resolve the conflict.
+然后你需要自己负责处理这个冲突，包括继续抛出异常并且回滚，合并或者提交其它业务逻辑以解决这个冲突。
 
-This behavior can be turned off by setting <tt>ActiveRecord::Base.lock_optimistically = false</tt>.
+你可以这样设置： <tt>ActiveRecord::Base.lock_optimistically = false</tt> 来关闭这种机制。
 
-To override the name of the +lock_version+ column, +ActiveRecord::Base+ provides a class attribute called +locking_column+:
++ActiveRecord::Base+ 提供了一个类属性 +locking_column+ 来修改默认的 +lock_version+ 字段：
 
 <ruby>
 class Client < ActiveRecord::Base
@@ -684,11 +684,11 @@ class Client < ActiveRecord::Base
 end
 </ruby>
 
-h4. Pessimistic Locking
+h4. 悲观锁
 
-Pessimistic locking uses a locking mechanism provided by the underlying database. Using +lock+ when building a relation obtains an exclusive lock on the selected rows. Relations using +lock+ are usually wrapped inside a transaction for preventing deadlock conditions.
+悲观锁使用数据库提供的锁机制。当它使用 +lock+ 来构建一个 relation 实例对象时对返回的记录行加独占锁（写锁）。 relation 实例对象通常在一个事务里面使用 +lock+ 来防止发生死锁。
 
-For example:
+比如说：
 
 <ruby>
 Item.transaction do
@@ -698,60 +698,60 @@ Item.transaction do
 end
 </ruby>
 
-The above session produces the following SQL for a MySQL backend:
+上面的代码在 MySQL 作为后端数据库时会生成以下 SQL 语句：
 
 <sql>
-SQL (0.2ms)   BEGIN
-Item Load (0.3ms)   SELECT * FROM `items` LIMIT 1 FOR UPDATE
-Item Update (0.4ms)   UPDATE `items` SET `updated_at` = '2009-02-07 18:05:56', `name` = 'Jones' WHERE `id` = 1
-SQL (0.8ms)   COMMIT
+SQL (0.2ms) BEGIN
+Item Load (0.3ms)  SELECT * FROM `item` LIMIT 1 FOR UPDATE
+Item Update (0.4ms)  UPDATE `items` SET `updated_at` = `2009-02-07 18:05:56`, `name` = 'Jones' WHERE `id` = 1
+SQL (0.8ms)  COMMIT
 </sql>
 
-You can also pass raw SQL to the +lock+ method for allowing different types of locks. For example, MySQL has an expression called +LOCK IN SHARE MODE+ where you can lock a record but still allow other queries to read it. To specify this expression just pass it in as the lock option:
+你还可以传递原始 SQL 语句给 +lock+ 方法来支持不同类型的锁。比如说： MySQL 有一中锁叫做 +LOCK IN SHARE MODE+ ，它可以让你对一条记录上锁但是允许其它人读它。要指定这种锁类型，你需要把它作为参数传给 lock 方法：
 
 <ruby>
 Item.transaction do
   i = Item.lock("LOCK IN SHARE MODE").find(1)
-  i.increment!(:views)
+  i.increament(:view)
 end
 </ruby>
 
-If you already have an instance of your model, you can start a transaction and acquire the lock in one go using the following code:
+如果你已经有一个对象实例了，你可以使用如下代码来一次性地开启一个事务并加锁。
 
 <ruby>
 item = Item.first
 item.with_lock do
-  # This block is called within a transaction,
-  # item is already locked.
-  item.increment!(:views)
+  # 这个代码块在事务里面执行
+  # item 是已经加锁的
+  item.increment!(:view)
 end
 </ruby>
 
-h3. Joining Tables
+h3. 连接表
 
-Active Record provides a finder method called +joins+ for specifying +JOIN+ clauses on the resulting SQL. There are multiple ways to use the +joins+ method.
+Active Record 提供了一个叫做 +joins+ 的查找方法来对结果的 SQL 语句指定 +JOIN+ 子句。Active Record 提供了多种使用 +joins+ 方法的方式。
 
-h4. Using a String SQL Fragment
+h4. 使用字符串 SQL 语句
 
-You can just supply the raw SQL specifying the +JOIN+ clause to +joins+:
+你可以使用原生态的 SQL 语句来使用 +JOIN+ 方法以生成 +joins+ 子句。
 
 <ruby>
-Client.joins('LEFT OUTER JOIN addresses ON addresses.client_id = clients.id')
+Client.join('LEFT OUTER JOIN addresses ON addresses.client_id = clients.id')
 </ruby>
 
-This will result in the following SQL:
+它会生成如下 SQL 语句：
 
 <sql>
 SELECT clients.* FROM clients LEFT OUTER JOIN addresses ON addresses.client_id = clients.id
 </sql>
 
-h4. Using Array/Hash of Named Associations
+h4. 使用已定义的 Associations 的数组或者映射表形式
 
-WARNING: This method only works with +INNER JOIN+.
+WARNING: 这个方法只适用于 +INTER JOIN+ 的情况。
 
-Active Record lets you use the names of the "associations":association_basics.html defined on the model as a shortcut for specifying +JOIN+ clause for those associations when using the +joins+ method.
+Active Record 允许我们使用 model 上定义的 "associations":association_basic.html 的名字作为使用 +joins+ 方法时指定连接表的缩写形式。
 
-For example, consider the following +Category+, +Post+, +Comments+ and +Guest+ models:
+比如说：看如下关于 +Category+ ， +Post+ ， +Comments+ 和 +Guest+ 几个 model 的例子。
 
 <ruby>
 class Category < ActiveRecord::Base
@@ -778,30 +778,30 @@ class Tag < ActiveRecord::Base
 end
 </ruby>
 
-Now all of the following will produce the expected join queries using +INNER JOIN+:
+现在以下所有的语句都会产生相应的使用了 +INNER JOIN+ 的连接查询语句：
 
-h5. Joining a Single Association
+h5. 使用单个 Association
 
 <ruby>
 Category.joins(:posts)
 </ruby>
 
-This produces:
+它会产生如下语句：
 
 <sql>
 SELECT categories.* FROM categories
   INNER JOIN posts ON posts.category_id = categories.id
 </sql>
 
-Or, in English: "return a Category object for all categories with posts". Note that you will see duplicate categories if more than one post has the same category. If you want unique categories, you can use Category.joins(:post).select("distinct(categories.id)").
+或者用英语说就是：“ return a Category object for all categories with posts ”。注意如果你有多个 posts 关联相同的 category 的话，就会出现重复。如果你想消除重复， 那你可以这样写： Category.joins(:post).select("distinct(categories.id)") 。
 
-h5. Joining Multiple Associations
+h5. 使用多个 Association
 
 <ruby>
 Post.joins(:category, :comments)
 </ruby>
 
-This produces:
+它会产生这样的结果：
 
 <sql>
 SELECT posts.* FROM posts
@@ -809,31 +809,31 @@ SELECT posts.* FROM posts
   INNER JOIN comments ON comments.post_id = posts.id
 </sql>
 
-Or, in English: "return all posts that have a category and at least one comment". Note again that posts with multiple comments will show up multiple times.
+或者用英语说就是：“ return all posts that having a category and at least one comment ”。再次提醒有多条 comment 记录的 post 会重复出现。
 
-h5. Joining Nested Associations (Single Level)
+h5. 使用嵌套 Association （单层的）
 
 <ruby>
 Post.joins(:comments => :guest)
 </ruby>
 
-This produces:
+它会产生如下语句：
 
 <sql>
 SELECT posts.* FROM posts
   INNER JOIN comments ON comments.post_id = posts.id
-  INNER JOIN guests ON guests.comment_id = comments.id
+  INNER JOIN guest ON guests.comment_id = comments.id
 </sql>
 
-Or, in English: "return all posts that have a comment made by a guest."
+同样，用英语说的就是： “ return all posts that have a comment made by guest. ”。
 
-h5. Joining Nested Associations (Multiple Level)
+h5. 使用嵌套 Association （多层的）
 
 <ruby>
 Category.joins(:posts => [{:comments => :guest}, :tags])
 </ruby>
 
-This produces:
+它产生如下结果：
 
 <sql>
 SELECT categories.* FROM categories
@@ -843,31 +843,31 @@ SELECT categories.* FROM categories
   INNER JOIN tags ON tags.post_id = posts.id
 </sql>
 
-h4. Specifying Conditions on the Joined Tables
+h4. 指定连接表的条件表达式
 
-You can specify conditions on the joined tables using the regular "Array":#array-conditions and "String":#pure-string-conditions conditions. "Hash conditions":#hash-conditions provides a special syntax for specifying conditions for the joined tables:
+你可以使用通常的 "数组式":#2-2 和 "纯字符串式":#2-1 条件表达式来直接指定连接表的条件表达式。 "映射表式条件表达式":#2-3 需要用一种特殊的语法来指定。
 
 <ruby>
 time_range = (Time.now.midnight - 1.day)..Time.now.midnight
 Client.joins(:orders).where('orders.created_at' => time_range)
 </ruby>
 
-An alternative and cleaner syntax is to nest the hash conditions:
+另外一种更清晰的写法是使用映射表式条件表达式
 
 <ruby>
 time_range = (Time.now.midnight - 1.day)..Time.now.midnight
 Client.joins(:orders).where(:orders => {:created_at => time_range})
 </ruby>
 
-This will find all clients who have orders that were created yesterday, again using a +BETWEEN+ SQL expression.
+它会使用 +BETWEEN+ 关键字来找出所有昨天创建了 order 的 client 记录。
 
-h3. Eager Loading Associations
+h3. 预加载 Association
 
-Eager loading is the mechanism for loading the associated records of the objects returned by +Model.find+ using as few queries as possible.
+预加载是一种预先加载可能被多个 +Model.find+ 都会使用到的关联记录的机制。
 
-<strong>N <plus> 1 queries problem</strong>
+<strong>N <plus> 1 查询问题</strong>
 
-Consider the following code, which finds 10 clients and prints their postcodes:
+看下面的代码：它找出 10 个 client 记录并打印出它们的 postcodes ：
 
 <ruby>
 clients = Client.limit(10)
@@ -877,23 +877,23 @@ clients.each do |client|
 end
 </ruby>
 
-This code looks fine at the first sight. But the problem lies within the total number of queries executed. The above code executes 1 ( to find 10 clients ) <plus> 10 ( one per each client to load the address ) = <strong>11</strong> queries in total.
+第一眼看去，这个代码没什么问题。不幸的是：它的问题在于这段语句执行的查询次数。上面的代码总共执行了 1 （找出 10 条 client 记录） <plus> 10 （每次加载一次 address 记录） = <strong>11</strong> 次查询。
 
-<strong>Solution to N <plus> 1 queries problem</strong>
+<strong>N <plus> 1 查询问题的解决方案</strong>
 
-Active Record lets you specify in advance all the associations that are going to be loaded. This is possible by specifying the +includes+ method of the +Model.find+ call. With +includes+, Active Record ensures that all of the specified associations are loaded using the minimum possible number of queries.
+Active Record 允许你提前指定是否需要加载所有的 association 。你可以在调用 +Model.find+ 时候用 +includes+ 来指定它。如果使用了 +includes+ 方法， 那 Active Record 保证在最少次数内加载所有的指定的 associations 。
 
-Revisiting the above case, we could rewrite +Client.all+ to use eager load addresses:
+再来看上面的问题，我们可以在使用 +Client.all+ 时预先加载 address 。
 
 <ruby>
-clients = Client.includes(:address).limit(10)
+clients - Client.includes(:address).limit(10)
 
-clients.each do |client|
+client.each do |client|
   puts client.address.postcode
 end
 </ruby>
 
-The above code will execute just <strong>2</strong> queries, as opposed to <strong>11</strong> queries in the previous case:
+相对于之前的代码的 <strong>11</strong> 次查询，以上的代码只需要执行 <strong>2</strong> 次查询。
 
 <sql>
 SELECT * FROM clients LIMIT 10
@@ -901,51 +901,51 @@ SELECT addresses.* FROM addresses
   WHERE (addresses.client_id IN (1,2,3,4,5,6,7,8,9,10))
 </sql>
 
-h4. Eager Loading Multiple Associations
+h4. 预加载多个 Association
 
-Active Record lets you eager load any number of associations with a single +Model.find+ call by using an array, hash, or a nested hash of array/hash with the +includes+ method.
+Active Record 允许你在一次 +Model.find+ 调用中使用 +include+ 方法通过数组，映射表或者嵌套的数组/映射表的方式来加载任意多个 association 。
 
-h5. Array of Multiple Associations
+h5. 多个 Association 的数组
 
 <ruby>
 Post.includes(:category, :comments)
 </ruby>
 
-This loads all the posts and the associated category and comments for each post.
+它会载入所有的 post 和与之关联的 category 和 comment 记录。
 
-h5. Nested Associations Hash
+h5. 嵌套的 Association 映射表
 
 <ruby>
-Category.includes(:posts => [{:comments => :guest}, :tags]).find(1)
+Category.includes(:posts => [{:comments => :guest}, :tags).find(1)
 </ruby>
 
-This will find the category with id 1 and eager load all of the associated posts, the associated posts' tags and comments, and every comment's guest association.
+它会返回 id 为 1 的 category 记录并预先加载与之相关联的 post 记录，与 post 相关联的 tag 和 comment 记录和与 comment 相关联的 guest 记录。
 
-h4. Specifying Conditions on Eager Loaded Associations
+h4. 为预加载的 Association 指定条件表达式
 
-Even though Active Record lets you specify conditions on the eager loaded associations just like +joins+, the recommended way is to use "joins":#joining-tables instead.
+尽管 Active Record 像给 +joins+ 一样给预加载的 association 也提供了指定条件表达式的方法，但我们建议使用 "joins":#12 来代替。
 
-However if you must do this, you may use +where+ as you would normally.
+然后，如果你还是要这样做，那么你可以想你平时一样使用 +where+ 来达到目的。
 
 <ruby>
 Post.includes(:comments).where("comments.visible", true)
 </ruby>
 
-This would generate a query which contains a +LEFT OUTER JOIN+ whereas the +joins+ method would generate one using the +INNER JOIN+ function instead.
+它会产生一个包含 +LEFT OUTER JOIN+ 查询语句，而 +joins+ 语句产生的语句包含的是 +INNER JOIN+ 。
 
-<ruby>
+<sql>
   SELECT "posts"."id" AS t0_r0, ... "comments"."updated_at" AS t1_r5 FROM "posts" LEFT OUTER JOIN "comments" ON "comments"."post_id" = "posts"."id" WHERE (comments.visible = 1)
-</ruby>
+</sql>
 
-If there was no +where+ condition, this would generate the normal set of two queries.
+如果没有 +where+ 语句，那会生成两条普通的查询语句。
 
-If, in the case of this +includes+ query, there were no comments for any posts, all the posts would still be loaded. By using +joins+ (an INNER JOIN), the join conditions *must* match, otherwise no records will be returned.
+如果在 +includes+ 的查询时， post 没有任何 comment ，那依然会加载所有的 post 记录。如果使用 +joins+ （使用 INNER JOIN ），那就不会返回任何记录。
 
-h3. Scopes
+h3. 作用域（ Scope ）
 
-Scoping allows you to specify commonly-used ARel queries which can be referenced as method calls on the association objects or models. With these scopes, you can use every method previously covered such as +where+, +joins+ and +includes+. All scope methods will return an +ActiveRecord::Relation+ object which will allow for further methods (such as other scopes) to be called on it.
+作用域让你可以定义常用的 Arel 查询以便于 association 对象和 model 对象的调用。在这些作用域中，你可以使用之前提到过的任何方法，比如： +where+ ， +joins+ 和 +includes+ 。所有的作用域方法都会返回一个 +ActiveRecord::Relation+ 对象，这个对象可以进一步调用其它方法（包括其它作用域）。
 
-To define a simple scope, we use the +scope+ method inside the class, passing the ARel query that we'd like run when this scope is called:
+定义一个简单的作用域，我们只需在类里面给 +scope+ 方法传递我们希望执行的 Arel 查询就可以了：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -953,15 +953,15 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-Just like before, these methods are also chainable:
+就像之前的一样，这些方法也是可以级联的。
 
 <ruby>
 class Post < ActiveRecord::Base
-  scope :published, where(:published => true).joins(:category)
+  scope :publiced, where(:published => true).joins(:category)
 end
 </ruby>
 
-Scopes are also chainable within scopes:
+作用域里面可以包含其它作用域：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -970,34 +970,34 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-To call this +published+ scope we can call it on either the class:
+我们可以在类里面调用 +published+ 这个作用域：
 
 <ruby>
-Post.published # => [published posts]
+Post.published # => [published posted]
 </ruby>
 
-Or on an association consisting of +Post+ objects:
+我们也可以在一个包含 +Post+ 对象的 association 里面调用：
 
 <ruby>
 category = Category.first
 category.posts.published # => [published posts belonging to this category]
 </ruby>
 
-h4. Working with times
+h4. 包含时间的计算
 
-If you're working with dates or times within scopes, due to how they are evaluated, you will need to use a lambda so that the scope is evaluated every time.
+如果你在作用域里面包含日期或者时间，你必需使用 lambda 来保证它们每次都重新计算。
 
 <ruby>
 class Post < ActiveRecord::Base
-  scope :created_before_now, lambda { where("created_at < ?", Time.zone.now ) }
+  scope :created_before_now, lambda { where("created_at < ?", Time.zone.now) }
 end
 </ruby>
 
-Without the +lambda+, this +Time.zone.now+ will only be called once.
+如果不使用 +lambda+ ， +Time.zone.now+ 将只调用一次。
 
-h4. Passing in arguments
+h4. 传递参数
 
-When a +lambda+ is used for a +scope+, it can take arguments:
+当在 +scope+ 里面使用 +lambda+ 时，它可以带参数：
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -1005,13 +1005,13 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-This may then be called using this:
+它可以这样调用：
 
 <ruby>
 Post.created_before(Time.zone.now)
 </ruby>
 
-However, this is just duplicating the functionality that would be provided to you by a class method.
+然而，这只是相当于实现了一个类方法的功能。
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -1021,127 +1021,127 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-Using a class method is the preferred way to accept arguments for scopes. These methods will still be accessible on the association objects:
+类方法是给作用域传递参数的一个更好的方式。这些方法依然可以被 association 对象调用：
 
 <ruby>
 category.posts.created_before(time)
 </ruby>
 
-h4. Working with scopes
+h4. 使用作用域
 
-Where a relational object is required, the +scoped+ method may come in handy. This will return an +ActiveRecord::Relation+ object which can have further scoping applied to it afterwards. A place where this may come in handy is on associations
+当你需要一个 relation 实例对象时， +scoped+ 方法就派上用场了。它会返回一个 +ActiveRecord::Relation+ 对象，并且这个对象可以继续调用其它作用域。另外， association 也会用到作用域。
 
 <ruby>
 client = Client.find_by_first_name("Ryan")
 orders = client.orders.scoped
 </ruby>
 
-With this new +orders+ object, we are able to ascertain that this object can have more scopes applied to it. For instance, if we wanted to return orders only in the last 30 days at a later point.
+对于这个新的 +orders+ 对象，我们可以断定它可以继续调用其它的作用域。比如说，如果我们希望在之后的调用点上返回最近 30 天的 order 记录。
 
 <ruby>
 orders.where("created_at > ?", 30.days.ago)
 </ruby>
 
-h4. Applying a default scope
+h4. 定义默认的作用域
 
-If we wish for a scope to be applied across all queries to the model we can use the +default_scope+ method within the model itself.
+如果我们希望定义一个 model 里面所有的查询都会执行的作用域，那我们可以在 model 里面使用 +default_scope+ 方法。
 
 <ruby>
 class Client < ActiveRecord::Base
-  default_scope where("removed_at IS NULL")
+  default_scope where("removed_at is NULL")
 end
 </ruby>
 
-When queries are executed on this model, the SQL query will now look something like this:
+当这个 model 中执行了查询，就会产生类似如下的 SQL 查询语句：
 
 <sql>
 SELECT * FROM clients WHERE removed_at IS NULL
 </sql>
 
-h4. Removing all scoping
+h4. 移除所有的作用域
 
-If we wish to remove scoping for any reason we can use the +unscoped+ method. This is especially useful if a +default_scope+ is specified in the model and should not be applied for this particular query.
+如果想移除作用域，我们可以用 +unscope+ 方法。当某个特定的查询不需要默认作用域时，这个功能尤其有用。
 
 <ruby>
 Client.unscoped.all
 </ruby>
 
-This method removes all scoping and will do a normal query on the table.
+这个方法移除所有的默认作用域，在数据表上执行普通的查询。
 
-h3. Dynamic Finders
+h3. 动态查找方法
 
-For every field (also known as an attribute) you define in your table, Active Record provides a finder method. If you have a field called +first_name+ on your +Client+ model for example, you get +find_by_first_name+ and +find_all_by_first_name+ for free from Active Record. If you have a +locked+ field on the +Client+ model, you also get +find_by_locked+ and +find_all_by_locked+ methods.
+Active Record 为我们数据表上定义的每个字段都提供了相应的查找方法。如果你的 client 表上有一个 +first_name+ 字段，你马上可以从 Active Record 那里得到 +find_by_first_name+ 和 +find_all_by_first_name+ 两个查找方法。如果你的 client 表上还有 +locked+ 字段，那你也可以得到 +find_by_locked+ 和 +find_all_by_locked+ 方法。
 
-You can also use +find_last_by_*+ methods which will find the last record matching your argument.
+你还可以使用 +find_last_by_*+ 的方法来找到最后一条匹配的记录。
 
-You can specify an exclamation point (<tt>!</tt>) on the end of the dynamic finders to get them to raise an +ActiveRecord::RecordNotFound+ error if they do not return any records, like +Client.find_by_name!("Ryan")+
+你还可以在动态查找方法后面加上一个感叹号（ <tt>!</tt>）来保证如果没有匹配的记录时抛出一个 +ActiveRecord::RecordNotFound+ 错误，就像 +Client.find_by_name!("Ryan")+ 。
 
-If you want to find both by name and locked, you can chain these finders together by simply typing "+and+" between the fields. For example, +Client.find_by_first_name_and_locked("Ryan", true)+.
+如果你想同时用 name 和 locked 字段来查找数据，可以简单地在字段之间加上 +and+ 来串联这些查找方法。比如说： +Client.find_by_name_and_locked("Ryan", true)+ 。
 
-WARNING: Up to and including Rails 3.1, when the number of arguments passed to a dynamic finder method is lesser than the number of fields, say <tt>Client.find_by_name_and_locked("Ryan")</tt>, the behavior is to pass +nil+ as the missing argument. This is *unintentional* and this behavior will be changed in Rails 3.2 to throw an +ArgumentError+.
+WARNING: 在 Rails 3.1 及其以下版本中，如果传入一个动态查找方法的参数少于字段数，就像 <tt>Client.find_by_name_and_locked("Ryan")</tt> 一样，它会给缺少的字段传递一个 +nil+ 值。这是无意义的，所以在 Rails 3.2 中，它会抛出一个 +AgumentError+ 的异常。
 
-h3. Find or build a new object
+h3. 查找并创建一个新对象
 
-It's common that you need to find a record or create it if it doesn't exist. You can do that with the +first_or_create+ and +first_or_create!+ methods.
+通常，你需要先查找一条记录并在它不存在时创建它。这时，你可以使用 +first_or_create+ 或者 +first_or_create!+ 方法。
 
 h4. +first_or_create+
 
-The +first_or_create+ method checks whether +first+ returns +nil+ or not. If it does return +nil+, then +create+ is called. This is very powerful when coupled with the +where+ method. Let's see an example.
++first_or_create+ 方法先检查 +first+ 方法是不是返回 +nil+ ，如果是，就调用 +create+ 方法。它和 +where+ 方法一起使用时非常有用。让我们一起看个例子：
 
-Suppose you want to find a client named 'Andy', and if there's none, create one and additionally set his +locked+ attribute to false. You can do so by running:
+假设你想找一个叫 'Andy' 的客户的记录，如果没有就创建一条新记录并把它的 +locked+ 字段设为 false 。你可以这样做：
 
 <ruby>
 Client.where(:first_name => 'Andy').first_or_create(:locked => false)
-# => #<Client id: 1, first_name: "Andy", orders_count: 0, locked: false, created_at: "2011-08-30 06:09:27", updated_at: "2011-08-30 06:09:27">
+# => #<Client id: 1, first_name: "Andy", orders_count: 0, locked: false, created_at: "2011-08-30 06:09:27", updated_at: "201108-30 06:09:27">
 </ruby>
 
-The SQL generated by this method looks like this:
+它会产生类似于如下 SQL 语句：
 
 <sql>
 SELECT * FROM clients WHERE (clients.first_name = 'Andy') LIMIT 1
 BEGIN
-INSERT INTO clients (created_at, first_name, locked, orders_count, updated_at) VALUES ('2011-08-30 05:22:57', 'Andy', 0, NULL, '2011-08-30 05:22:57')
+INSERT INTO clients (created_at, first_name, locked, orders_count, updated_at)  VALUES ('2011-08-30 05:22:57', 'Andy', 0, NULL, '2011-08-30 05:22:57')
 COMMIT
 </sql>
 
-+first_or_create+ returns either the record that already exists or the new record. In our case, we didn't already have a client named Andy so the record is created and returned.
++first_or_create+ 返回已存在的或者新创建的一条记录。在我们的例子中，没有一个叫做 Andy 的 client 记录，所以我们新创建了一条记录并返回。
 
-The new record might not be saved to the database; that depends on whether validations passed or not (just like +create+).
+这条新创建的记录并不一定能保存到数据库里面，这取决于它能不能通过 validation 的验证（就像 +create+ 方法一样）。
 
-It's also worth noting that +first_or_create+ takes into account the arguments of the +where+ method. In the example above we didn't explicitly pass a +:first_name => 'Andy'+ argument to +first_or_create+. However, that was used when creating the new record because it was already passed before to the +where+ method.
++first_or_create+ 每必要关心 +where+ 方法的参数。在上面的例子中，我们并没有明确给 +first_or_create+ 方法传递 +:first_name => 'Andy'+ 的参数。然而，在创建新记录时，依然使用了这个参数，因为这个参数已经传给了 +where+ 方法。
 
-You can do the same with the +find_or_create_by+ method:
+你也可以这样用 +find_or_create_by+ 方法：
 
 <ruby>
 Client.find_or_create_by_first_name(:first_name => "Andy", :locked => false)
 </ruby>
 
-This method still works, but it's encouraged to use +first_or_create+ because it's more explicit on which arguments are used to _find_ the record and which are used to _create_, resulting in less confusion overall.
+这个方法也可行，但是我们鼓励使用 +first_or_create+ 方法，因为它能明确指定那些参数传给 _find_ 方法，那些参数传给 _create_ 方法，这样能避免很多混乱。
 
 h4. +first_or_create!+
 
-You can also use +first_or_create!+ to raise an exception if the new record is invalid. Validations are not covered on this guide, but let's assume for a moment that you temporarily add
+如果你使用了 +first_or_create+ 方法，那当新记录不合法时，就会抛出一个异常。这篇指导不包含 validation 的知识，但是我们可以假定你暂时添加了以下代码到你的 +Client+ 的 model 中。
 
 <ruby>
 validates :orders_count, :presence => true
 </ruby>
 
-to your +Client+ model. If you try to create a new +Client+ without passing an +orders_count+, the record will be invalid and an exception will be raised:
+如果你在创建新记录时没有传一个 +orders_counts+ 的参数，那新记录就是不合法的，会抛出一个异常：
 
 <ruby>
 Client.where(:first_name => 'Andy').first_or_create!(:locked => false)
 # => ActiveRecord::RecordInvalid: Validation failed: Orders count can't be blank
 </ruby>
 
-As with +first_or_create+ there is a +find_or_create_by!+ method but the +first_or_create!+ method is preferred for clarity.
+同样，有一个 +find_or_create_by!+ 方法，但是 +first_or_create!+ 方法更加清晰明确。
 
 h4. +first_or_initialize+
 
-The +first_or_initialize+ method will work just like +first_or_create+ but it will not call +create+ but +new+. This means that a new model instance will be created in memory but won't be saved to the database. Continuing with the +first_or_create+ example, we now want the client named 'Nick':
++first_or_initialize+ 方法和 +first_or_create+ 方法差不多，只是它最后调用 +new+ 而不是 +create+ 方法。那就是说一个新 model 实例创建在内存中，而没有保存到数据库中。继续上面的例子，我们现在再创建一个叫 'Nick' 的记录：
 
 <ruby>
 nick = Client.where(:first_name => 'Nick').first_or_initialize(:locked => false)
-# => <Client id: nil, first_name: "Nick", orders_count: 0, locked: false, created_at: "2011-08-30 06:09:27", updated_at: "2011-08-30 06:09:27">
+# => #<Client id: nil, first_name: "Nick", orders_count: 0, locked: false, created_at: "2011-08-30 06:09:27", updated_at: "2011-08-30 06:09:27">
 
 nick.persisted?
 # => false
@@ -1150,34 +1150,34 @@ nick.new_record?
 # => true
 </ruby>
 
-Because the object is not yet stored in the database, the SQL generated looks like this:
+因为这个对象还没有保存到数据库中，所以相应的 SQL 语句就像这样：
 
 <sql>
 SELECT * FROM clients WHERE (clients.first_name = 'Nick') LIMIT 1
 </sql>
 
-When you want to save it to the database, just call +save+:
+如果你想将它保存到数据库中，直接调用 +save+ 即可：
 
 <ruby>
 nick.save
 # => true
 </ruby>
 
-h3. Finding by SQL
+h3. 直接用 SQL 语句查找
 
-If you'd like to use your own SQL to find records in a table you can use +find_by_sql+. The +find_by_sql+ method will return an array of objects even if the underlying query returns just a single record. For example you could run this query:
+如果你想直接使用 SQL 语句查找记录，可以使用 +find_by_sql+ 方法。这个方法即使结果只有一条记录也会返回一个包含记录集的数组。比如你可以执行下面的查询：
 
 <ruby>
 Client.find_by_sql("SELECT * FROM clients
-  INNER JOIN orders ON clients.id = orders.client_id
+  INNER JOIN orders ON clients.id = orders.cient_id
   ORDER clients.created_at desc")
 </ruby>
 
-+find_by_sql+ provides you with a simple way of making custom calls to the database and retrieving instantiated objects.
++find_by_sql+ 方法提供了一种简单的调用数据库和查询实例对象的方法。
 
 h3. +select_all+
 
-<tt>find_by_sql</tt> has a close relative called +connection#select_all+. +select_all+ will retrieve objects from the database using custom SQL just like +find_by_sql+ but will not instantiate them. Instead, you will get an array of hashes where each hash indicates a record.
+<tt>find_by_sql</tt> 有一个近似方法叫 +connection#select_all+ 。像 +find_by_sql+ 一样， +select_all+ 方法直接用 SQL 语句从数据库里面查找数据，但是并不实例化它们。它会返回一个包含映射表的数组，每个映射表代表了一条记录。
 
 <ruby>
 Client.connection.select_all("SELECT * FROM clients WHERE id = '1'")
@@ -1185,7 +1185,7 @@ Client.connection.select_all("SELECT * FROM clients WHERE id = '1'")
 
 h3. +pluck+
 
-<tt>pluck</tt> can be used to query a single column from the underlying table of a model. It accepts a column name as argument and returns an array of values of the specified column with the corresponding data type.
+<tt>pluck</tt> 用于从一个 model 相关的数据表中查询一个单独的列。它接受一个列名作为参数并以相应的数据类型返回一组值。
 
 <ruby>
 Client.where(:active => true).pluck(:id)
@@ -1195,93 +1195,95 @@ Client.uniq.pluck(:role)
 # SELECT DISTINCT role FROM clients
 </ruby>
 
-+pluck+ makes it possible to replace code like
++pluck+ 方法实现了如下代码的的替换
 
 <ruby>
 Client.select(:id).map { |c| c.id }
 </ruby>
 
-with
+替换为
 
 <ruby>
 Client.pluck(:id)
 </ruby>
 
-h3. Existence of Objects
+h3. 检查对象存在性
 
-If you simply want to check for the existence of the object there's a method called +exists?+. This method will query the database using the same query as +find+, but instead of returning an object or collection of objects it will return either +true+ or +false+.
+如果你仅仅想检查一条记录是否存在，可以使用 +exists?+ 方法。这个方法会像 +find+ 方法一样查询数据库，但是它返回的是 +true+ 或者 +false+ 。
 
 <ruby>
 Client.exists?(1)
 </ruby>
 
-The +exists?+ method also takes multiple ids, but the catch is that it will return true if any one of those records exists.
++exists?+ 方法可以接受多个 id 作为参数，但是注意只要任何一条记录存在它都会返回 true 。
 
 <ruby>
 Client.exists?(1,2,3)
-# or
-Client.exists?([1,2,3])
+# 或者
+Client.exists?([1,2,3]}
 </ruby>
 
-It's even possible to use +exists?+ without any arguments on a model or a relation.
+直接在一个 model 或者 relation 实例上调用不带参数的 +exists?+ 方法也是可以的。
 
 <ruby>
 Client.where(:first_name => 'Ryan').exists?
 </ruby>
 
-The above returns +true+ if there is at least one client with the +first_name+ 'Ryan' and +false+ otherwise.
+上面的例子中，如果至少有一个 +first_name+ 为 'Ryan' 的 client 记录存在，那就会返回 true ，否则就返回 false 。
 
 <ruby>
 Client.exists?
 </ruby>
 
-The above returns +false+ if the +clients+ table is empty and +true+ otherwise.
+如果 +client+ 表为空，就返回 +false+ ，否则返回 +true+ 。
 
-You can also use +any?+ and +many?+ to check for existence on a model or relation.
+你也可以使用 +any?+ 或者 +many?+ 来检查一个 model 或者 relation 的存在性。
 
 <ruby>
-# via a model
+# model
 Post.any?
 Post.many?
 
-# via a named scope
+# 已定义的作用域
 Post.recent.any?
 Post.recent.many?
 
-# via a relation
+# relation
 Post.where(:published => true).any?
 Post.where(:published => true).many?
 
-# via an association
+# association
 Post.first.categories.any?
 Post.first.categories.many?
 </ruby>
 
-h3. Calculations
+h3. 计算
 
-This section uses count as an example method in this preamble, but the options described apply to all sub-sections.
+这个章节在序言中使用 count 方法作为例子，但是这些操作适用于所有子节的方法。
 
-All calculation methods work directly on a model:
+所有的计算方法都直接在 model 上
 
 <ruby>
 Client.count
 # SELECT count(*) AS count_all FROM clients
 </ruby>
 
-Or on a relation:
+或者 relation 实例对象上
 
 <ruby>
 Client.where(:first_name => 'Ryan').count
 # SELECT count(*) AS count_all FROM clients WHERE (first_name = 'Ryan')
 </ruby>
 
-You can also use various finder methods on a relation for performing complex calculations:
+使用。
+
+你也可以在 relation 实例对象上使用很多查找方法来做复杂的计算：
 
 <ruby>
-Client.includes("orders").where(:first_name => 'Ryan', :orders => {:status => 'received'}).count
+Client.includes("orders").where(:first_name => 'Ryan', :orders= => {:status => 'received'}).count
 </ruby>
 
-Which will execute:
+它会生成如下语句：
 
 <sql>
 SELECT count(DISTINCT clients.id) AS count_all FROM clients
@@ -1289,63 +1291,63 @@ SELECT count(DISTINCT clients.id) AS count_all FROM clients
   (clients.first_name = 'Ryan' AND orders.status = 'received')
 </sql>
 
-h4. Count
+h4. 次数
 
-If you want to see how many records are in your model's table you could call +Client.count+ and that will return the number. If you want to be more specific and find all the clients with their age present in the database you can use +Client.count(:age)+.
+如果你想知道你的数据表有多少条记录，你可以调用 +Client.count+ 。如果你想更加明确一点，找出数据库中所有的 client 当前的年龄，你可以用 +Client.count(:age)+ 。
 
-For options, please see the parent section, "Calculations":#calculations.
+想知道具体用法，可以参见父章节： "计算":#21 。
 
-h4. Average
+h4. 平均值
 
-If you want to see the average of a certain number in one of your tables you can call the +average+ method on the class that relates to the table. This method call will look something like this:
+如果你想知道你的数据库中一些数据的平均值，你可以在数据表对应的类上使用 +average+ 方法。这个方法大致像下面这样调用：
 
 <ruby>
 Client.average("orders_count")
 </ruby>
 
-This will return a number (possibly a floating point number such as 3.14159265) representing the average value in the field.
+它会返回一个数字（可能是一个浮点数，如： 3.14159265 ），代表这块区域的平均值。
 
-For options, please see the parent section, "Calculations":#calculations.
+想知道具体用法，可以参见父章节： "计算":#21 。
 
-h4. Minimum
+h4. 最小值
 
-If you want to find the minimum value of a field in your table you can call the +minimum+ method on the class that relates to the table. This method call will look something like this:
+如果你想知道你的数据库中某些方面的最小值，你可以在数据表对应的类上使用 +minmum+ 方法。这个方法大致像下面这样调用：
 
 <ruby>
 Client.minimum("age")
 </ruby>
 
-For options, please see the parent section, "Calculations":#calculations.
+想知道更多用法，可以参见父章节： "计算":#21 。
 
-h4. Maximum
+h4. 最大值
 
-If you want to find the maximum value of a field in your table you can call the +maximum+ method on the class that relates to the table. This method call will look something like this:
+如果你想知道你的数据库中某些方面的最大值，你可以在数据表对应的类上使用 +maximum+ 方法。这个方法大致像下面这样调用：
 
 <ruby>
 Client.maximum("age")
 </ruby>
 
-For options, please see the parent section, "Calculations":#calculations.
+想知道更多用法，可以参见父章节： "计算":#21 。
 
-h4. Sum
+h4. 总和
 
-If you want to find the sum of a field for all records in your table you can call the +sum+ method on the class that relates to the table. This method call will look something like this:
+如果你想知道你的数据库中某些方面的总和，你可以在数据表对应的类上使用 +sum+ 方法。这个方法大致像下面这样调用：
 
 <ruby>
 Client.sum("orders_count")
 </ruby>
 
-For options, please see the parent section, "Calculations":#calculations.
+想知道更多用法，可以参见父章节： "计算":#21 。
 
-h3. Running EXPLAIN
+h3. 执行 EXPLAIN
 
-You can run EXPLAIN on the queries triggered by relations. For example,
+你可以在查询上面执行 relation 触发的 EXPLAIN 。比如说：
 
 <ruby>
 User.where(:id => 1).joins(:posts).explain
 </ruby>
 
-may yield
+在 MySQL 下可能产生如下结果：
 
 <plain>
 EXPLAIN for: SELECT `users`.* FROM `users` INNER JOIN `posts` ON `posts`.`user_id` = `users`.`id` WHERE `users`.`id` = 1
@@ -1358,10 +1360,8 @@ EXPLAIN for: SELECT `users`.* FROM `users` INNER JOIN `posts` ON `posts`.`user_i
 2 rows in set (0.00 sec)
 </plain>
 
-under MySQL.
 
-Active Record performs a pretty printing that emulates the one of the database
-shells. So, the same query running with the PostgreSQL adapter would yield instead
+Active Record 模拟数据库引擎并以一个清晰的格式打印出结果。所以，同样的查询在 PostgreSQL 中可能会像下面这样：
 
 <plain>
 EXPLAIN for: SELECT "users".* FROM "users" INNER JOIN "posts" ON "posts"."user_id" = "users"."id" WHERE "users"."id" = 1
@@ -1376,15 +1376,13 @@ EXPLAIN for: SELECT "users".* FROM "users" INNER JOIN "posts" ON "posts"."user_i
 (6 rows)
 </plain>
 
-Eager loading may trigger more than one query under the hood, and some queries
-may need the results of previous ones. Because of that, +explain+ actually
-executes the query, and then asks for the query plans. For example,
+预加载在数据库引擎盖下面会触发多个查询，并且某些查询可能需要用到之前一些查询的结果。所有， +explain+ 方法先执行查询，再做查询计划。比如说：
 
 <ruby>
 User.where(:id => 1).includes(:posts).explain
 </ruby>
 
-yields
+在 MySQL 数据库下生成
 
 <plain>
 EXPLAIN for: SELECT `users`.* FROM `users`  WHERE `users`.`id` = 1
@@ -1404,51 +1402,41 @@ EXPLAIN for: SELECT `posts`.* FROM `posts`  WHERE `posts`.`user_id` IN (1)
 1 row in set (0.00 sec)
 </plain>
 
-under MySQL.
+h4. 自动化 EXPLAIN
 
-h4. Automatic EXPLAIN
+Active Record 可以在慢查询中自动执行 EXPLAIN 并写入日志。
 
-Active Record is able to run EXPLAIN automatically on slow queries and log its
-output. This feature is controlled by the configuration parameter
+这个功能需要加上配置参数来开启
 
 <ruby>
 config.active_record.auto_explain_threshold_in_seconds
 </ruby>
 
-If set to a number, any query exceeding those many seconds will have its EXPLAIN
-automatically triggered and logged. In the case of relations, the threshold is
-compared to the total time needed to fetch records. So, a relation is seen as a
-unit of work, no matter whether the implementation of eager loading involves
-several queries under the hood.
+如果设置为一个数字，那一个超过这些时间（以秒为单位）的查询就会自动触发一个 EXPLAIN 并写入日志。在 relation 的计算中，这个阈值是与获取记录的总时间相比较的。所以，一个 relation 的计算就像是一个工作单位，不管它是不是实现预先加载而涉及了多个查询。
 
-A threshold of +nil+ disables automatic EXPLAINs.
+阈值为 +nil+ 则关闭了自动执行 EXPLAIN 。
 
-The default threshold in development mode is 0.5 seconds, and +nil+ in test and
-production modes.
+默认情况下，开发模式下的阈值为 0.5 秒，测试和生产模式下为 +nil+ 。
 
-INFO. Automatic EXPLAIN gets disabled if Active Record has no logger, regardless
-of the value of the threshold.
+INFO. 不管阈值是不是设为 +nil+ ，如果没有日志系统，自动 EXPLAIN 都不起作用。
 
-h5. Disabling Automatic EXPLAIN
+h5. 禁用自动 EXPLAIN
 
-Automatic EXPLAIN can be selectively silenced with +ActiveRecord::Base.silence_auto_explain+:
+自动 EXPLAIN 可以用 +ActiveRecord::Base.silence_auto_explain+ 来选择性的禁用。
 
 <ruby>
-ActiveRecord::Base.silence_auto_explain do
-  # no automatic EXPLAIN is triggered here
+ActiveRecord.silence_auto_explain do
+  # 这里不会触发自动 EXPLAIN
 end
 </ruby>
 
-That may be useful for queries you know are slow but fine, like a heavyweight
-report of an admin interface.
+这在你知道某个查询很慢但是合理时是非常有用的，就像管理员页面某个重量级的报表等。
 
-As its name suggests, +silence_auto_explain+ only silences automatic EXPLAINs.
-Explicit calls to +ActiveRecord::Relation#explain+ run.
+正如名字所言， +silence_auto_explain+ 只会禁用自动 EXPLAIN 。直接调用 +ActiveRecord::Relation#explain+ 依然是可用的。
 
-h4. Interpreting EXPLAIN
+h4. 深入了解 EXPLAIN
 
-Interpretation of the output of EXPLAIN is beyond the scope of this guide. The
-following pointers may be helpful:
+深入了解 EXPLAIN 的输出已经超出本篇指导的范围了，以下的链接或许对你有帮助：
 
 * SQLite3: "EXPLAIN QUERY PLAN":http://www.sqlite.org/eqp.html
 

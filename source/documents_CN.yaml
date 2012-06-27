@@ -29,9 +29,10 @@
       contributor: sanatir
       description: This guide covers all the associations provided by Active Record.
     -
-      name: Active Record Query Interface
+      name: Active Record 查询接口
       url: active_record_querying.html
-      description: This guide covers the database query interface provided by Active Record.
+      contributer: zlx
+      description: 这篇指导涉及了如何使用 Active Record 从数据库中检索数据。
 -
   name: 视图(Views)
   documents:      
