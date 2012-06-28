@@ -71,6 +71,8 @@
     - 
       name: Rails Internationalization API
       url: i18n.html
+      work_in_progress: true
+      contributer: zlx
       description: This guide covers how to add internationalization to your applications. Your application will be able to translate content to different languages, change pluralization rules, use correct date formats for each country and so on.
     - 
       name: Action Mailer 介绍
