@@ -1,6 +1,6 @@
 #coding: utf-8
-- 
-  name: 起步(Start Here) 
+-
+  name: 起步(Start Here)
   documents:
     -
       name: Rails 初上手指南
@@ -13,7 +13,7 @@
   documents:
     -
       name: Rails 数据迁移
-      url: migrations.html 
+      url: migrations.html
       contributor: zernel
       description: 这篇文章将会教会你如何使用 Active Record 来进行数据迁移，如何用结构化的语言来组织、更新你的数据库。
     -
@@ -35,14 +35,14 @@
       description: 这篇指导涉及了如何使用 Active Record 从数据库中检索数据。
 -
   name: 视图(Views)
-  documents:      
-    - 
+  documents:
+    -
       name: Rails中的布局与渲染
       url: layouts_and_rendering.html
       work_in_progress: true
       contributor: NaixSpirit
       description: This guide covers the basic layout features of Action Controller and Action View, including rendering and redirecting, using content_for blocks, and working with partials.
-    - 
+    -
       name: Action View Form Helpers
       url: form_helpers.html
       work_in_progress: true
@@ -51,117 +51,119 @@
 -
   name: 控制器(Controllers)
   documents:
-    - 
+    -
       name: 动作控制器概述
       url: action_controller_overview.html
-      contributor: wolflee  
+      contributor: wolflee
       description: 这篇指南介绍控制器的工作原理以及它们在应用中的请求周期中是怎样协调运行的。内容包括 sessions ，过滤器，cookies ，数据流，除此之外还有包含处理由请求引起异常的内容。
-    - 
-      name: 深入浅出说路由 
+    -
+      name: 深入浅出说路由
       url: routing.html
-      contributor: Tassandar	
+      contributor: Tassandar
       description: 这份教程介绍了 Rails 路由的常见功能。如果你想了解你的Rails程序中的路由该如何配置，就从这里开始吧。
 -
   name: 深入(Digging Deeper)
   documents:
-    - 
+    -
       name: Active Support Core Extensions
       url: active_support_core_extensions.html
       description: This guide documents the Ruby core extensions defined in Active Support.
-    - 
+    -
       name: Rails Internationalization API
       url: i18n.html
       work_in_progress: true
       contributer: zlx
       description: This guide covers how to add internationalization to your applications. Your application will be able to translate content to different languages, change pluralization rules, use correct date formats for each country and so on.
-    - 
+    -
       name: Action Mailer 介绍
       contributor: Tassandar
       url: action_mailer_basics.html
       work_in_progress: true
       description: This guide describes how to use Action Mailer to send and receive emails.
-    - 
+    -
       name: Testing Rails Applications
-      url: testing.html 
+      url: testing.html
       description: This is a rather comprehensive guide to doing both unit and functional tests in Rails. It covers everything from 'What is a test?' to the testing APIs. Enjoy.
-    - 
+    -
       name: Securing Rails Applications
       url: security.html
       description: This guide describes common security problems in web applications and how to avoid them with Rails.
-    - 
+    -
       name: Debugging Rails Applications
       url: debugging_rails_applications.html
       description: This guide describes how to debug Rails applications. It covers the different ways of achieving this and how to understand what is happening "behind the scenes" of your code.
-    - 
+    -
       name: Rails 应用与性能测试
       url: performance_testing.html
-      contributor: Tassandar	
+      contributor: Tassandar
       description: 这份文章介绍了几种对一个 Ruby on Rails 应用进行性能测试的方法。
-    - 
+    -
       name: Rails 应用配置指南
       url: configuring.html
       contributor: ichord
       description: 这个指南是一份全面的 Rails 应用基本配置指南.
-    - 
+    -
       name: Rails 命令行工具和 Rake 任务
       url: command_line.html
       contributor: Fenprace
       description: 本指南涵盖了 Rails 的命令行工具和 rake 任务。
-    - 
-      name: Caching with Rails 
+    -
+      name: Caching with Rails
       url: caching_with_rails.html
       description: Various caching techniques provided by Rails.
       work_in_progress: true
       contributor: sunny0425
-    - 
+    -
       name: Asset Pipeline
       url: asset_pipeline.html
       description: This guide documents the asset pipeline.
       description: 本指南记载了 asset pipline.
-    - 
+    -
       name: Engine 入门
       url: engines.html
       work_in_progress: true
       contributor: jhjguxin
       description: 这是一个解释如何编写一个可挂载的 engine 的教程。
-    - 
+    -
       name: The Rails Initialization Process
       url: initialization.html
       description: This guide explains the internals of the Rails initialization process as of Rails 3.1
 -
   name: 扩展(Extending Rails)
   documents:
-    - 
+    -
       name: Rails 插件入门指南
       url: plugins.html
       description: 这篇文章将会告诉你如何在 Rails 上创建一个插件.
-    - 
+    -
       name: Rails on Rack
       url: rails_on_rack.html
+      work_in_progress: true
+      contributer: wolflee
       description: This guide covers Rails integration with Rack and interfacing with other Rack components.
-    - 
+    -
       name: Creating and Customizing Rails Generators
       url: generators.html
       description: This guide covers the process of adding a brand new generator to your extension or providing an alternative to an element of a built-in Rails generator (such as providing alternative test stubs for the scaffold generator).
 -
   name: 为 Ruby on Rails 社区做出贡献
-  documents: 
-    - 
+  documents:
+    -
       name: Contributingaaa to Ruby on Rails
       url: contributing_to_ruby_on_rails.html
       description: Rails is not 'somebody else's framework. This guide covers a variety of ways that you can get involved in the ongoing development of Rails.
-    - 
+    -
       name: API Documentation Guidelines
       url: api_documentation_guidelines.html
       description: This guide documents the Ruby on Rails API documentation guidelines.
-    - 
+    -
       name: Ruby on Rails Guides Guidelines
       url: ruby_on_rails_guides_guidelines.html
       description: This guide documents the Ruby on Rails guides guidelines.
 -
   name: Release Notes
   documents:
-    - 
+    -
       name: Upgrading Ruby on Rails
       url: upgrading_ruby_on_rails.html
       description: This guide helps in upgrading applications to latest Ruby on Rails versions.
@@ -173,15 +175,15 @@
       name: Ruby on Rails 3.1 Release Notes
       url: 3_1_release_notes.html
       description: Release notes for Rails 3.1.
-    - 
+    -
       name: Ruby on Rails 3.0 Release Notes
       url: 3_0_release_notes.html
       description: Release notes for Rails 3.0.
-    - 
+    -
       name: Ruby on Rails 2.3 Release Notes
       url: 2_3_release_notes.html
       description: Release notes for Rails 2.3.
-    - 
+    -
       name: Ruby on Rails 2.2 Release Notes
       url: 2_2_release_notes.html
       description: Release notes for Rails 2.2.
