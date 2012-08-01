@@ -136,9 +136,8 @@
     -
       name: Rails on Rack
       url: rails_on_rack.html
-      work_in_progress: true
       contributer: wolflee
-      description: This guide covers Rails integration with Rack and interfacing with other Rack components.
+      description: 这篇指南涵盖了 Rails 与 Rack 集成以及其他 Rack 组件的连接。
     -
       name: Creating and Customizing Rails Generators
       url: generators.html
