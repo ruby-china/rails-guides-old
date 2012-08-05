@@ -1,19 +1,8 @@
-h2.Caching with Rails: An overview
-
 h2. Rails中使用缓存：概述
 
-This guide will teach you what you need to know about avoiding that expensive round-trip to your database and returning what you need to return to the web clients in the shortest time possible.
-
-本指南中你将会教你怎么去避免高成本的数据库读取和尽可能花最短的时间返回你所需要内容的到 web 客户端。
-
-After reading this guide, you should be able to use and configure:
+本指南将会教你怎样去避免高成本的数据库读取和尽可能花最短的时间返回你所需要内容的到 web 客户端。
 
 阅读本指南后，你将能够使用和配置：
-
-* Page, action, and fragment caching
-* Sweepers
-* Alternative cache stores
-* Conditional GET support
 
 * 页面，action，和片段的缓存
 * Sweepers
@@ -22,31 +11,19 @@ After reading this guide, you should be able to use and configure:
 
 endprologue.
 
-h3. Basic Caching
-
 h3. 基本的缓存
 
-This is an introduction to the three types of caching techniques that Rails provides by default without the use of any third party plugins.
+这是一份对三种 Rails 提供的不需要第三方插件支持的缓存技术的介绍。
 
-这是一份关于三种 Rails 提供的不需要第三方插件支持的缓存技术的介绍。
-
-To start playing with caching you'll want to ensure that +config.action_controller.perform_caching+ is set to +true+, if you're running in development mode. This flag is normally set in the corresponding +config/environments/*.rb+ and caching is disabled by default for development and test, and enabled for production.
-
-如果在开发模式下，使用缓存首先要确保 +config.action_controller.perform_caching+ 设置为 +true+。通常是在对应的 +config/environments/*.rb+ 下设置，在开发和测试模式下通常缓存默认为不可用，在生产环境下为可用的。
+如果在开发模式下，使用缓存首先要确保 +config.action_controller.perform_caching+ 设置为 +true+。通常是在对应的 +config/environments/*.rb+ 下设置，在开发和测试模式下通常缓存默认为不使用用，在生产环境下为使用的。
 
 <ruby>
 config.action_controller.perform_caching = true
 </ruby>
 
-h4. Page Caching
-
 h4. 页面缓存
 
-Page caching is a Rails mechanism which allows the request for a generated page to be fulfilled by the webserver (i.e. Apache or nginx), without ever having to go through the Rails stack at all. Obviously, this is super-fast. Unfortunately, it can't be applied to every situation (such as pages that need authentication) and since the webserver is literally just serving a file from the filesystem, cache expiration is an issue that needs to be dealt with.
-
-页面缓存是一种 Rails 的机制，它允许请求已经由 webserver （如：Apache 或 nginx）生成的页面 ，而不需要通过 Rails 的栈。很明显地这很快，然而不幸地是，这不能在所有的情况下应用（例如需要 authentication 的页面）。而且因为 webserver 是直接的从文件系统中请求文件，cache 失效也是一个需要处理的问题。 
-
-To enable page caching, you need to use the +caches_page+ method.
+页面缓存是一种 Rails 的机制，它允许请求已经由 webserver （如：Apache 或 nginx）生成的页面 ，而不需要通过 Rails 的栈。很明显地这非常快，但它不能在所有的情况下使用（例如需要认证的页面）。而且因为 webserver 是直接的从文件系统中请求文件，cache 失效也是一个需要处理的问题。 
 
 使用页面缓存，你需要使用 +caches_page+ 方法。
 
@@ -61,19 +38,12 @@ class ProductsController < ActionController
 end
 </ruby>
 
-Let's say you have a controller called +ProductsController+ and an +index+ action that lists all the products. The first time anyone requests +/products+, Rails will generate a file called +products.html+ and the webserver will then look for that file before it passes the next request for +/products+ to your Rails application.
 
 假如有个控制器为 +ProductsController+ 然后有个 +index+ 的 action 列出所有的产品 （products），任何第一次请求 +/products+ 时 Rails 会生成一个文件：+products.html+ 而且 webserver 会查找那个文件直到下次向 Rails 应用程序请求 +/products+。 
 
-By default, the page cache directory is set to +Rails.public_path+ (which is usually set to the +public+ folder) and this can be configured by changing the configuration setting +config.action_controller.page_cache_directory+. Changing the default from +public+ helps avoid naming conflicts, since you may want to put other static html in +public+, but changing this will require web server reconfiguration to let the web server know where to serve the cached files from.
+页面的缓存目录默认设置为 +Rails.public_path+ （这就是通常设置的 +public+ 文件夹)，可以通过修改配置选项 +config.action_controller.page_cache_directory+ 来设置。由于可能在 +public+ 目录下放其他静态 html 文件，所以修改掉默认的 +public+ 可以避免命名冲突。但这就需要重新配置 web server 让它知道从哪里来获取已经缓存的文件。
 
-页面的缓存目录默认设置为 +Rails.public_path+ （这就是通常设置的 +public+ 文件夹)，可以通过修改配置选项 +config.action_controller.page_cache_directory+ 来设置。由于你可能在 +public+ 目录下放其他静态 html 文件，所以修改掉默认的 +public+ 可以避免命名冲突。但是这就需要重新配置 web server 以使它知道从哪里来获取已经缓存的文件。
-
-The Page Caching mechanism will automatically add a +.html+ extension to requests for pages that do not have an extension to make it easy for the webserver to find those pages and this can be configured by changing the configuration setting +config.action_controller.page_cache_extension+.
-
-页面缓存机制会自动添加 +.html+ 后缀名到请求的没有后缀的页面，以使 webserver 更加容易的请求到这些页面。可以通过修改配置选项  +config.action_controller.page_cache_extension+ 来改变。
-
-In order to expire this page when a new product is added we could extend our example controller like this:
+页面缓存机制会自动添加 +.html+ 后缀名到请求的没有后缀的页面，以使 webserver 更加容易的查找到这些页面。可以通过修改配置选项  +config.action_controller.page_cache_extension+ 来改变。
 
 当添加一个新的产品（ product ）时，为了使页面失效，可以这样修改控制器：
 
@@ -93,15 +63,10 @@ class ProductsController < ActionController
 end
 </ruby>
 
-If you want a more complicated expiration scheme, you can use cache sweepers to expire cached objects when things change. This is covered in the section on Sweepers.
 
-如果想使用一个更复杂的失效机制，可以使用缓存清理器（ cache sweepers ）在改变发生时使已缓存的对象失效。
+如果想使用一个更复杂的失效机制，可以使用缓存清理器（ cache sweepers ）在改变发生时使已缓存的对象失效。这在 Sweepers 部分有说明。
 
-By default, page caching automatically gzips files (for example, to +products.html.gz+ if user requests +/products+) to reduce the size of data transmitted (web servers are typically configured to use a moderate compression ratio as a compromise, but since precompilation happens once, compression ratio is maximum).
-
-页面缓存默认会自动压缩文件，（例如用户请求 +/products+ 会使用 +products.html.gz+ )为了减少数据传输的大小（ web 服务器一般配置为使用合适的压缩比例，但因为已经有一次预编译了，压缩比例是最大的了）。
-
-Nginx is able to serve compressed content directly from disk by enabling +gzip_static+:
+页面缓存默认会自动压缩（ gzip ）文件，（例如用户请求 +/products+ 会使用 +products.html.gz+ ）为了减少数据传输的大小（ web 服务器一般配置为使用合适的压缩比例，但因为已经有一次预编译了，压缩比例是最大的了）。
 
 Nginx 可以通过开启 +gzip_statis+ 来直接使用硬盘上的已压缩的内容。
 
@@ -111,15 +76,11 @@ location /  {
 }
 </plain>
 
-You can disable gzipping by setting +:gzip+ option to false (for example, if action returns image):
-
-也可以通过将 +:gzip+ 选项设置为 false 来关闭使用压缩文件，（例如，action 返回图片时则不需要压缩）。
+也可以通过将 +:gzip+ 选项设置为 false 来关闭使用压缩文件，（例如 action 返回图片时则不需要压缩）。
 
 <ruby>
 caches_page :image, :gzip => false
 </ruby>
-
-Or, you can set custom gzip compression level (level names are taken from +Zlib+ constants):
 
 或者设置特定的压缩级别（级别名称可以使用 +Zlib+ 中的常量）：
 
@@ -127,21 +88,17 @@ Or, you can set custom gzip compression level (level names are taken from +Zlib+
 caches_page :image, :gzip => :best_speed
 </ruby>
 
-NOTE: Page caching ignores all parameters. For example +/products?page=1+ will be written out to the filesystem as +products.html+ with no reference to the +page+ parameter. Thus, if someone requests +/products?page=2+ later, they will get the cached first page. A workaround for this limitation is to include the parameters in the page's path, e.g. +/productions/page/1+.
-
 NOTE: 页面缓存会忽略所有的参数。如 +/products?page=1+ 将会在文件系统中生成没有关于 +page+ 参数的 +/products.html+ 。这样如果之后有人请求 +/products?page=2+ ，将会获取到缓存的第一页。能采取的措施就是把参数包含在页面的路径中，如： +/productions/page/1+ 。
-
-INFO: Page caching runs in an after filter. Thus, invalid requests won't generate spurious cache entries as long as you halt them. Typically, a redirection in some before filter that checks request preconditions does the job.
 
 INFO: 页面缓存在过滤器之后运行。这样，只要你中断无效的请求就不会生成伪造的缓存纪录。通常在一些检验请求的 before filter 中的跳转会做这项工作。
 
-h4. Action Caching
+h4. Action 缓存
 
-One of the issues with Page Caching is that you cannot use it for pages that require to restrict access somehow. This is where Action Caching comes in. Action Caching works like Page Caching except for the fact that the incoming web request does go from the webserver to the Rails stack and Action Pack so that before filters can be run on it before the cache is served. This allows authentication and other restriction to be run while still serving the result of the output from a cached copy.
+页面缓存的问题之一是，不能缓存需要限制访问的页面。这时就有了 Action 缓存。Action 缓存和页面缓存一样，但它的网页请求是从 webserver 到 Rails 栈和 Action Pack 中。这样 before filter 可以在 cache 服务之前运行。就使得在获取缓存副本的同时也能运行权限和其他验证限制。
 
-Clearing the cache works in a similar way to Page Caching, except you use +expire_action+ instead of +expire_page+.
+清除缓存的方法和清除页面缓存一样，除了使用 +expire_action+ 代替 +expire_page+。
 
-Let's say you only wanted authenticated users to call actions on +ProductsController+.
+如果想要已验证的用户才能调用 +ProductionsController+ 中的 action。
 
 <ruby>
 class ProductsController < ActionController
@@ -160,21 +117,25 @@ class ProductsController < ActionController
 end
 </ruby>
 
-You can also use +:if+ (or +:unless+) to pass a Proc that specifies when the action should be cached. Also, you can use +:layout => false+ to cache without layout so that dynamic information in the layout such as logged in user info or the number of items in the cart can be left uncached. This feature is available as of Rails 2.2.
+可以使用 +:if+ （或 +:unless+ ）来传递一个 Proc 来确定什么时候 action 能被缓存。同时也可以使用 +:layout => false+ 来取消 layout 的缓存，这样在 layout 中的动态信息如登录的用户信息或者购物车的项目数量就不被缓存了。这个特性在 Rails 2.2 就可以使用了。
 
-You can modify the default action cache path by passing a +:cache_path+ option. This will be passed directly to +ActionCachePath.path_for+. This is handy for actions with multiple possible routes that should be cached differently. If a block is given, it is called with the current controller instance.
+可以通过修改 +:cache_path+ 选项的值来传递默认的 action 缓存的路径。修改的值被直接传给 +ActionCachePath.path_for+ 。这便于有多个路由的 action 做不同的缓存。如果传递一个块，将会被当前的控制器实例调用。
 
-Finally, if you are using memcached or Ehcache, you can also pass +:expires_in+. In fact, all parameters not used by +caches_action+ are sent to the underlying cache store.
+最后，如果使用 memcached 或 Ehcache ，可以传值到 +:expires_in+ 。事实上所有不被 +caches_action+ 使用的参数都发送到了底层的缓存存储。
 
-INFO: Action caching runs in an after filter. Thus, invalid requests won't generate spurious cache entries as long as you halt them. Typically, a redirection in some before filter that checks request preconditions does the job.
+INFO: Action 缓存在 after filter 中运行。这样，只要你中断无效的请求，它将不会产生伪造的缓存纪录。通常在一些检验请求的 before filter 中的跳转会做这项工作。
 
-h4. Fragment Caching
+h4. 片段缓存
 
-Life would be perfect if we could get away with caching the entire contents of a page or action and serving it out to the world. Unfortunately, dynamic web applications usually build pages with a variety of components not all of which have the same caching characteristics. In order to address such a dynamically created page where different parts of the page need to be cached and expired differently, Rails provides a mechanism called Fragment Caching.
+如果可以通过缓存整个页面或 action 来处理所有的问题那就完美了。但是动态的 web 应用程序通常会用不同的部分来构成页面，这些不同的部分并不都是使用完全相同的缓存配置。为了处理一个不同部分需要不同的缓存和失效时间的动态创建的页面， Rails 提供了片段缓存的机制。 
 
 Fragment Caching allows a fragment of view logic to be wrapped in a cache block and served out of the cache store when the next request comes in.
 
+片段缓存允许一个逻辑视图的片段放在一个缓存块中，在下一个请求时就可以直接使用缓存存储。
+
 As an example, if you wanted to show all the orders placed on your website in real time and didn't want to cache that part of the page, but did want to cache the part of the page which lists all products available, you could use this piece of code:
+
+举个例子，你想要在网站上实时的显示所有的订单，不想缓存页面上的这一部分，但是想缓存页面上显示所有产品的那一部分，可以这样写你的代码：
 
 <ruby>
 <% Order.find_recent.each do |o| %>
@@ -189,20 +150,20 @@ As an example, if you wanted to show all the orders placed on your website in re
 <% end %>
 </ruby>
 
-The cache block in our example will bind to the action that called it and is written out to the same place as the Action Cache, which means that if you want to cache multiple fragments per action, you should provide an +action_suffix+ to the cache call:
+例子中的缓存块将会绑定到调用它的 action ，之后会将缓存写在和 Action 缓存的相同位置。所以如果你想为每个 action 缓存多个片段，你应该在 cache 调用时提供 +action_suffix+ ：
 
 <ruby>
 <% cache(:action => 'recent', :action_suffix => 'all_products') do %>
   All available products:
 </ruby>
 
-and you can expire it using the +expire_fragment+ method, like so:
+同时可以使用 +expire_fragment+ 方法来使缓存失效：
 
 <ruby>
 expire_fragment(:controller => 'products', :action => 'recent', :action_suffix => 'all_products')
 </ruby>
 
-If you don't want the cache block to bind to the action that called it, You can also use globally keyed fragments by calling the +cache+ method with a key, like so:
+如果不希望缓存块绑定到所调用的 action ，可以通过调用加上一个关键字的 +cache+ 方法使用全局片段：
 
 <ruby>
 <% cache('all_available_products') do %>
@@ -210,17 +171,17 @@ If you don't want the cache block to bind to the action that called it, You can 
 <% end %>
 </ruby>
 
-This fragment is then available to all actions in the +ProductsController+ using the key and can be expired the same way:
+这个片段可以在 +ProductionsController+ 的所有 action 中使用。使用关键字，再以同样的方式使它失效：
 
 <ruby>
 expire_fragment('all_available_products')
 </ruby>
 
-h4. Sweepers
+h4. 清理器
 
-Cache sweeping is a mechanism which allows you to get around having a ton of +expire_{page,action,fragment}+ calls in your code. It does this by moving all the work required to expire cached content into an +ActionController::Caching::Sweeper+ subclass. This class is an observer and looks for changes to an object via callbacks, and when a change occurs it expires the caches associated with that object in an around or after filter.
+Cache 清理是让你在代码里避免调用一大堆 +expire_{page,action,fragmeng}+ 方法的机制。它把所有需要是缓存内容失效的工作移到了 +ActionController::Caching::Sweeper+ 的子类中。这个类是一个观察器，通过回调来查询一个对象的变化，当变化发生时，就会在 around 或 after filter 中将该对象缓存的相关内容失效。
 
-Continuing with our Product controller example, we could rewrite it with a sweeper like this:
+继续 Product controller 的例子，可以在清理器中这样处理：
 
 <ruby>
 class ProductSweeper < ActionController::Caching::Sweeper
@@ -252,13 +213,13 @@ class ProductSweeper < ActionController::Caching::Sweeper
 end
 </ruby>
 
-You may notice that the actual product gets passed to the sweeper, so if we were caching the edit action for each product, we could add an expire method which specifies the page we want to expire:
+可能你注意到了实际的 product 传递到了清理器，如果对每一个 product 的 edit action 缓存，就可以加上一个对特定页面的失效方法：
 
 <ruby>
 expire_action(:controller => 'products', :action => 'edit', :id => product.id)
 </ruby>
 
-Then we add it to our controller to tell it to call the sweeper when certain actions are called. So, if we wanted to expire the cached content for the list and edit actions when the create action was called, we could do the following:
+之后把它加到控制器中，来告知控制器当某个 action 调用时使用清理器。如果我们想在 create action 调用后，使列表和 edit action 的缓存内容失效，我们可以这样做：
 
 <ruby>
 class ProductsController < ActionController
@@ -274,11 +235,11 @@ class ProductsController < ActionController
 end
 </ruby>
 
-h4. SQL Caching
+h4. SQL 缓存
 
-Query caching is a Rails feature that caches the result set returned by each query so that if Rails encounters the same query again for that request, it will use the cached result set as opposed to running the query against the database again.
+查询缓存是 Rails 的一个特性，它缓存了每一个数据库查询的结果集，这样如果 Rails 再次遇到那个请求中的同样的查询，它将会使用缓存的结果集而不是到数据库中继续查询。
 
-For example:
+例如：
 
 <ruby>
 class ProductsController < ActionController
@@ -296,75 +257,81 @@ class ProductsController < ActionController
 end
 </ruby>
 
-The second time the same query is run against the database, it's not actually going to hit the database. The first time the result is returned from the query it is stored in the query cache (in memory) and the second time it's pulled from memory.
+第二次对数据库运行相同的查询，它实际上并不到数据库查询。第一次查询返回的结果存储在查询缓存（内存）中，第二次就直接从内存中读取。
 
-However, it's important to note that query caches are created at the start of an action and destroyed at the end of that action and thus persist only for the duration of the action. If you'd like to store query results in a more persistent fashion, you can in Rails by using low level caching.
+然而，需要注意查询缓存在一个 action 的开始时创建，在 action 结束时清除，只持续在这个 action 的期间。如果希望在一个更持久的方式中存储查询结果，可以在 Rails 中使用低级别的缓存。
 
-h3. Cache Stores
+h3. 缓存存储
 
-Rails provides different stores for the cached data created by action and fragment caches. Page caches are always stored on disk.
+Rails 对通过 action 或片段缓存的数据提供不同的存储方式。页面缓存通常存储在硬盘上。
 
-h4. Configuration
+h4. 配置
 
-You can set up your application's default cache store by calling +config.cache_store=+ in the Application definition inside your +config/application.rb+ file or in an Application.configure block in an environment specific configuration file (i.e. +config/environments/*.rb+). The first argument will be the cache store to use and the rest of the argument will be passed as arguments to the cache store constructor.
+可以在程序配置时通过修改在 +config/application.rb+ 中的 +config.cache_store=+ 选项来设置应用程序的默认缓存存储方式，或者在特定的环境配置文件（如 +config/environments/*.rb+)的 Application.configure 块中设置。第一个参数指定使用的缓存存储方式，其他的参数会传递到缓存构造器中。
 
 <ruby>
 config.cache_store = :memory_store
 </ruby>
 
-Alternatively, you can call +ActionController::Base.cache_store+ outside of a configuration block.
+也可以在配置块之外调用 +ActionController::Base.cache_store+。
 
-You can access the cache by calling +Rails.cache+.
+可以通过调用 +Rails.cache+ 来读写 cache。
 
 h4. ActiveSupport::Cache::Store
 
-This class provides the foundation for interacting with the cache in Rails. This is an abstract class and you cannot use it on its own. Rather you must use a concrete implementation of the class tied to a storage engine. Rails ships with several implementations documented below.
+这个类提供了 Rails 中缓存交互的基础，它是个抽象类，不能直接使用。相反，你需要使用这个类的一个具体实现绑定到一个存储引擎。 Rails 下面提供了几种具体实现的文档。 
 
-The main methods to call are +read+, +write+, +delete+, +exist?+, and +fetch+. The fetch method takes a block and will either return an existing value from the cache, or evaluate the block and write the result to the cache if no value exists.
+主要的调用的方法为 +read+, +write, +delete+, +exist?+ 和 +fetch+。fetch 方法使用一个块，将会返回一个缓存中已有的值，当值不存在时则执行块，然后把结果写到缓存中。
 
-There are some common options used by all cache implementations. These can be passed to the constructor or the various methods to interact with entries.
+有许多在所有缓存实现中通用的选项。这些可以传递到构造器，或者与各种方法交互。
 
-* +:namespace+ - This option can be used to create a namespace within the cache store. It is especially useful if your application shares a cache with other applications. The default value will include the application name and Rails environment.
+* +:namespace+ - 这个选项在缓存存储创建命名空间时使用。在应用程序和其他应用程序共享一个缓存的情况下，这是非常有用的。默认的值将会包含应用程序名称和 Rails 环境。
 
-* +:compress+ - This option can be used to indicate that compression should be used in the cache. This can be useful for transferring large cache entries over a slow network.
+* +:compress+ - 这个选项用来指明在缓存中使用压缩。在速度较慢的网络中传输较大的缓存内容时非常有用。
 
-* +:compress_threshold+ - This options is used in conjunction with the +:compress+ option to indicate a threshold under which cache entries should not be compressed. This defaults to 16 kilobytes.
+* +:compress_threshold+ － 这个选项和 +compress+ 一起使用，来确定缓存内容不压缩的界限。默认为16K（千字节）。
 
-* +:expires_in+ - This option sets an expiration time in seconds for the cache entry when it will be automatically removed from the cache.
+* +:expires_in+ - 这个选项设置一个以秒为单位的失效时间，这样缓存的条目将会自动从缓存中移除。
 
-* +:race_condition_ttl+ - This option is used in conjunction with the +:expires_in+ option. It will prevent race conditions when cache entries expire by preventing multiple processes from simultaneously regenerating the same entry (also known as the dog pile effect). This option sets the number of seconds that an expired entry can be reused while a new value is being regenerated. It's a good practice to set this value if you use the +:expires_in+ option.
+* +:race_condition_ttl+ - 这个选项和 +expires_in+ 共同使用。它会在缓存失效时，从同时再产生的相同条目（也被称为 dog pile 效应）中阻止多个进程，以阻止竞争条件。该选项设置了一个失效的条目在已有新值生成的情况下可以被再次使用的秒数。如果使用了 +:expires_in+ 选项，则最好设置该值。
 
 h4. ActiveSupport::Cache::MemoryStore
 
-This cache store keeps entries in memory in the same Ruby process. The cache store has a bounded size specified by the +:size+ options to the initializer (default is 32Mb). When the cache exceeds the allotted size, a cleanup will occur and the least recently used entries will be removed.
+该缓存存储将在相同的 Ruby 进程中的缓存条目保存在内存中。它可以在初始化时通过设定 +:size+ 选项来限定缓存内容的大小（默认为32M）。当缓存超过了分配的大小，会做一次清理，将最近使用最少的条目移除。
 
 <ruby>
 ActionController::Base.cache_store = :memory_store, :size => 64.megabytes
 </ruby>
 
-If you're running multiple Ruby on Rails server processes (which is the case if you're using mongrel_cluster or Phusion Passenger), then your Rails server process instances won't be able to share cache data with each other. This cache store is not appropriate for large application deployments, but can work well for small, low traffic sites with only a couple of server processes or for development and test environments.
+如果你运行多个 Ruby on Rails 服务进程（如使用 mongrel_cluster 或 Phusion Passenger）， Rails 服务进程实例彼此间不能共享缓存数据。这个缓存存储不适合部署大应用程序，但是在小的，只有少数的服务进程的低流量网站或开发及测试环境下使用还是很不错的。
 
-This is the default cache store implementation.
+该缓存存储是默认的缓存存储实现方式。
 
 h4. ActiveSupport::Cache::FileStore
 
-This cache store uses the file system to store entries. The path to the directory where the store files will be stored must be specified when initializing the cache.
+该缓存存储方式使用文件系统存储缓存条目。存储文件的目录路径需要在初始化缓存时确定。
 
 <ruby>
 ActionController::Base.cache_store = :file_store, "/path/to/cache/directory"
 </ruby>
 
-With this cache store, multiple server processes on the same host can share a cache. Servers processes running on different hosts could share a cache by using a shared file system, but that set up would not be ideal and is not recommended. The cache store is appropriate for low to medium traffic sites that are served off one or two hosts.
+使用该缓存存储，相同主机的多服务进程可以共享一个缓存。不同主机的服务进程也可以使用同一个共享文件系统来共享缓存。但是这样的结构不是完美的，也不推荐使用。该缓存存适合一或两个主机的低到中流量网站。
 
-Note that the cache will grow until the disk is full unless you periodically clear out old entries.
+注意：缓存将会不断增加，直到磁盘满了为止，所以需要定期清理旧的缓存内容。
 
 h4. ActiveSupport::Cache::MemCacheStore
 
 This cache store uses Danga's +memcached+ server to provide a centralized cache for your application. Rails uses the bundled +memcache-client+ gem by default. This is currently the most popular cache store for production websites. It can be used to provide a single, shared cache cluster with very a high performance and redundancy.
 
+该缓存存储使用 Danga 的 +memcached+ 服务来为应用程序提供集中缓存。Rails 默认使用 +memcache-client+ gem。这是现在网站生产环境下使用的最流行的缓存存储方式。它提供高性能、备份的单一共享 cluster （簇）。
+
 When initializing the cache, you need to specify the addresses for all memcached servers in your cluster. If none is specified, it will assume memcached is running on the local host on the default port, but this is not an ideal set up for larger sites.
 
+在初始化缓存时，需要在 cluster（簇） 中指定所有 memcached 服务器的地址。若没指定，将会认为 memcached 运行在本地主机的默认端口，对于大型网站来说，这不是完美的。
+
 The +write+ and +fetch+ methods on this cache accept two additional options that take advantage of features specific to memcached. You can specify +:raw+ to send a value directly to the server with no serialization. The value must be a string or number. You can use memcached direct operation like +increment+ and +decrement+ only on raw values. You can also specify +:unless_exist+ if you don't want memcached to overwrite an existing entry.
+
+该缓存存储中的 +write+ 和 +fetch+ 方法接受两个额外的选项来使用 memcached 。可以指定 +:raw+ 来把无序列的值直接传递到服务。该值可以是一个字符串或数值。可以使用 memcached 直接的操作，例如对原始（ raw ）值使用 +increment+ 和 +decrement+ 。如果不希望 memcached 重写已经存在的内容，可以指定 +:unless_exist+ 。
 
 <ruby>
 ActionController::Base.cache_store = :mem_cache_store, "cache-1.example.com", "cache-2.example.com"
@@ -372,46 +339,47 @@ ActionController::Base.cache_store = :mem_cache_store, "cache-1.example.com", "c
 
 h4. ActiveSupport::Cache::EhcacheStore
 
-If you are using JRuby you can use Terracotta's Ehcache as the cache store for your application. Ehcache is an open source Java cache that also offers an enterprise version with increased scalability, management, and commercial support. You must first install the jruby-ehcache-rails3 gem (version 1.1.0 or later) to use this cache store.
+如果你使用 JRuby ，你可以使用 Terracotta 的 Ehcache 作为你应用程序的缓存存储方式。 Ehcache 是开源的 Java 缓存，它也提供具有增加的可扩展性，管理和商业支持的企业版本。使用此缓存存储，需要先安装 jruby-ehcache-rails3 gem 包（版本为1.1.0 及之后的版本）。
 
 <ruby>
 ActionController::Base.cache_store = :ehcache_store
 </ruby>
 
-When initializing the cache, you may use the +:ehcache_config+ option to specify the Ehcache config file to use (where the default is "ehcache.xml" in your Rails config directory), and the :cache_name option to provide a custom name for your cache (the default is rails_cache).
+在初始化缓存时，你可能使用 +:ehcache_config+ 选项来指定 Ehcache 使用的配置文件（默认为 Rails 项目 config 目录下的“echcache.xml“），:cache_name 选项为缓存提供一个自定义名称（默认的名称为 rails_cache ）。
 
-In addition to the standard +:expires_in+ option, the +write+ method on this cache can also accept the additional  +:unless_exist+ option, which will cause the cache store to use Ehcache's +putIfAbsent+ method instead of +put+, and therefore will not overwrite an existing entry. Additionally, the +write+ method supports all of the properties exposed by the "Ehcache Element class":http://ehcache.org/apidocs/net/sf/ehcache/Element.html , including:
+除了标准的 +:expires_in+ 选项外，+write+ 方法在该缓存中也接收额外的 +:unless_exist+ 选项，它可以使缓存存储使用 Ehcache 的 +putIfAbsent+ 方法来代替 +put+，因此将不会重写已经存在的缓存内容。另外， +write+ 方法提供所有的属性，通过 "Ehcache Element class":http://ehcache.org/apidocs/net/sf/ehcache/Element.html ，包括：
 
-|_. Property |_. Argument Type |_. Description |
-| elementEvictionData | ElementEvictionData | Sets this element's eviction data instance. |
-| eternal | boolean | Sets whether the element is eternal. |
-| timeToIdle, tti | int | Sets time to idle |
-| timeToLive, ttl, expires_in | int | Sets time to Live |
-| version | long | Sets the version attribute of the ElementAttributes object. |
+|_. 属性 |_. 参数类型 |_. 描述 |
+| elementEvictionData | ElementEvictionData | 设置元素的 eviction 数据实例。 |
+| eternal | boolean | 设置元素是否是永久的。 |
+| timeToIdle, tti | int | 设置空闲时间 |
+| timeToLive, ttl, expires_in | int | 设置活跃时间 |
+| version | long | 设置 ElementAttributes 对象的版本属性。 |
+|
 
-These options are passed to the +write+ method as Hash options using either camelCase or underscore notation, as in the following examples:
+这些选项以 Hash 选项传递到 +write+ 方法，使用驼峰命名法或下划线表示法，下面是一个例子：
 
 <ruby>
 Rails.cache.write('key', 'value', :time_to_idle => 60.seconds, :timeToLive => 600.seconds)
 caches_action :index, :expires_in => 60.seconds, :unless_exist => true
 </ruby>
 
-For more information about Ehcache, see "http://ehcache.org/":http://ehcache.org/ .
-For more information about Ehcache for JRuby and Rails, see "http://ehcache.org/documentation/jruby.html":http://ehcache.org/documentation/jruby.html
+更多关于 Ehcache 的信息，请查看 "http://ehcache.org/":http://ehcache.org/ 。
+更多关于 Ehcache for JRuby and Rails 的信息，请查看 "http://ehcache.org/documentation/jruby.html":http://ehcache.org/documentation/jruby.html。
 
 h4. ActiveSupport::Cache::NullStore
 
-This cache store implementation is meant to be used only in development or test environments and it never stores anything. This can be very useful in development when you have code that interacts directly with +Rails.cache+, but caching may interfere with being able to see the results of code changes. With this cache store, all +fetch+ and +read+ operations will result in a miss.
+该缓存存储的实现不存储任何内容，它应该只是用于开发或测试环境下。在开发环境下这是非常有用的，如果你有代码和 +Rails.cache+ 交互，但是缓存可以直接看到代码更改的结果。使用该缓存存储方式，所有的 +fetch+ 和 +read+ 操作将会丢失。
 
 <ruby>
 ActionController::Base.cache_store = :null_store
 </ruby>
 
-h4. Custom Cache Stores
+h4. 自定义的缓存存储
 
-You can create your own custom cache store by simply extending +ActiveSupport::Cache::Store+ and implementing the appropriate methods. In this way, you can swap in any number of caching technologies into your Rails application.
+可以通过扩展 +ActiveSupport::Cache::Store+ ，以及实现相应的方法来创建自定义缓存存储。通过这种方式，可以将任何缓存技术应用到你的 Rails 应用程序中。
 
-To use a custom cache store, simple set the cache store to a new instance of the class.
+使用一个自定义的缓存存储，只需要简单的将缓存设置为该类的一个实例。
 
 <ruby>
 ActionController::Base.cache_store = MyCacheStore.new
@@ -419,24 +387,24 @@ ActionController::Base.cache_store = MyCacheStore.new
 
 h4. Cache Keys
 
-The keys used in a cache can be any object that responds to either +:cache_key+ or to +:to_param+. You can implement the +:cache_key+ method on your classes if you need to generate custom keys. Active Record will generate keys based on the class name and record id.
+在缓存中使用的键可以是任何能对 +:cache_key+ 或 +:to_param+ 响应的对象。如果需要生成自定义的键，可以在类里面实现 +:cache_key+ 方法。Active Record 会生成基于类名和纪录 id 的键。
 
-You can use Hashes and Arrays of values as cache keys.
+你可以使用 Hash 和 数组的值作为缓存键。
 
 <ruby>
 # This is a legal cache key
 Rails.cache.read(:site => "mysite", :owners => [owner_1, owner_2])
 </ruby>
 
-The keys you use on +Rails.cache+ will not be the same as those actually used with the storage engine. They may be modified with a namespace or altered to fit technology backend constraints. This means, for instance, that you can't save values with +Rails.cache+ and then try to pull them out with the +memcache-client+ gem. However, you also don't need to worry about exceeding the memcached size limit or violating syntax rules.
+你在 +Rails.cache+ 中使用的键和这些在实际中使用的存储引擎中使用的键不一样。他们可能会修改一个命名空间或改变以适应技术的后端约束。这意味着，例如，你不能使用 +Rails.cache+ 保存值，然后尝试使用 +memcache-client+ gem 来获取值。然而，你也不需要担心超出 memcached 限制的大小和违反语法规则。
 
-h3. Conditional GET support
+h3. 有条件的 GET 支持
 
-Conditional GETs are a feature of the HTTP specification that provide a way for web servers to tell browsers that the response to a GET request hasn't changed since the last request and can be safely pulled from the browser cache.
+有条件的 GET 是 HTTP 规格的一个特性，它为 web 服务提供一种方式来告知浏览器对一个 GET 请求的响应与上一个的请求没有变化，可以安全的从浏览器缓存中获取。
 
-They work by using the +HTTP_IF_NONE_MATCH+ and +HTTP_IF_MODIFIED_SINCE+ headers to pass back and forth both a unique content identifier and the timestamp of when the content was last changed. If the browser makes a request where the content identifier (etag) or last modified since timestamp matches the server’s version then the server only needs to send back an empty response with a not modified status.
+通过使用 +HTTP_IF_NONE_MATCH+ 和 +HTTP_IF_MODIFIED_SINCE+ 头部来传递返回唯一的内容标识和内容上次更改的时间戳。如果浏览器发起一个请求，它的内容标识（etag）或者上次更改的时间戳匹配服务器的版本，之后服务器只需要发送会一个包含未更改状态的空响应。
 
-It is the server's (i.e. our) responsibility to look for a last modified timestamp and the if-none-match header and determine whether or not to send back the full response. With conditional-get support in Rails this is a pretty easy task:
+查看上次更改的时间戳和 if-none-match 头部以及决定是否发送整个响应 是服务器（例如我们）的负责的。在 Rails 中使用 conditional-get 支持是非常简单的：
 
 <ruby>
 class ProductsController < ApplicationController
@@ -462,6 +430,8 @@ end
 
 If you don't have any special response processing and are using the default rendering mechanism (i.e. you're not using respond_to or calling render yourself) then you’ve got an easy helper in fresh_when:
 
+如果你没有任何特殊的响应过程，且使用默认的渲染机制（例如：没有使用 respond_to 或者自己调用渲染），则你可以使用简单的fresh_when 这个helper方法：
+
 <ruby>
 class ProductsController < ApplicationController
 
@@ -475,6 +445,6 @@ class ProductsController < ApplicationController
 end
 </ruby>
 
-h3. Further reading
+h3. 更多阅读
 
 * "Scaling Rails Screencasts":http://railslab.newrelic.com/scaling-rails
