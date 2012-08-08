@@ -321,15 +321,9 @@ ActionController::Base.cache_store = :file_store, "/path/to/cache/directory"
 
 h4. ActiveSupport::Cache::MemCacheStore
 
-This cache store uses Danga's +memcached+ server to provide a centralized cache for your application. Rails uses the bundled +memcache-client+ gem by default. This is currently the most popular cache store for production websites. It can be used to provide a single, shared cache cluster with very a high performance and redundancy.
-
 该缓存存储使用 Danga 的 +memcached+ 服务来为应用程序提供集中缓存。Rails 默认使用 +memcache-client+ gem。这是现在网站生产环境下使用的最流行的缓存存储方式。它提供高性能、备份的单一共享 cluster （簇）。
 
-When initializing the cache, you need to specify the addresses for all memcached servers in your cluster. If none is specified, it will assume memcached is running on the local host on the default port, but this is not an ideal set up for larger sites.
-
 在初始化缓存时，需要在 cluster（簇） 中指定所有 memcached 服务器的地址。若没指定，将会认为 memcached 运行在本地主机的默认端口，对于大型网站来说，这不是完美的。
-
-The +write+ and +fetch+ methods on this cache accept two additional options that take advantage of features specific to memcached. You can specify +:raw+ to send a value directly to the server with no serialization. The value must be a string or number. You can use memcached direct operation like +increment+ and +decrement+ only on raw values. You can also specify +:unless_exist+ if you don't want memcached to overwrite an existing entry.
 
 该缓存存储中的 +write+ 和 +fetch+ 方法接受两个额外的选项来使用 memcached 。可以指定 +:raw+ 来把无序列的值直接传递到服务。该值可以是一个字符串或数值。可以使用 memcached 直接的操作，例如对原始（ raw ）值使用 +increment+ 和 +decrement+ 。如果不希望 memcached 重写已经存在的内容，可以指定 +:unless_exist+ 。
 
@@ -355,7 +349,6 @@ ActionController::Base.cache_store = :ehcache_store
 | timeToIdle, tti | int | 设置空闲时间 |
 | timeToLive, ttl, expires_in | int | 设置活跃时间 |
 | version | long | 设置 ElementAttributes 对象的版本属性。 |
-|
 
 这些选项以 Hash 选项传递到 +write+ 方法，使用驼峰命名法或下划线表示法，下面是一个例子：
 
