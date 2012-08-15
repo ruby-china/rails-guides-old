@@ -1,40 +1,40 @@
-h2. A Guide to Testing Rails Applications
+h2. 测试 Rails 应用指南
 
-This guide covers built-in mechanisms offered by Rails to test your application. By referring to this guide, you will be able to:
+本指南包括由 Rails 提供的内置结构来测试你的应用程序。参照本指南，你将能够:
 
-* Understand Rails testing terminology
-* Write unit, functional and integration tests for your application
-* Identify other popular testing approaches and plugins
+* 了解 Rails 测试术语
+* 为你的应用程序编写单元测试, 功能测试, 以及集成测试
+* 认同其他流行的测试方法以及插件
 
-This guide won't teach you to write a Rails application; it assumes basic familiarity with the Rails way of doing things.
+本指南将不会教你写一个 Rails 应用, 它假定你已熟悉基本的 Rails 的操作方法
 
 endprologue.
 
-h3. Why Write Tests for your Rails Applications?
+h3. 为什么要为你的 Rails 应用程序写测试?
 
-* Rails makes it super easy to write your tests. It starts by producing skeleton test code in the background while you are creating your models and controllers.
-* By simply running your Rails tests you can ensure your code adheres to the desired functionality even after some major code refactoring.
-* Rails tests can also simulate browser requests and thus you can test your application's response without having to test it through your browser.
+* Rails 让你写测试超级容易。当你创建一个模型(Model)和控制器(Controller)的时候，它在后台建立一个测试代码的骨架。
+* 只需要运行你的 Rails 测试，你就可以确定那些所需功能的代码，甚至一些主要的重构代码。
+* Rails 测试还可以模拟浏览器请求，因此你无需通过浏览器进行测试就能测试你的应用程序的响应。
 
-h3. Introduction to Testing
+h3. 测试介绍
 
-Testing support was woven into the Rails fabric from the beginning. It wasn't an "oh! let's bolt on support for running tests because they're new and cool" epiphany. Just about every Rails application interacts heavily with a database - and, as a result, your tests will need a database to interact with as well. To write efficient tests, you'll need to understand how to set up this database and populate it with sample data.
+测试支持一开始就被编织进了 Rails 组织结构。这不是一个“哦！让我们死心踏地的支持运行测试吧，因为它们很酷很新”的顿悟。几乎每个 Rails 应用程序都会和数据库进行大量的交互 － 并且，这样的结果就是你的测试将也需要一个数据库来与之交互。要编写一个高效的测试，你需要了解如何建立这个数据库并且填充样式数据。
 
-h4. The Three Environments
+h4. 使用的三个环境
 
-Every Rails application you build has 3 sides: a side for production, a side for development, and a side for testing.
+你建立的么一个 Rails 应用都有3个方面：一个方面用于生产，一个方面用于开发，以及一个方面用于测试。
 
-One place you'll find this distinction is in the +config/database.yml+ file. This YAML configuration file has 3 different sections defining 3 unique database setups:
+在 +config/database.yml+ 文档中你可以发现这个的不同。这个 YAML 这个配置文件有 3 个独立的部分，分别定义了 3 个独立的数据库设置：
 
-* production
-* development
-* test
+* 生产环境
+* 开发环境
+* 测试环境
 
-This allows you to set up and interact with test data without any danger of your tests altering data from your production environment.
+这将允许你设置并且和测试数据交互，而且在你改动测试数据时将不会对你的生产环境有任何风险。
 
-For example, suppose you need to test your new +delete_this_user_and_every_everything_associated_with_it+ function. Wouldn't you want to run this in an environment where it makes no difference if you destroy data or not?
+例如，假设你想测试你的 +delete_this_user_and_every_everything_associated_with_it+ 新函数。当你在销毁数据或者不这样做时，难道你不想在一个没有任何区别的环境中运行么？
 
-When you do end up destroying your testing database (and it will happen, trust me), you can rebuild it from scratch according to the specs defined in the development database. You can do this by running +rake db:test:prepare+.
+当你最终销毁你的测试数据库时(这会发生的，相信我)，你可以你根据在开发数据库中定义的规格从头开始重新建立它。你可以这样操作，运行 +rake db:test:prepare+ 。
 
 h4. Rails Sets up for Testing from the Word Go
 
@@ -52,7 +52,7 @@ h4. The Low-Down on Fixtures
 
 For good tests, you'll need to give some thought to setting up test data. In Rails, you can handle this by defining and customizing fixtures.
 
-h5. What are Fixtures?
+h5. 什么是测试夹具?
 
 _Fixtures_ is a fancy word for sample data. Fixtures allow you to populate your testing database with predefined data before your tests run. Fixtures are database independent and assume a single format: *YAML*.
 
