@@ -36,9 +36,9 @@ h4. 使用的三个环境
 
 当你最终销毁你的测试数据库时(这会发生的，相信我)，你可以你根据在开发数据库中定义的规格从头开始重新建立它。你可以这样操作，运行 +rake db:test:prepare+ 。
 
-h4. Rails Sets up for Testing from the Word Go
+h4. Rails 会随着命令的敲击而建立测试
 
-Rails creates a +test+ folder for you as soon as you create a Rails project using +rails new+ _application_name_. If you list the contents of this folder then you shall see:
+当你使用 +rails new+ _application_name_ 命令来创建一个 Rails 项目的同时Rails 会为你建立一个 +test+ 文件夹。如果你把文件夹中的内容罗列出来，你将会看到：
 
 <shell>
 $ ls -F test/
@@ -46,23 +46,23 @@ $ ls -F test/
 fixtures/       functional/     integration/    test_helper.rb  unit/
 </shell>
 
-The +unit+ folder is meant to hold tests for your models, the +functional+ folder is meant to hold tests for your controllers, and the +integration+ folder is meant to hold tests that involve any number of controllers interacting. Fixtures are a way of organizing test data; they reside in the +fixtures+ folder. The +test_helper.rb+ file holds the default configuration for your tests.
+这个 +unit+ 文件夹是指为你保存模型(Model)测试，+functional+ 这个文件夹是指为你保存控制器(Controller)测试，以及 +integration+ 文件夹是指为你保存那些设计任何交互控制器的测试。夹具(Fixtures)是组织测试数据的一种方法；它们所属于 +fixtures+ 文件夹。这个 +test_help.rb+ 文件保存了你的测试的默认配置。
 
 h4. The Low-Down on Fixtures
 
-For good tests, you'll need to give some thought to setting up test data. In Rails, you can handle this by defining and customizing fixtures.
+至于一个好的测试，你将需要给予更多的想法来建立测试数据。在 Rails 中，你可以由自定义夹具(Fixtures) 来操作它。
 
 h5. 什么是测试夹具?
 
-_Fixtures_ is a fancy word for sample data. Fixtures allow you to populate your testing database with predefined data before your tests run. Fixtures are database independent and assume a single format: *YAML*.
+_夹具(Fixtures)_ 对于样本数据是一个奇妙的词。夹具(Fixtures) 允许你在测试运行之前把预先定义的数据填充到你的测试数据库中。夹具(Fixtures) 是一个独立的数据库并呈现出一种单独的格式： *YAML* 。
 
-You'll find fixtures under your +test/fixtures+ directory. When you run +rails generate model+ to create a new model, fixture stubs will be automatically created and placed in this directory.
+你将会在你的 +test/fixtures+ 目录下找到测试夹具。当你运行 +rails generate model+ 来创建一个新的模型，fixture stubs 将会被自动创建并且被放置于这个目录中。
 
 h5. YAML
 
-YAML-formatted fixtures are a very human-friendly way to describe your sample data. These types of fixtures have the *.yml* file extension (as in +users.yml+).
+YAML 格式的 fixture 是一个以自然语言的方式来描述你的样本数据。这种类型的 fixtures 具有 *.yml* 文件后缀（比如 +user.yml+ ）。
 
-Here's a sample YAML fixture file:
+这里是一个 YAML fixture 文件的示例：
 
 <yaml>
 # lo & behold!  I am a YAML comment!
@@ -77,11 +77,11 @@ steve:
  profession: guy with keyboard
 </yaml>
 
-Each fixture is given a name followed by an indented list of colon-separated key/value pairs. Records are separated by a blank space. You can place comments in a fixture file by using the # character in the first column.
+每一个 fixture 被给予一个命名，后面给随着由冒号分隔开的由 键/值 对组成的列表。每条记录是由换行所分开。你可以使用 # 字符把注释放置于 fixture 文件的第一列。
 
 h5. ERB'in It Up
 
-ERB allows you to embed ruby code within templates. YAML fixture format is pre-processed with ERB when you load fixtures. This allows you to use Ruby to help you generate some sample data.
+ERB 允许你在模板中插入 ruby 代码。当你加载 fixtures 时，YAML fixture 格式将会使用 ERB 被预先处理。这将会允许你使用 Ruby 来帮助你产生一些样本数据。
 
 <erb>
 <% earth_size = 20 %>
@@ -98,46 +98,46 @@ mars:
   brightest_on: <%= 13.days.from_now.to_s(:db) %>
 </erb>
 
-Anything encased within the
+任何被包括在标签
 
 <erb>
 <% %>
 </erb>
 
-tag is considered Ruby code. When this fixture is loaded, the +size+ attribute of the three records will be set to 20/50, 20/2, and 20-69 respectively. The +brightest_on+ attribute will also be evaluated and formatted by Rails to be compatible with the database.
+中的会被认为是 Ruby 代码。当这个 fixture 被加载时，这三条记录的 +size+ 属性将会被分别设置为 20/50，20/2，以及 20-69 。+brightest_on+ 属性也将会被 Rails 赋值并且格式化来和数据库兼容。
 
 h5. Fixtures in Action
 
-Rails by default automatically loads all fixtures from the +test/fixtures+ folder for your unit and functional test. Loading involves three steps:
+Rails 默认会为你的单元测试和功能测试加载 +test/fixtures+ 文件夹中的所有 fixtures 。加载包含三个步骤：
 
-* Remove any existing data from the table corresponding to the fixture
-* Load the fixture data into the table
-* Dump the fixture data into a variable in case you want to access it directly
+* 从与这个 fixture 对应的数据表中移除所有的已存在的数据。
+* 加载 fixture 数据到数据表中。
+* 把 fixture 数据转储到一个变量中以防你想要直接访问它。
 
-h5. Fixtures are ActiveRecord objects
+h5. Fixtures 是 ActiveRecord 对象
 
-Fixtures are instances of ActiveRecord. As mentioned in point #3 above, you can access the object directly because it is automatically setup as a local variable of the test case. For example:
+Fixtures 是 ActiveRecord 实例。在上面提到的第三点中，你可以直接访问这个对象，是因为它自动设置为测试情形下的一个本地变量。例如：
 
 <ruby>
-# this will return the User object for the fixture named david
+# 这将会为 fixture 返回被命名为 david 的 User 对象
 users(:david)
 
-# this will return the property for david called id
+# 这将会返回 david 的 id 属性
 users(:david).id
 
-# one can also access methods available on the User class
+# 同时也可以访问 User 类的可用方法
 email(david.girlfriend.email, david.location_tonight)
 </ruby>
 
-h3. Unit Testing your Models
+h3. 单元测试你的模型(Models)
 
-In Rails, unit tests are what you write to test your models.
+在 Rails 中，单元测试是你写出来测试你的模型的。
 
-For this guide we will be using Rails _scaffolding_. It will create the model, a migration, controller and views for the new resource in a single operation. It will also create a full test suite following Rails best practices. I will be using examples from this generated code and will be supplementing it with additional examples where necessary.
+在这个指南中我将使用 Rails 的 _scaffolding_ 。它将会在一个单独的 opration 中为一个新的 resource 创建模型，一个 migration ，控制器和视图。它也会遵循 Rails 最佳实践来创建一个完全的测试套件。我将使用这样产生的代码作为示例并且会在需要的地方增加示例来补充。
 
-NOTE: For more information on Rails <i>scaffolding</i>, refer to "Getting Started with Rails":getting_started.html
+NOTE: 关于 Rails <i>scaffolding</i> 的更多信息，查看 "Rails 初上手":getting_started.html
 
-When you use +rails generate scaffold+, for a resource among other things it creates a test stub in the +test/unit+ folder:
+当你使用 +rails generate scaffold+ 时，它将会在 +test/unit+ 文件夹中为一个在其它一些东西中的 resource 创建一个 test stub ：
 
 <shell>
 $ rails generate scaffold post title:string body:text
@@ -148,7 +148,7 @@ create  test/fixtures/posts.yml
 ...
 </shell>
 
-The default test stub in +test/unit/post_test.rb+ looks like this:
+默认的 test stub 在 +test/unit/post_test.rb+ ，看起来像这样：
 
 <ruby>
 require 'test_helper'
@@ -161,23 +161,23 @@ class PostTest < ActiveSupport::TestCase
 end
 </ruby>
 
-A line by line examination of this file will help get you oriented to Rails testing code and terminology.
+一行一行的检查该文件将会有助于你面向理解 Rails 测试代码和术语。
 
 <ruby>
 require 'test_helper'
 </ruby>
 
-As you know by now, +test_helper.rb+ specifies the default configuration to run our tests. This is included with all the tests, so any methods added to this file are available to all your tests.
+正如你现在所知道的，+test_helper.rb+ 指定了默认的设置来运行我们的测试。这会被所有的测试所包括，所以任何一个你加入的这个文件的方法会对你的所有测试有效。
 
 <ruby>
 class PostTest < ActiveSupport::TestCase
 </ruby>
 
-The +PostTest+ class defines a _test case_ because it inherits from +ActiveSupport::TestCase+. +PostTest+ thus has all the methods available from +ActiveSupport::TestCase+. You'll see those methods a little later in this guide.
++PostTest+ 类指定了一个 _test case_ 因为它继承于 +ActiveSupport::TestCase+ 。+PostTest+ 因此拥有源自于 +ActiceSupport::TestCase+ 所有的可用方法。稍后你将会在此指南中看到这些方法。
 
-Any method defined within a +Test::Unit+ test case that begins with +test+ (case sensitive) is simply called a test. So, +test_password+, +test_valid_password+ and +testValidPassword+ all are legal test names and are run automatically when the test case is run.
+任何由 +test+ （区分大小写）开头，在一个 +Test::Unit+ 测试用例中指定的方法会被一个测试所调用。所以，+test_password+，+test_valid_password+ 以及 +testValidPassword+ 所有这些都是合法的测试命名并且当测试用例运行时也会自动运行。
 
-Rails adds a +test+ method that takes a test name and a block. It generates a normal +Test::Unit+ test with method names prefixed with +test_+. So,
+Rails 增加了一个 +test+ 方法，它取了一个测试名称和数据块。它产生了一个标准 +Test::Unit+ 测试，它的方法名称有 +test_+ 前缀。所以，
 
 <ruby>
 test "the truth" do
@@ -185,7 +185,7 @@ test "the truth" do
 end
 </ruby>
 
-acts as if you had written
+编译为
 
 <ruby>
 def test_the_truth
@@ -193,26 +193,26 @@ def test_the_truth
 end
 </ruby>
 
-only the +test+ macro allows a more readable test name. You can still use regular method definitions though.
+只有 +test+ 宏允许更多可读的测试名称。然而你仍然可以使用规则的方法定义。
 
-NOTE: The method name is generated by replacing spaces with underscores. The result does not need to be a valid Ruby identifier though, the name may contain punctuation characters etc. That's because in Ruby technically any string may be a method name. Odd ones need +define_method+ and +send+ calls, but formally there's no restriction.
+NOTE: 方法的名称是由下划线取代了空格。虽然这样并不需要是一个有效的 Ruby 标识符，但是该名称可能会包含标点字符等。这是因为在 Ruby 语言中，任何字符串可能是一个方法的名称。少数的字符串需要 +define_method+ 和 +send+ 调用，但是没有正式的限制。
 
 <ruby>
 assert true
 </ruby>
 
-This line of code is called an _assertion_. An assertion is a line of code that evaluates an object (or expression) for expected results. For example, an assertion can check:
+这一行代码被称作一个 _断言_ _assertion_ 。断言是一行代码，它可以为预期结果评估（或者阐述）一个对象。例如，断言可以检查：
 
-* does this value = that value?
-* is this object nil?
-* does this line of code throw an exception?
-* is the user's password greater than 5 characters?
+* 是否这个值 ＝ 另一个值？
+* 这个对象是否为空？
+* 这样代码是否会抛出异常？
+* 是否这个用户的密码大于 5 个字符？
 
-Every test contains one or more assertions. Only when all the assertions are successful will the test pass.
+每个测试包含一个或多个断言。只有当所有断言都成功时，测试才会通过。
 
-h4. Preparing your Application for Testing
+h4. 测试应用程序的准备工作
 
-Before you can run your tests, you need to ensure that the test database structure is current. For this you can use the following rake commands:
+在你运行测试之前，你需要确认测试数据库结构当前可用。为此你可以使用下面的 rake 命令：
 
 <shell>
 $ rake db:migrate
@@ -220,24 +220,24 @@ $ rake db:migrate
 $ rake db:test:load
 </shell>
 
-The +rake db:migrate+ above runs any pending migrations on the _development_ environment and updates +db/schema.rb+. The +rake db:test:load+ recreates the test database from the current +db/schema.rb+. On subsequent attempts, it is a good idea to first run +db:test:prepare+, as it first checks for pending migrations and warns you appropriately.
+上面的 +rake db:migrate+ 在 _development_ 环境运行了待处理的 migrations 并且更新了 +db/schema.rb+ 。+rake db:test:load+ 由当前 +db/schema.rb+ 重新建立了测试数据库。在接下来的尝试中，首先运行 +db:test:prepare+ 是一个好主意，因为它首先检查待处理的 magrations 并且适当的向你发出警告。
 
-NOTE: +db:test:prepare+ will fail with an error if +db/schema.rb+ doesn't exist.
+NOTE: 如果 +db/schema.rb+ 不存在，+db:test:prepare+ 将会由一个错误而失败。
 
-h5. Rake Tasks for Preparing your Application for Testing
+h5. 测试准备工作的 Rake 任务
 
-|_.Tasks                         |_.Description|
-|+rake db:test:clone+            |Recreate the test database from the current environment's database schema|
-|+rake db:test:clone_structure+  |Recreate the test database from the development structure|
-|+rake db:test:load+             |Recreate the test database from the current +schema.rb+|
-|+rake db:test:prepare+          |Check for pending migrations and load the test schema|
-|+rake db:test:purge+            |Empty the test database.|
+|_.任务                          |_.描述|
+|+rake db:test:clone+            |由当前环境的数据库 schema 重建测试数据库|
+|+rake db:test:clone_structure+  |由 structure 中重建测试数据|
+|+rake db:test:load+             |由当前 +schema.rb+ 重建测试数据|
+|+rake db:test:prepare+          |检查待处理的 migrations 并且加载测试 schema|
+|+rake db:test:purge+            |清空测试数据。|
 
-TIP: You can see all these rake tasks and their descriptions by running +rake --tasks --describe+
+TIP: 运行 +rake --tasks --describe+ ，你就会看到所有的 rake 任务以及它们的描述
 
-h4. Running Tests
+h4. 运行测试
 
-Running a test is as simple as invoking the file containing the test cases through Ruby:
+运行测试是非常简单的，通过 Ruby 调用包含测试实例的文件即可。
 
 <shell>
 $ ruby -Itest test/unit/post_test.rb
@@ -250,9 +250,9 @@ Finished in 0.023513 seconds.
 1 tests, 1 assertions, 0 failures, 0 errors
 </shell>
 
-This will run all the test methods from the test case. Note that +test_helper.rb+ is in the +test+ directory, hence this directory needs to be added to the load path using the +-I+ switch.
+这将会从测试实例中运行所有的测试方法。注意，+test_help.rb+ 在 +test+ 目录中，因此这个目录需要通过使用 +-I+ 参数来添加到加载路径。
 
-You can also run a particular test method from the test case by using the +-n+ switch with the +test method name+.
+你也可以通过使用 +-n+ 参数加 +测试方法名称+ 来运行测试实例中个别的测试方法。
 
 <shell>
 $ ruby -Itest test/unit/post_test.rb -n test_the_truth
@@ -265,9 +265,9 @@ Finished in 0.023513 seconds.
 1 tests, 1 assertions, 0 failures, 0 errors
 </shell>
 
-The +.+ (dot) above indicates a passing test. When a test fails you see an +F+; when a test throws an error you see an +E+ in its place. The last line of the output is the summary.
+上面的 +.+ （点）表示测试通过。当一个测试失败时，你将会看到 +F+ ；当测试抛出一个错误时你会在那个地方看到 +E+ 。输出内容的最后一行是概要。
 
-To see how a test failure is reported, you can add a failing test to the +post_test.rb+ test case.
+你可以在 +post_test.rb+ 测试实例中增加一个失败的测试来看看测试失败如何报告。
 
 <ruby>
 test "should not save post without title" do
@@ -276,7 +276,7 @@ test "should not save post without title" do
 end
 </ruby>
 
-Let us run this newly added test.
+让我们运行一下这个刚刚增加的测试。
 
 <shell>
 $ ruby unit/post_test.rb -n test_should_not_save_post_without_title
@@ -292,7 +292,7 @@ test_should_not_save_post_without_title(PostTest) [/test/unit/post_test.rb:6]:
 1 tests, 1 assertions, 1 failures, 0 errors
 </shell>
 
-In the output, +F+ denotes a failure. You can see the corresponding trace shown under +1)+ along with the name of the failing test. The next few lines contain the stack trace followed by a message which mentions the actual value and the expected value by the assertion. The default assertion messages provide just enough information to help pinpoint the error. To make the assertion failure message more readable, every assertion provides an optional message parameter, as shown here:
+在这个输出中，+F+ 表示失败。你可以看到对应的 trace ，在 1) 后面紧跟这失败信息的名称。接下来的几行包含了堆积的 trace ，它们后面跟随着有关断言涉及到的实际值和期许值的信息。默认的断言信息提供仅仅足够强调错误的信息。为了是这个断言失败的信息更加可读，每个 assertion 提供了一个可选的信息参数，如下所示：
 
 <ruby>
 test "should not save post without title" do
@@ -301,7 +301,7 @@ test "should not save post without title" do
 end
 </ruby>
 
-Running this test shows the friendlier assertion message:
+运行这个测试将会显示更加友好的断言信息：
 
 <shell>
   1) Failure:
@@ -310,7 +310,7 @@ Saved the post without a title.
 <false> is not true.
 </shell>
 
-Now to get this test to pass we can add a model level validation for the _title_ field.
+现在为了使这个测试通过，我们可以为 _title_ 这个字段增加一个 model 级的验证。
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -318,7 +318,7 @@ class Post < ActiveRecord::Base
 end
 </ruby>
 
-Now the test should pass. Let us verify by running the test again:
+现在这个测试将会通过。让我们通过再一次运行测试来验证一下：
 
 <shell>
 $ ruby unit/post_test.rb -n test_should_not_save_post_without_title
@@ -330,21 +330,21 @@ Finished in 0.193608 seconds.
 1 tests, 1 assertions, 0 failures, 0 errors
 </shell>
 
-Now, if you noticed, we first wrote a test which fails for a desired functionality, then we wrote some code which adds the functionality and finally we ensured that our test passes. This approach to software development is referred to as _Test-Driven Development_ (TDD).
+现在，也许你已经注意到了，我们写了一个对于需求功能没有通过的测试，然后我们在需求功能中加入了一些代码并且最终确保了我们的测试通过。这种软件开发模式就是所提及的 测试驱动开发模式 (TDD)。
 
-TIP: Many Rails developers practice _Test-Driven Development_ (TDD). This is an excellent way to build up a test suite that exercises every part of your application. TDD is beyond the scope of this guide, but one place to start is with "15 TDD steps to create a Rails application":http://andrzejonsoftware.blogspot.com/2007/05/15-tdd-steps-to-create-rails.html.
+TIP: 许多 Rails 开发者实践 _Test-Driven Developmet_ （TDD）。这是一中非常出色的方式来建立一个可以执行应用程序每一部分的测试套件。TDD 已经超出了本指南的范围，但是你可以从这里开始入 "15 TDD steps to create a Rails application":http://andrzejonsoftware.blogspot.com/2007/05/15-tdd-steps-to-create-rails.html 。
 
-To see how an error gets reported, here's a test containing an error:
+来看一下错误是如何被报出的，这里是一个包含了错误的测试：
 
 <ruby>
 test "should report error" do
-  # some_undefined_variable is not defined elsewhere in the test case
+  # some_undefined_variable 没有在测试实例的任何地方被定义
   some_undefined_variable
   assert true
 end
 </ruby>
 
-Now you can see even more output in the console from running the tests:
+运行测试后，现在你可以在终端中看到更多的输出：
 
 <shell>
 $ ruby unit/post_test.rb -n test_should_report_error
@@ -361,9 +361,9 @@ NameError: undefined local variable or method `some_undefined_variable' for #<Po
 1 tests, 0 assertions, 0 failures, 1 errors
 </shell>
 
-Notice the 'E' in the output. It denotes a test with error.
+注意这个在输出中的 'E' 。它表示测试有错误发生。
 
-NOTE: The execution of each test method stops as soon as any error or an assertion failure is encountered, and the test suite continues with the next method. All test methods are executed in alphabetical order.
+NOTE: 每一个测试方法一旦遇到任何错误或者断言失效就会停止执行，并且测试套件会继续执行下一个方法。所有测试方法将会按照字母顺序来执行。
 
 h4. What to Include in Your Unit Tests
 
