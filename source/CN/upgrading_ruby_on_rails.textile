@@ -16,7 +16,7 @@ h4(#general_ruby). Ruby 版本
 
 Rails 通常都是紧随最新的 Ruby 版本而发布。
 
-* Rails 3 以上版本需要 Ruby 1.8.7 或更高。 Support for all of the previous Ruby versions has been dropped officially and you should upgrade as early as possible.
+* Rails 3 以上版本需要 Ruby 1.8.7 或更高。 对于更早的 Ruby 版本官方已经停止支持，所以你还是尽可能趁早升级吧。
 * Rails 3.2.x 将是支持 Ruby 1.8.7 的最后一个分支。
 * Rails 4 只支持 Ruby 1.9.3。
 
@@ -24,15 +24,15 @@ TIP: Ruby 1.8.7 p248 and p249 have marshaling bugs that crash Rails. Ruby Enterp
 
 h3. 升级 Rails 3.2 至 Rails 4.0
 
-NOTE: This section is a work in progress.
+注:本节还在完善中。
 
-If your application is currently on any version of Rails older than 3.2.x, you should upgrade to Rails 3.2 before attempting an update to Rails 4.0.
+如果你的应用现今跑在 3.2.x 之前的任何版本上，在尝试升级到 Rails 4.0 之前你需要先升级至 Rails 3.2。
 
-The following changes are meant for upgrading your application to Rails 4.0.
+如下的改动是为了升级你的应用至 Rails 4.0.
 
 h4(#plugins4_0). vendor/plugins
 
-Rails 4.0 no longer supports loading plugins from <tt>vendor/plugins</tt>. You must replace any plugins by extracting them to gems and adding them to your Gemfile. If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 4.0 不再支持从 <tt>vendor/plugins</tt> 载入插件。你必须通过把它们解压为 gem 文件，然后添加到 Gemfile 的方式来替换插件。 If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
 
 h4(#identity_map4_0). IdentityMap
 
