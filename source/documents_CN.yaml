@@ -167,7 +167,7 @@
       url: upgrading_ruby_on_rails.html
       work_in_progress: true
       contributor: gingerhot
-      描述：本指导旨在帮助 Ruby on Rails 应用到最新版本。
+      描述：本指导旨在帮助升级 Ruby on Rails 应用至最新版本。
     -
       name: Ruby on Rails 3.2 Release Notes
       url: 3_2_release_notes.html
