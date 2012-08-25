@@ -1,12 +1,12 @@
-h2. A Guide for Upgrading Ruby on Rails
+h2. Ruby on Rails 升级指南
 
-This guide provides steps to be followed when you upgrade your applications to a newer version of Ruby on Rails. These steps are also available in individual release guides.
+本指南提供了当你欲将应用升级到一个更新版本的 Ruby on Rails 时可以遵循的一些步骤。这些步骤在每个单独的更新指南中也可以找到。
 
 endprologue.
 
-h3. General Advice
+h3. 一般性建议
 
-Before attempting to upgrade an existing application, you should be sure you have a good reason to upgrade. You need to balance out several factors: the need for new features, the increasing difficulty of finding support for old code, and your available time and skills, to name a few.
+在尝试升级一个已经存在的应用之前请保证你有恰切的理由这么做。你需要权衡再三：对新的特性的需求，对旧代码寻求支持所增加的难度，你现有的时间和技术水准，等等。
 
 h4(#general_testing). Test Coverage
 
