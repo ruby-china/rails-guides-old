@@ -36,7 +36,7 @@ Rails 4.0 不再支持从 <tt>vendor/plugins</tt> 载入插件。你必须通过
 
 h4(#identity_map4_0). IdentityMap
 
-Rails 4.0 从  <tt>ActiveRecord</tt> 中去掉了 <tt>IdentityMap</tt> ， 源于 "some inconsistencies with associations":https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6. If you have manually enabled it in your application, you will have to remove the following config that has no effect anymore: <tt>config.active_record.identity_map</tt>.
+Rails 4.0 从  <tt>ActiveRecord</tt> 中去掉了 <tt>IdentityMap</tt> ， 源于 "some inconsistencies with associations":https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6. 如果你曾经在应用中手动开启了它，你必须去掉下面的配置，以使之不再有效: <tt>config.active_record.identity_map</tt>.
 
 h3. 升级 Rails 3.1 至 Rails 3.2
 
