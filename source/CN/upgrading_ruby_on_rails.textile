@@ -84,7 +84,7 @@ h4(#plugins3_2). vendor/plugins
 
 Rails 3.2 弱化了 <tt>vendor/plugins</tt> ，在 Rails 4.0 中则完全去掉了。 因此它并非是升级 Rails 3.2 而严格需要的一部分，你可以通过从插件中提取出 gem 的方式来替换掉任何插件，然后把它们添加到你的 Gemfile 中， 如果你不选择把它们制作成 gem 的方式，你可以把它们移到 <tt>lib/my_plugin/*</tt> ，然后在 <tt>config/initializers/my_plugin.rb</tt> 中添加一个正确的 initializer。
 
-h3. Upgrading from Rails 3.0 to Rails 3.1
+h3. 升级 Rails 3.0 至 Rails 3.1
 
 如果你的应用现今跑在 3.0.x 之前的任何版本上，在尝试升级到 Rails 3.1 之前你需要先升级至 Rails 3.0 。
 
@@ -105,13 +105,13 @@ group :assets do
   gem 'uglifier',     ">= 1.0.3"
 end
 
-# jQuery is the default JavaScript library in Rails 3.1
+# 在 Rails 3.1 中 jQuery 是默认 JavaScript 库。
 gem 'jquery-rails'
 </ruby>
 
 h4(#config_app3_1). config/application.rb
 
-The asset pipeline requires the following additions:
+asset pipeline 需要增加如下几行：
 
 <ruby>
 config.assets.enabled = true
@@ -127,12 +127,12 @@ config.assets.prefix = '/asset-files'
 
 h4(#config_dev3_1). config/environments/development.rb
 
-Remove the RJS setting <tt>config.action_view.debug_rjs = true</tt>.
+在 <tt>config.action_view.debug_rjs = true</tt> 中去掉 RJS 设置。
 
-Add these settings if you enable the asset pipeline:
+如果你开启了 asset pipeline 请增加这些设置：
 
 <ruby>
-# Do not compress assets
+# 不压缩 assets
 config.assets.compress = false
 
 # Expands the lines which load the assets
@@ -144,7 +144,7 @@ h4(#config_prod3_1). config/environments/production.rb
 Again, most of the changes below are for the asset pipeline. You can read more about these in the "Asset Pipeline":asset_pipeline.html guide.
 
 <ruby>
-# Compress JavaScripts and CSS
+# 压缩 JavaScripts 和 CSS 文件
 config.assets.compress = true
 
 # Don't fallback to assets pipeline if a precompiled asset is missed
@@ -165,7 +165,7 @@ config.assets.digest = true
 
 h4(#config_test3_1). config/environments/test.rb
 
-You can help test performance with these additions to your test environment:
+在 test environment 中添加这些可以提升测试效能：
 
 <ruby>
 # Configure static asset server for tests with Cache-Control for performance
@@ -175,19 +175,18 @@ config.static_cache_control = "public, max-age=3600"
 
 h4(#config_wp3_1). config/initializers/wrap_parameters.rb
 
-Add this file with the following contents, if you wish to wrap parameters into a nested hash. This is on by default in new applications.
+如果你希望把参数打包进一个嵌套的哈希时，请添加包含如下内容的文件。在一个新的应用中这个是默认打开的。
 
 <ruby>
-# Be sure to restart your server when you modify this file.
-# This file contains settings for ActionController::ParamsWrapper which
-# is enabled by default.
+# 在你修改了该文件后务必重启服务器。
+# 该文件对 ActionController::ParamsWrapper 的设置是默认开启的。
 
-# Enable parameter wrapping for JSON. You can disable this by setting :format to an empty array.
+# 打开 JSON 的参数打包功能。通过给 :format 设置一个空数组可关闭该功能。
 ActiveSupport.on_load(:action_controller) do
   wrap_parameters :format => [:json]
 end
 
-# Disable root element in JSON by default.
+# 关闭 JSON 的默认根元素功能。
 ActiveSupport.on_load(:active_record) do
   self.include_root_in_json = false
 end
