@@ -1,48 +1,61 @@
-h2. A Guide for Upgrading Ruby on Rails
+h2. Ruby on Rails 升级教程
 
 This guide provides steps to be followed when you upgrade your applications to a newer version of Ruby on Rails. These steps are also available in individual release guides.
-
+当你升级你的应用到一个新版本的 Ruby on Rails，该教程提供了一些步骤让你跟随。这些步骤同样适用于其他已发布的教程。
 endprologue.
 
-h3. General Advice
+h3. 一般建议
 
 Before attempting to upgrade an existing application, you should be sure you have a good reason to upgrade. You need to balance out several factors: the need for new features, the increasing difficulty of finding support for old code, and your available time and skills, to name a few.
+在企图升级一个已存在的应用之前，你应该确保你有一个很好的升级理由。你需要去权衡多方面因素：举几个例子来说，是否需要新特性，为老代码查找支持增加了难度，还有你可利用的时间和技能。
 
-h4(#general_testing). Test Coverage
+h4(#general_test). 测试覆盖率
 
 The best way to be sure that your application still works after upgrading is to have good test coverage before you start the process. If you don't have automated tests that exercise the bulk of your application, you'll need to spend time manually exercising all the parts that have changed. In the case of a Rails upgrade, that will mean every single piece of functionality in the application. Do yourself a favor and make sure your test coverage is good _before_ you start an upgrade.
+确保你的应用在升级之后仍然能够工作的最佳方式是拥有好的测试覆盖率在你开始操作之前。如果你没有自动化测试来检查你应有的大部分程序，你就需要花时间来手动检查所有改变的部分。在升级 Rails这种情况下，这将意味着要测试应用测试的每个功能。帮帮你自己的忙，确保在你开始升级之前你的测试覆盖率是好的。
 
-h4(#general_ruby). Ruby Versions
+h4(#general_ruby). Ruby 版本
 
 Rails generally stays close to the latest released Ruby version when it's released:
+Rails 发布时一般发布靠近 Ruby 的最新版本:
 
 * Rails 3 and above requires Ruby 1.8.7 or higher. Support for all of the previous Ruby versions has been dropped officially and you should upgrade as early as possible.
+* Rails 3 和之前的版本要求 Ruby 1.8.7或者更高的版本。之前所支持的 Ruby 版本已经被正式放弃，你需要尽快升级。
 * Rails 3.2.x will be the last branch to support Ruby 1.8.7.
+* Rails 3.2.x 将是支持 Ruby 1.8.7 的最新分支。
 * Rails 4 will support only Ruby 1.9.3.
+* Rails 4 将只支持 Ruby 1.9.3。
 
 TIP: Ruby 1.8.7 p248 and p249 have marshaling bugs that crash Rails. Ruby Enterprise Edition has these fixed since the release of 1.8.7-2010.02. On the 1.9 front, Ruby 1.9.1 is not usable because it outright segfaults, so if you want to use 1.9.x, jump on to 1.9.2 or 1.9.3 for smooth sailing.
+提示： Ruby 1.8.7 p248 和 p249 有同样的 bug 会使 Rails 崩溃。Ruby 企业版在 1.8.7-2010.02的发布中已经修复这些 bug。在 1.9 系列中, Ruby 1.9.1 因为彻底的段错误而不可用，所以你如果想使用 1.9.x，为了一切顺利请跳到 1.9.2 或 1.9.3。
 
-h3. Upgrading from Rails 3.2 to Rails 4.0
+h3. 升级从 Rails 3.2 到 4.0
 
-NOTE: This section is a work in progress.
+NOTE: 本节是一项进展中的工作。
 
 If your application is currently on any version of Rails older than 3.2.x, you should upgrade to Rails 3.2 before attempting an update to Rails 4.0.
+如果你的应用程序是使用 Rails 3.2.x 之前的版本，在你升级到 Rails 4.0之前请先升级到 Rails 3.2。
 
 The following changes are meant for upgrading your application to Rails 4.0.
+接下来的修改是为了升级你的应用程序到 Rails 4.0。
 
-h4(#plugins4_0). vendor/plugins
+h4(#plugins4_0). 
 
 Rails 4.0 no longer supports loading plugins from <tt>vendor/plugins</tt>. You must replace any plugins by extracting them to gems and adding them to your Gemfile. If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 4.0 不再支持从<tt>供应商/插件</tt>中加载插件。你必须通过提取它们为 gems 并将它们添加到你的 Gemfile来取代所有插件。如果你选择不再使它们成为 gems，你可以将它们放进<tt>lib/my_plugin/*<tt>，并添加一个适当的初始化器在 <tt>config/initializers/my_plugin.rb</tt>中。
 
 h4(#identity_map4_0). IdentityMap
 
 Rails 4.0 has removed <tt>IdentityMap</tt> from <tt>ActiveRecord</tt>, due to "some inconsistencies with associations":https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6. If you have manually enabled it in your application, you will have to remove the following config that has no effect anymore: <tt>config.active_record.identity_map</tt>.
+由于"关联上的不一致"：https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6，Rails 4.0 已经从<tt>ActiveRecord</tt>中去除了<tt>IdentityMap</tt>。 如果你手工使之在你的应用程序中可用，你将不得不移除下面的配置使之不会有影响：<tt>config.active_record.identity_map</tt>。
 
-h3. Upgrading from Rails 3.1 to Rails 3.2
+h3. 升级从 Rails 3.1 到 3.2
 
 If your application is currently on any version of Rails older than 3.1.x, you should upgrade to Rails 3.1 before attempting an update to Rails 3.2.
+如果你的应用程序是使用 Rails 3.1.x 之前的版本，在你升级到 Rails 3.2之前请先升级到 Rails 3.1。
 
 The following changes are meant for upgrading your application to Rails 3.2.2, the latest 3.2.x version of Rails.
+接下来的修改为了让你的应用程序升级到 Rails 3.2.2，Rails 3.2.x 的最新版本。
 
 h4(#gemfile3_2). Gemfile
 
