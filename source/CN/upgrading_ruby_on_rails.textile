@@ -32,7 +32,7 @@ h3. 升级 Rails 3.2 至 Rails 4.0
 
 h4(#plugins4_0). vendor/plugins
 
-Rails 4.0 不再支持从 <tt>vendor/plugins</tt> 载入插件。你必须通过把它们解压为 gem 文件，然后添加到 Gemfile 的方式来替换插件。 If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 4.0 不再支持从 <tt>vendor/plugins</tt> 载入插件。你必须通过从插件中提取出 gem 的方式来替换掉任何插件，然后把它们添加到你的 Gemfile 中， 如果你不选择把它们制作成 gem 的方式，你可以把它们移到 <tt>lib/my_plugin/*</tt> ，然后在 <tt>config/initializers/my_plugin.rb</tt> 中添加一个正确的 initializer。
 
 h4(#identity_map4_0). IdentityMap
 
@@ -42,7 +42,7 @@ h3. 升级 Rails 3.1 至 Rails 3.2
 
 如果你的应用现今跑在 3.1.x 之前的任何版本上，在尝试升级到 Rails 3.2 之前你需要先升级至 Rails 3.1 。
 
-如下的改动是为了升级你的应用至 Rails 3.2.2 -- Rails 的最新的 3.2.x 版本 。
+如下的改动是为了升级你的应用至 Rails 3.2.2 ，这是 Rails 最新的 3.2.x 版本 。
 
 h4(#gemfile3_2). Gemfile
 
@@ -82,17 +82,17 @@ config.active_record.mass_assignment_sanitizer = :strict
 
 h4(#plugins3_2). vendor/plugins
 
-Rails 3.2 deprecates <tt>vendor/plugins</tt> and Rails 4.0 will remove them completely. While it's not strictly necessary as part of a Rails 3.2 upgrade, you can start replacing any plugins by extracting them to gems and adding them to your Gemfile. If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 3.2 弱化了 <tt>vendor/plugins</tt> ，在 Rails 4.0 中则完全去掉了。 因此它并非是升级 Rails 3.2 而严格需要的一部分，你可以通过从插件中提取出 gem 的方式来替换掉任何插件，然后把它们添加到你的 Gemfile 中， 如果你不选择把它们制作成 gem 的方式，你可以把它们移到 <tt>lib/my_plugin/*</tt> ，然后在 <tt>config/initializers/my_plugin.rb</tt> 中添加一个正确的 initializer。
 
 h3. Upgrading from Rails 3.0 to Rails 3.1
 
-If your application is currently on any version of Rails older than 3.0.x, you should upgrade to Rails 3.0 before attempting an update to Rails 3.1.
+如果你的应用现今跑在 3.0.x 之前的任何版本上，在尝试升级到 Rails 3.1 之前你需要先升级至 Rails 3.0 。
 
-The following changes are meant for upgrading your application to Rails 3.1.3, the latest 3.1.x version of Rails.
+如下的改动是为了升级你的应用至 Rails 3.1.3 ，这是 Rails 最新的 3.1.x 版本。
 
 h4(#gemfile3_1). Gemfile
 
-Make the following changes to your +Gemfile+.
+对你的 +Gemfile+ 作如下改动：
 
 <ruby>
 gem 'rails', '= 3.1.3'
