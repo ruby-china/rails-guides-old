@@ -1,52 +1,52 @@
-h2. A Guide for Upgrading Ruby on Rails
+h2. Ruby on Rails 升级指南
 
-This guide provides steps to be followed when you upgrade your applications to a newer version of Ruby on Rails. These steps are also available in individual release guides.
+本指南提供了当你欲将应用升级到一个更新版本的 Ruby on Rails 时可以遵循的一些步骤。这些步骤在每一的发布指南中也可以找到。
 
 endprologue.
 
-h3. General Advice
+h3. 一般性建议
 
-Before attempting to upgrade an existing application, you should be sure you have a good reason to upgrade. You need to balance out several factors: the need for new features, the increasing difficulty of finding support for old code, and your available time and skills, to name a few.
+在尝试升级一个已经存在的应用之前请保证你有恰切的理由这么做。你需要权衡再三：对新的特性的需求，对旧代码寻求支持所增加的难度，你现有的时间和技术水准，等等。
 
-h4(#general_testing). Test Coverage
+h4(#general_testing). 测试覆盖（Test Coverage）
 
-The best way to be sure that your application still works after upgrading is to have good test coverage before you start the process. If you don't have automated tests that exercise the bulk of your application, you'll need to spend time manually exercising all the parts that have changed. In the case of a Rails upgrade, that will mean every single piece of functionality in the application. Do yourself a favor and make sure your test coverage is good _before_ you start an upgrade.
+能保证升级后你的应用还可以正常工作的万全之策在升级之前拥有良好的测试覆盖。 If you don't have automated tests that exercise the bulk of your application, you'll need to spend time manually exercising all the parts that have changed. In the case of a Rails upgrade, that will mean every single piece of functionality in the application. Do yourself a favor and make sure your test coverage is good _before_ you start an upgrade.
 
-h4(#general_ruby). Ruby Versions
+h4(#general_ruby). Ruby 版本
 
-Rails generally stays close to the latest released Ruby version when it's released:
+Rails 通常都是紧随最新的 Ruby 版本而发布。
 
-* Rails 3 and above requires Ruby 1.8.7 or higher. Support for all of the previous Ruby versions has been dropped officially and you should upgrade as early as possible.
-* Rails 3.2.x will be the last branch to support Ruby 1.8.7.
-* Rails 4 will support only Ruby 1.9.3.
+* Rails 3 以上版本需要 Ruby 1.8.7 或更高。 对于更早的 Ruby 版本官方已经停止支持，所以你还是尽可能趁早升级吧。
+* Rails 3.2.x 将是支持 Ruby 1.8.7 的最后一个分支。
+* Rails 4 只支持 Ruby 1.9.3。
 
 TIP: Ruby 1.8.7 p248 and p249 have marshaling bugs that crash Rails. Ruby Enterprise Edition has these fixed since the release of 1.8.7-2010.02. On the 1.9 front, Ruby 1.9.1 is not usable because it outright segfaults, so if you want to use 1.9.x, jump on to 1.9.2 or 1.9.3 for smooth sailing.
 
-h3. Upgrading from Rails 3.2 to Rails 4.0
+h3. 升级 Rails 3.2 至 Rails 4.0
 
-NOTE: This section is a work in progress.
+注:本节还在完善中。
 
-If your application is currently on any version of Rails older than 3.2.x, you should upgrade to Rails 3.2 before attempting an update to Rails 4.0.
+如果你的应用现今跑在 3.2.x 之前的任何版本上，在尝试升级到 Rails 4.0 之前你需要先升级至 Rails 3.2。
 
-The following changes are meant for upgrading your application to Rails 4.0.
+如下的改动是为了升级你的应用至 Rails 4.0.
 
 h4(#plugins4_0). vendor/plugins
 
-Rails 4.0 no longer supports loading plugins from <tt>vendor/plugins</tt>. You must replace any plugins by extracting them to gems and adding them to your Gemfile. If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 4.0 不再支持从 <tt>vendor/plugins</tt> 载入插件。你必须通过从插件中提取出 gem 的方式来替换掉任何插件，然后把它们添加到你的 Gemfile 中， 如果你不选择把它们制作成 gem 的方式，你可以把它们移到 <tt>lib/my_plugin/*</tt> ，然后在 <tt>config/initializers/my_plugin.rb</tt> 中添加一个正确的 initializer。
 
 h4(#identity_map4_0). IdentityMap
 
-Rails 4.0 has removed <tt>IdentityMap</tt> from <tt>ActiveRecord</tt>, due to "some inconsistencies with associations":https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6. If you have manually enabled it in your application, you will have to remove the following config that has no effect anymore: <tt>config.active_record.identity_map</tt>.
+Rails 4.0 从  <tt>ActiveRecord</tt> 中去掉了 <tt>IdentityMap</tt> ， 源于 "some inconsistencies with associations":https://github.com/rails/rails/commit/302c912bf6bcd0fa200d964ec2dc4a44abe328a6. 如果你曾经在应用中手动开启了它，你必须去掉下面的配置，以使之不再有效: <tt>config.active_record.identity_map</tt>.
 
-h3. Upgrading from Rails 3.1 to Rails 3.2
+h3. 升级 Rails 3.1 至 Rails 3.2
 
-If your application is currently on any version of Rails older than 3.1.x, you should upgrade to Rails 3.1 before attempting an update to Rails 3.2.
+如果你的应用现今跑在 3.1.x 之前的任何版本上，在尝试升级到 Rails 3.2 之前你需要先升级至 Rails 3.1 。
 
-The following changes are meant for upgrading your application to Rails 3.2.2, the latest 3.2.x version of Rails.
+如下的改动是为了升级你的应用至 Rails 3.2.2 ，这是 Rails 最新的 3.2.x 版本 。
 
 h4(#gemfile3_2). Gemfile
 
-Make the following changes to your +Gemfile+.
+对你的 +Gemfile+ 作如下改动：
 
 <ruby>
 gem 'rails', '= 3.2.2'
@@ -60,7 +60,7 @@ end
 
 h4(#config_dev3_2). config/environments/development.rb
 
-There are a couple of new configuration settings that you should add to your development environment:
+你需要添加很多新的配置设置到你的开发环境：
 
 <ruby>
 # Raise exception on mass assignment protection for Active Record models
@@ -73,7 +73,7 @@ config.active_record.auto_explain_threshold_in_seconds = 0.5
 
 h4(#config_test3_2). config/environments/test.rb
 
-The <tt>mass_assignment_sanitizer</tt> configuration setting should also be be added to <tt>config/environments/test.rb</tt>:
+<tt>mass_assignment_sanitizer</tt> 的配置设置同样要添加到 <tt>config/environments/test.rb</tt>:
 
 <ruby>
 # Raise exception on mass assignment protection for Active Record models
@@ -82,17 +82,17 @@ config.active_record.mass_assignment_sanitizer = :strict
 
 h4(#plugins3_2). vendor/plugins
 
-Rails 3.2 deprecates <tt>vendor/plugins</tt> and Rails 4.0 will remove them completely. While it's not strictly necessary as part of a Rails 3.2 upgrade, you can start replacing any plugins by extracting them to gems and adding them to your Gemfile. If you choose not to make them gems, you can move them into, say, <tt>lib/my_plugin/*</tt> and add an appropriate initializer in <tt>config/initializers/my_plugin.rb</tt>.
+Rails 3.2 弱化了 <tt>vendor/plugins</tt> ，在 Rails 4.0 中则完全去掉了。 因此它并非是升级 Rails 3.2 而严格需要的一部分，你可以通过从插件中提取出 gem 的方式来替换掉任何插件，然后把它们添加到你的 Gemfile 中， 如果你不选择把它们制作成 gem 的方式，你可以把它们移到 <tt>lib/my_plugin/*</tt> ，然后在 <tt>config/initializers/my_plugin.rb</tt> 中添加一个正确的 initializer。
 
-h3. Upgrading from Rails 3.0 to Rails 3.1
+h3. 升级 Rails 3.0 至 Rails 3.1
 
-If your application is currently on any version of Rails older than 3.0.x, you should upgrade to Rails 3.0 before attempting an update to Rails 3.1.
+如果你的应用现今跑在 3.0.x 之前的任何版本上，在尝试升级到 Rails 3.1 之前你需要先升级至 Rails 3.0 。
 
-The following changes are meant for upgrading your application to Rails 3.1.3, the latest 3.1.x version of Rails.
+如下的改动是为了升级你的应用至 Rails 3.1.3 ，这是 Rails 最新的 3.1.x 版本。
 
 h4(#gemfile3_1). Gemfile
 
-Make the following changes to your +Gemfile+.
+对你的 +Gemfile+ 作如下改动：
 
 <ruby>
 gem 'rails', '= 3.1.3'
@@ -105,13 +105,13 @@ group :assets do
   gem 'uglifier',     ">= 1.0.3"
 end
 
-# jQuery is the default JavaScript library in Rails 3.1
+# 在 Rails 3.1 中 jQuery 是默认 JavaScript 库。
 gem 'jquery-rails'
 </ruby>
 
 h4(#config_app3_1). config/application.rb
 
-The asset pipeline requires the following additions:
+asset pipeline 需要增加如下几行：
 
 <ruby>
 config.assets.enabled = true
@@ -127,12 +127,12 @@ config.assets.prefix = '/asset-files'
 
 h4(#config_dev3_1). config/environments/development.rb
 
-Remove the RJS setting <tt>config.action_view.debug_rjs = true</tt>.
+在 <tt>config.action_view.debug_rjs = true</tt> 中去掉 RJS 设置。
 
-Add these settings if you enable the asset pipeline:
+如果你开启了 asset pipeline 请增加这些设置：
 
 <ruby>
-# Do not compress assets
+# 不压缩 assets
 config.assets.compress = false
 
 # Expands the lines which load the assets
@@ -144,7 +144,7 @@ h4(#config_prod3_1). config/environments/production.rb
 Again, most of the changes below are for the asset pipeline. You can read more about these in the "Asset Pipeline":asset_pipeline.html guide.
 
 <ruby>
-# Compress JavaScripts and CSS
+# 压缩 JavaScripts 和 CSS 文件
 config.assets.compress = true
 
 # Don't fallback to assets pipeline if a precompiled asset is missed
@@ -165,7 +165,7 @@ config.assets.digest = true
 
 h4(#config_test3_1). config/environments/test.rb
 
-You can help test performance with these additions to your test environment:
+在 test environment 中添加这些可以提升测试效能：
 
 <ruby>
 # Configure static asset server for tests with Cache-Control for performance
@@ -175,19 +175,18 @@ config.static_cache_control = "public, max-age=3600"
 
 h4(#config_wp3_1). config/initializers/wrap_parameters.rb
 
-Add this file with the following contents, if you wish to wrap parameters into a nested hash. This is on by default in new applications.
+如果你希望把参数打包进一个嵌套的哈希时，请添加包含如下内容的文件。在一个新的应用中这个是默认打开的。
 
 <ruby>
-# Be sure to restart your server when you modify this file.
-# This file contains settings for ActionController::ParamsWrapper which
-# is enabled by default.
+# 在你修改了该文件后务必重启服务器。
+# 该文件对 ActionController::ParamsWrapper 的设置是默认开启的。
 
-# Enable parameter wrapping for JSON. You can disable this by setting :format to an empty array.
+# 打开 JSON 的参数打包功能。通过给 :format 设置一个空数组可关闭该功能。
 ActiveSupport.on_load(:action_controller) do
   wrap_parameters :format => [:json]
 end
 
-# Disable root element in JSON by default.
+# 关闭 JSON 的默认根元素功能。
 ActiveSupport.on_load(:active_record) do
   self.include_root_in_json = false
 end
