@@ -141,25 +141,25 @@ config.assets.debug = true
 
 h4(#config_prod3_1). config/environments/production.rb
 
-同样下面的大部分改动都是为 asset pipeline 而做。 更详细的内容可以阅读 "Asset Pipeline":asset_pipeline.html guide 。
+同样下面的大部分改动都是为 asset pipeline 而做。 更详细的内容可以阅读 "Asset Pipeline":asset_pipeline.html 指南。
 
 <ruby>
 # 压缩 JavaScripts 和 CSS 文件
 config.assets.compress = true
 
-# Don't fallback to assets pipeline if a precompiled asset is missed
+# 当找不到一个预编译的 asset 时不要后退回 assets pipeline
 config.assets.compile = false
 
-# Generate digests for assets URLs
+# 为 assets URLs 生成摘要
 config.assets.digest = true
 
-# Defaults to Rails.root.join("public/assets")
+# 默认为 Rails.root.join("public/assets")
 # config.assets.manifest = YOUR_PATH
 
-# Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+# 预编译额外的 assets ( 已经添加的 application.js， application.css， 及所有的非JS/CSS )
 # config.assets.precompile += %w( search.js )
 
-# Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+# 强制对应用的所有访问都是通过 SSL，使用 Strict-Transport-Security 以及 secure cookies。
 # config.force_ssl = true
 </ruby>
 
