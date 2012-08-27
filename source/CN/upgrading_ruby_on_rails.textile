@@ -168,7 +168,7 @@ h4(#config_test3_1). config/environments/test.rb
 在 test environment 中添加这些可以提升测试效能：
 
 <ruby>
-# Configure static asset server for tests with Cache-Control for performance
+# 配置静态 asset 服务器，测试开启了 Cache-Control 时的性能
 config.serve_static_assets = true
 config.static_cache_control = "public, max-age=3600"
 </ruby>
