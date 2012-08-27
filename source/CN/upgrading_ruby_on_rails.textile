@@ -10,7 +10,7 @@ h3. 一般性建议
 
 h4(#general_testing). 测试覆盖（Test Coverage）
 
-能保证升级后你的应用还可以正常工作的万全之策在升级之前拥有良好的测试覆盖。如果你 If you don't have automated tests that exercise the bulk of your application, you'll need to spend time manually exercising all the parts that have changed. In the case of a Rails upgrade, that will mean every single piece of functionality in the application. Do yourself a favor and make sure your test coverage is good _before_ you start an upgrade.
+能保证升级后你的应用还可以正常工作的万全之策在升级之前拥有良好的测试覆盖。如果你还没有对你的应用进行过大量的自动化测试，你需要花时间手动对所有做过改动的部分进行测试。 对于 Rails 升级而言，这意味着应用中的每一个 functionality 。想对自己好点儿的话在升级 Rails 之前还是确认 test coverage 正确无误吧。
 
 h4(#general_ruby). Ruby 版本
 
