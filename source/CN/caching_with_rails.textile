@@ -129,11 +129,7 @@ h4. 片段缓存
 
 如果可以通过缓存整个页面或 action 来处理所有的问题那就完美了。但是动态的 web 应用程序通常会用不同的部分来构成页面，这些不同的部分并不都是使用完全相同的缓存配置。为了处理一个不同部分需要不同的缓存和失效时间的动态创建的页面， Rails 提供了片段缓存的机制。 
 
-Fragment Caching allows a fragment of view logic to be wrapped in a cache block and served out of the cache store when the next request comes in.
-
 片段缓存允许一个逻辑视图的片段放在一个缓存块中，在下一个请求时就可以直接使用缓存存储。
-
-As an example, if you wanted to show all the orders placed on your website in real time and didn't want to cache that part of the page, but did want to cache the part of the page which lists all products available, you could use this piece of code:
 
 举个例子，你想要在网站上实时的显示所有的订单，不想缓存页面上的这一部分，但是想缓存页面上显示所有产品的那一部分，可以这样写你的代码：
 
@@ -420,8 +416,6 @@ class ProductsController < ApplicationController
   end
 end
 </ruby>
-
-If you don't have any special response processing and are using the default rendering mechanism (i.e. you're not using respond_to or calling render yourself) then you’ve got an easy helper in fresh_when:
 
 如果你没有任何特殊的响应过程，且使用默认的渲染机制（例如：没有使用 respond_to 或者自己调用渲染），则你可以使用简单的fresh_when 这个helper方法：
 
