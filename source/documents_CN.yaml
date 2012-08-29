@@ -163,11 +163,9 @@
   name: Release Notes
   documents:
     -
-      name: Upgrading Ruby on Rails
+      name: 升级 Ruby on Rails
       url: upgrading_ruby_on_rails.html
-      description: This guide helps in upgrading applications to latest Ruby on Rails versions.
-      work_in_progress: true
-      contributor: zhaozhiming
+      description: 该教程将帮助你升级应用程序到最新的 Ruby on Rails 版本。
     -
       name: Ruby on Rails 3.2 Release Notes
       url: 3_2_release_notes.html
