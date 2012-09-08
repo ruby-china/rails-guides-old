@@ -529,7 +529,7 @@ h3. 覆盖条件表达式
 h4. +expect+
 
 你可以使用 +expect+ 来忽略一些特定的条件表达式。比如说：
-
+（应该是except）
 <ruby>
 Post.where('id > 10').limit(20).order('id asc').expect(:order)
 </ruby>
