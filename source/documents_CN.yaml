@@ -65,6 +65,8 @@
     -
       name: Active Support Core Extensions
       url: active_support_core_extensions.html
+      work_in_progress: true
+      contributor: scys77
       description: This guide documents the Ruby core extensions defined in Active Support.
     -
       name: Rails Internationalization API
