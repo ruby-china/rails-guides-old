@@ -127,7 +127,9 @@
     -
       name: The Rails Initialization Process
       url: initialization.html
-      description: This guide explains the internals of the Rails initialization process as of Rails 3.1
+      work_in_progress: true
+      contributor: hzyh64160
+      description: 本教程解释了 Rails 3.1 内部的初始化和启动的过程
 -
   name: 扩展(Extending Rails)
   documents:
