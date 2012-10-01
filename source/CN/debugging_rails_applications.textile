@@ -1,25 +1,25 @@
-h2. Debugging Rails Applications
+h2. 调式 Rails 应用
 
-This guide introduces techniques for debugging Ruby on Rails applications. By referring to this guide, you will be able to:
+该部分介绍调试Ruby on Rails应用的各种技术。通过参考这份文档你能够:
 
-* Understand the purpose of debugging
-* Track down problems and issues in your application that your tests aren't identifying
-* Learn the different ways of debugging
-* Analyze the stack trace
+* 理解调试的目的
+* 如何跟踪应用中那些通过测试不能确定的问题
+* 学习调式的不同方法
+* 分析堆栈记录
 
 endprologue.
 
-h3. View Helpers for Debugging
+h3. 查看Helper进行调式
 
-One common task is to inspect the contents of a variable. In Rails, you can do this with three methods:
+一个常见的任务就是检查一个变量的内容. 在Rails中，你可以通过以下三种方法:
 
 * +debug+
 * +to_yaml+
 * +inspect+
 
-h4. +debug+
 
-The +debug+ helper will return a &lt;pre&gt;-tag that renders the object using the YAML format. This will generate human-readable data from any object. For example, if you have this code in a view:
+h4. +debug+ 
++debug+ 会返回一个&lt;pre&gt;-标记, 这个标记会以YAML的格式来显示指定的对象。 它会从任意对象生成可读的数据格式。比如，如果在视图中包含下面的代码:
 
 <html>
 <%= debug @post %>
@@ -29,7 +29,7 @@ The +debug+ helper will return a &lt;pre&gt;-tag that renders the object using t
 </p>
 </html>
 
-You'll see something like this:
+你会看到类似如下的内容:
 
 <yaml>
 --- !ruby/object:Post
@@ -48,7 +48,7 @@ Title: Rails debugging guide
 
 h4. +to_yaml+
 
-Displaying an instance variable, or any other object or method, in YAML format can be achieved this way:
+可以通过这个方法，以YAML显示一个实例变量,或者其它对象以及其它方法：
 
 <html>
 <%= simple_format @post.to_yaml %>
@@ -58,9 +58,9 @@ Displaying an instance variable, or any other object or method, in YAML format c
 </p>
 </html>
 
-The +to_yaml+ method converts the method to YAML format leaving it more readable, and then the +simple_format+ helper is used to render each line as in the console. This is how +debug+ method does its magic.
+首先 +to_yaml+ 方法将其转化为YAML格式,使其更具有可读性;然后通过 +simple_format+ 方法在终端中显示每一行内容。 这就是 +debug+ 方法如何工作的神奇之处。
 
-As a result of this, you will have something like this in your view:
+作为结果，你的视图中将会包含类似如下内容:
 
 <yaml>
 --- !ruby/object:Post
@@ -78,7 +78,7 @@ Title: Rails debugging guide
 
 h4. +inspect+
 
-Another useful method for displaying object values is +inspect+, especially when working with arrays or hashes. This will print the object value as a string. For example:
+另外一个显示对象值的有用方法是 +inspect+, 特别是在处理数组和哈希的时候。它会以字符串的形式将对象值打印出来。比如:
 
 <html>
 <%= [1, 2, 3, 4, 5].inspect %>
@@ -88,7 +88,7 @@ Another useful method for displaying object values is +inspect+, especially when
 </p>
 </html>
 
-Will be rendered as follows:
+会以如下的形式显示:
 
 <pre>
 [1, 2, 3, 4, 5]
@@ -96,48 +96,48 @@ Will be rendered as follows:
 Title: Rails debugging guide
 </pre>
 
-h3. The Logger
+h3. 日志
 
-It can also be useful to save information to log files at runtime. Rails maintains a separate log file for each runtime environment.
+在运行状态中，将信息保存在日志文件中也十分有用。Rails为每一个运行环境维护着一个独立的日志文件。
 
-h4. What is the Logger?
+h4. 什么是日志?
 
-Rails makes use of Ruby's standard +logger+ to write log information. You can also substitute another logger such as +Log4r+ if you wish.
+Rails使用Ruby的标准 +logger+ 来记录日志信息。 如果愿意的话，你也可以用其它的日志工具比如 +Log4r+ 来替换。
 
-You can specify an alternative logger in your +environment.rb+ or any environment file:
+你可以在 +environment.rb+ 或其它任何环境文件中指定一个替换的日志工具:
 
 <ruby>
 Rails.logger = Logger.new(STDOUT)
 Rails.logger = Log4r::Logger.new("Application Log")
 </ruby>
 
-Or in the +Initializer+ section, add _any_ of the following
+或在 +Initializer+ 部分，添加下面部分
 
 <ruby>
 config.logger = Logger.new(STDOUT)
 config.logger = Log4r::Logger.new("Application Log")
 </ruby>
 
-TIP: By default, each log is created under +Rails.root/log/+ and the log file name is +environment_name.log+.
+提示: 默认情况下, 每个日志被创建于文件夹 +Rails.root/log/+ 下面,并且日志的文件名为 +environment_name.log+ 。
 
-h4. Log Levels
+h4. 日志级别
 
-When something is logged it's printed into the corresponding log if the log level of the message is equal or higher than the configured log level. If you want to know the current log level you can call the +Rails.logger.level+ method.
+如果日志信息的日志级别等于或者高于当前配置的日志级别时，一些日志信息就会打印在对应的日志文件中。如果你想知道当前的日志级别，你可以调用 +Rails.logger.level+ 方法。
 
-The available log levels are: +:debug+, +:info+, +:warn+, +:error+, and +:fatal+, corresponding to the log level numbers from 0 up to 4 respectively. To change the default log level, use
+可用的日志级别包含: +:debug+，+:info+，+:warn+, +error+,和 +:fatal+, 对相应日志级别数值依次为从0到4。 要更改默认的日志级别的话，可以通过：
 
 <ruby>
 config.log_level = :warn # In any environment initializer, or
 Rails.logger.level = 0 # at any time
 </ruby>
 
-This is useful when you want to log under development or staging, but you don't want to flood your production log with unnecessary information.
+这尤其是在开发或者工作台模式时想记录日志，但不希望在生产日志中充斥着大量的不必的信息时十分有用。
 
-TIP: The default Rails log level is +info+ in production mode and +debug+ in development and test mode.
+提示: 在生产模式下默认的日志级别为 +info+，在开发和测试模式下默认的日志级别为 +debug+ 。
 
-h4. Sending Messages
+h4. 发送信息
 
-To write in the current log use the +logger.(debug|info|warn|error|fatal)+ method from within a controller, model or mailer:
+在控制器，模型或者mailer中，通过 +logger.(debug|info|warn|error|fatal)+ 方法在当前日志中记录信息：
 
 <ruby>
 logger.debug "Person attributes hash: #{@person.attributes.inspect}"
@@ -145,7 +145,7 @@ logger.info "Processing the request..."
 logger.fatal "Terminating application, raised unrecoverable error!!!"
 </ruby>
 
-Here's an example of a method instrumented with extra logging:
+下面是一个被注入了附加日志的方法样例：
 
 <ruby>
 class PostsController < ApplicationController
@@ -169,7 +169,7 @@ class PostsController < ApplicationController
 end
 </ruby>
 
-Here's an example of the log generated by this method:
+下面是一个通过这个方法生成的日志样例：
 
 <shell>
 Processing PostsController#create (for 127.0.0.1 at 2008-09-08 11:52:54) [POST]
@@ -189,29 +189,29 @@ Redirected to #<Post:0x20af760>
 Completed in 0.01224 (81 reqs/sec) | DB: 0.00044 (3%) | 302 Found [http://localhost/posts]
 </shell>
 
-Adding extra logging like this makes it easy to search for unexpected or unusual behavior in your logs. If you add extra logging, be sure to make sensible use of log levels, to avoid filling your production logs with useless trivia.
+像这样添加附属日志信息，会使在日志中查询异常行为变的简单。在添加附属日志的时候，确保使用了合理的日志级别，这样可以避免在生产日志中添加大量的无用的琐碎信息。
 
-h3. Debugging with +ruby-debug+
+h3. 通过 +ruby-debug+ 调试
 
-When your code is behaving in unexpected ways, you can try printing to logs or the console to diagnose the problem. Unfortunately, there are times when this sort of error tracking is not effective in finding the root cause of a problem. When you actually need to journey into your running source code, the debugger is your best companion.
+当你的代码表现出费解的行为时，你可以通过在日志或者控制台中打印信息来诊断问题。不幸的是，在很多情况下这种追踪错误的方法并不是找到问题根本原因的有效方法。 当你实际需要深入到你正在执行的源码的时候，调试器是你最好的伙伴。
 
-The debugger can also help you if you want to learn about the Rails source code but don't know where to start. Just debug any request to your application and use this guide to learn how to move from the code you have written deeper into Rails code.
+调试器同时也能你在不知道如何下手的时候，帮助你学习Rails的源代码。只需要从调试你应用中的任意一个请求开始，使用这份指南学到如何从你的代码深入到Rails核心代码。
 
-h4. Setup
+h4. 安装
 
-The debugger used by Rails, +ruby-debug+, comes as a gem. To install it, just run:
+Rails中使用到的调试器, +ruby-debug+, 作为一个gem引入. 要安装它只需要执行:
 
 <shell>
 $ sudo gem install ruby-debug
 </shell>
 
-TIP: If you are using Ruby 1.9, you can install a compatible version of +ruby-debug+ by running +sudo gem install ruby-debug19+
+提示：如果你使用的是Ruby 1.9，你可以通过执行 +sudo gem install ruby-debug19+ 安装一个兼容版本的 +ruby-debug+
 
-In case you want to download a particular version or get the source code, refer to the "project's page on rubyforge":http://rubyforge.org/projects/ruby-debug/.
+如果你想下载一个特殊版本或者获取源代码，可以参照“project's page on rubyforge”:http://rubyforge.org/projects/ruby-debug/.
 
-Rails has had built-in support for ruby-debug since Rails 2.0. Inside any Rails application you can invoke the debugger by calling the +debugger+ method.
+从Rails 2.0开始Rails内置了对ruby-debug的支持。在任何Rails应用中，你都可以通过调用 +debugger+ 方法来调用调试器。
 
-Here's an example:
+下面是个例子：
 
 <ruby>
 class PeopleController < ApplicationController
@@ -222,13 +222,13 @@ class PeopleController < ApplicationController
 end
 </ruby>
 
-If you see the message in the console or logs:
+如果你在终端或者日志中看到如下的信息：
 
 <shell>
 ***** Debugger requested, but was not available: Start server with --debugger to enable *****
 </shell>
 
-Make sure you have started your web server with the option +--debugger+:
+请确保你已经使用 +--debugger+ 选项启动web服务器：
 
 <shell>
 $ rails server --debugger
@@ -238,22 +238,22 @@ $ rails server --debugger
 ...
 </shell>
 
-TIP: In development mode, you can dynamically +require \'ruby-debug\'+ instead of restarting the server, if it was started without +--debugger+.
+提示：在开发模式中，如果你没有使用 +--debugger+ 启动服务器，你可动态的 +require \'ruby-debug\'+ 而不用避免重启服务器。
 
-h4. The Shell
+h4. Shell
 
-As soon as your application calls the +debugger+ method, the debugger will be started in a debugger shell inside the terminal window where you launched your application server, and you will be placed at ruby-debug's prompt +(rdb:n)+. The _n_ is the thread number. The prompt will also show you the next line of code that is waiting to run.
+一旦你的应用调用了 +debugger+ 方法，在你启动了应用服务器后，调试器会在终端窗口中启动一个调试Shell，并且你会看到ruby调试器的 +(rdb:n)+ 提示符。_n_ 是启动的线程号。 提示行也会显示出正在等待执行的下一行代码。
 
-If you got there by a browser request, the browser tab containing the request will be hung until the debugger has finished and the trace has finished processing the entire request.
+如果你通过一个浏览器请求到达断点，直到调试结束和整个请求被处理完成，浏览页面才会被完全显示出来；否则包含请求的浏览页面会一直被挂起。
 
-For example:
+比如:
 
 <shell>
 @posts = Post.all
 (rdb:7)
 </shell>
 
-Now it's time to explore and dig into your application. A good place to start is by asking the debugger for help... so type: +help+ (You didn't see that coming, right?)
+现在是深入了解并挖掘你的应用的时候了。 一个开始的好地方是寻求调试器的帮助...... 因此，输入： +help+ 
 
 <shell>
 (rdb:7) help
@@ -268,11 +268,11 @@ condition  down     finish  list    ps    save     thread  var
 continue   edit     frame   method  putl  set      tmate   where
 </shell>
 
-TIP: To view the help menu for any command use +help &lt;command-name&gt;+ in active debug mode. For example: _+help var+_
+提示：通过在调试模式下使用 +help &lt;command-name&gt;+ 命令来查看任意命令的帮助。 比如：_+help var+_
 
-The next command to learn is one of the most useful: +list+. You can also abbreviate ruby-debug commands by supplying just enough letters to distinguish them from other commands, so you can also use +l+ for the +list+ command.
+另一个非常有用的命令是：+list+. 在输入的字母足够使其从它命令中分辨出来的情况下，你也可以以缩略的形式输入ruby-debug命令，比如你可以使用 +l+ 来代表 +list+ 命令
 
-This command shows you where you are in the code by printing 10 lines centered around the current line; the current line in this particular case is line 6 and is marked by +=>+.
+这个命令同时也列出了当前代码的位置，它详细列出了以当前行代码的为中心的10行代码；在下面指定的这个情况下，当前代码行为第六行并且它以 +=>+ 符号标记出来。
 
 <shell>
 (rdb:7) list
@@ -289,7 +289,7 @@ This command shows you where you are in the code by printing 10 lines centered a
    10        format.json { render :json => @posts }
 </shell>
 
-If you repeat the +list+ command, this time using just +l+, the next ten lines of the file will be printed out.
+如果你重复输入 +list+ 命令或者仅使用 +l+ , 文件中紧接的十行代码会被打印出来。
 
 <shell>
 (rdb:7) l
@@ -306,9 +306,9 @@ If you repeat the +list+ command, this time using just +l+, the next ten lines o
    20        format.html # show.html.erb
 </shell>
 
-And so on until the end of the current file. When the end of file is reached, the +list+ command will start again from the beginning of the file and continue again up to the end, treating the file as a circular buffer.
+以此类推直到当前文件结束。当到达文件结束的时候，+list+ 命令会把当前文件当做一个循环的缓冲器，从当前文件的开始位置重新进行从头至尾的遍历。
 
-On the other hand, to see the previous ten lines you should type +list-+ (or +l-+)
+同时，如果想查看前十行的代码的话，你可以输入 +list-+ (或 +l-+)
 
 <shell>
 (rdb:7) l-
@@ -325,8 +325,8 @@ On the other hand, to see the previous ten lines you should type +list-+ (or +l-
    10        format.json { render :json => @posts }
 </shell>
 
-This way you can move inside the file, being able to see the code above and over the line you added the +debugger+.
-Finally, to see where you are in the code again you can type +list=+
+通过这个方法你可在文件内部自由移动，查看添加 +debugger+ 之前和之后的代码。
+最后，你可以输入 +list=+ 回到调试代码的初始位置。
 
 <shell>
 (rdb:7) list=
@@ -343,13 +343,14 @@ Finally, to see where you are in the code again you can type +list=+
    10        format.json { render :json => @posts }
 </shell>
 
-h4. The Context
+h4. 上下文
 
-When you start debugging your application, you will be placed in different contexts as you go through the different parts of the stack.
+当开始调试应用的时候，在你穿梭在堆栈不同部分时你会处于不同的上下文关系中。
 
-ruby-debug creates a context when a stopping point or an event is reached. The context has information about the suspended program which enables a debugger to inspect the frame stack, evaluate variables from the perspective of the debugged program, and contains information about the place where the debugged program is stopped.
+当到达一个断点或一个事件的时候，ruby-debug会创建一个上下文。这个上下文包含了程序所挂起的信息，从而可以使调试器能够查看堆栈框架，从调试程序的角度查看变量，并且包含了调试程序被停止位置的信息。
 
-At any time you can call the +backtrace+ command (or its alias +where+) to print the backtrace of the application. This can be very helpful to know how you got where you are. If you ever wondered about how you got somewhere in your code, then +backtrace+ will supply the answer.
+在任何时候你可以调用命令 +backtrace+ (或其别名 +where+)来打印应用的回溯信息。这对于想知道怎么到达你现在的代码位置非常有用。任何时候如果你对怎么到达当前代码位置有些疑虑的时候，可以通过 +backtrace+ 来获得答案。
+
 
 <shell>
 (rdb:5) where
@@ -364,7 +365,7 @@ At any time you can call the +backtrace+ command (or its alias +where+) to print
 ...
 </shell>
 
-You move anywhere you want in this trace (thus changing the context) by using the +frame _n_+ command, where _n_ is the specified frame number.
+通过命令 +frame_n_+ 你可以移动到这个轨迹里的任意位置(通过改变上下文)，_n_ 代表了制定的框架号。
 
 <shell>
 (rdb:5) frame 2
@@ -372,27 +373,28 @@ You move anywhere you want in this trace (thus changing the context) by using th
        at line /PathTo/project/vendor/rails/actionpack/lib/action_controller/base.rb:1175
 </shell>
 
-The available variables are the same as if you were running the code line by line. After all, that's what debugging is.
+可用的变量和你逐行执行代码完全一样。毕竟，这就是调试的所在。
 
-Moving up and down the stack frame: You can use +up [n]+ (+u+ for abbreviated) and +down [n]+ commands in order to change the context _n_ frames up or down the stack respectively. _n_ defaults to one. Up in this case is towards higher-numbered stack frames, and down is towards lower-numbered stack frames.
+在堆栈框架内部上下移动：你可以使用 +up [n]+ (缩略为 +u+ ) 和 +down [n]+ 命令达到更改上下文环境为在堆栈内向上或向下 _n_ 层框架。在这例子中，向上为朝较高编号的框架，而向下为较低编号的框架。
 
-h4. Threads
+h4. 线程
 
-The debugger can list, stop, resume and switch between running threads by using the command +thread+ (or the abbreviated +th+). This command has a handful of options:
+通过命令 +thread+ (或缩写形式 +th+ )调试器可以列出，停止，恢复线程，以及在正在执行的线程之间切换。这个命令包含一系列的选项：
 
-* +thread+ shows the current thread.
-* +thread list+ is used to list all threads and their statuses. The plus + character and the number indicates the current thread of execution.
-* +thread stop _n_+ stop thread _n_.
-* +thread resume _n_+ resumes thread _n_.
-* +thread switch _n_+ switches the current thread context to _n_.
+* +thread+ 查看当前线程.
+* +thread list+ 列出所有线程和他们的状态。加号 + 符号和数字代表了正在执行的线程。
+* +thread stop _n_+ 停止线程 _n_.
+* +thread resume _n_+ 恢复线程 _n_.
+* +thread switch _n_+ 切换当前线程上下文到 _n_.
 
-This command is very helpful, among other occasions, when you are debugging concurrent threads and need to verify that there are no race conditions in your code.
+相对其它场合，当你在调试并发线程时并且需要验证你的代码中没有资源竞争时，这个命令非常有用。
 
-h4. Inspecting Variables
 
-Any expression can be evaluated in the current context. To evaluate an expression, just type it!
+h4. 检查变量
 
-This example shows how you can print the instance_variables defined within the current context:
+在当前上下文中可以评估任何表达式的值。如果要评估一个表达式，只需要输入即可！
+
+这个例子说明了如何打印当前上下文中所定义的的实例变量：
 
 <shell>
 @posts = Post.all
@@ -400,7 +402,7 @@ This example shows how you can print the instance_variables defined within the c
 ["@_response", "@action_name", "@url", "@_session", "@_cookies", "@performed_render", "@_flash", "@template", "@_params", "@before_filter_chain_aborted", "@request_origin", "@_headers", "@performed_redirect", "@_request"]
 </shell>
 
-As you may have figured out, all of the variables that you can access from a controller are displayed. This list is dynamically updated as you execute code. For example, run the next line using +next+ (you'll learn more about this command later in this guide).
+你或许已经指出了，它显示了所有可以从一个控制器中能访问的变量。这个列表会在你执行代码的过程中动态更新。比如，通过 +next+ 执行下一行(在本文后面你会获得关于这个命令的更详细的信息)。
 
 <shell>
 (rdb:11) next
@@ -411,18 +413,18 @@ Processing PostsController#index (for 127.0.0.1 at 2008-09-04 19:51:34) [GET]
 respond_to do |format|
 </shell>
 
-And then ask again for the instance_variables:
+接着再次查询实例变量：
 
 <shell>
 (rdb:11) instance_variables.include? "@posts"
 true
 </shell>
 
-Now +@posts+ is included in the instance variables, because the line defining it was executed.
+现在 +@posts+ 被包含在实例变量列表中, 因为定义它的那行代码被执行了.
 
-TIP: You can also step into *irb* mode with the command +irb+ (of course!). This way an irb session will be started within the context you invoked it. But be warned: this is an experimental feature.
+提示: 你也可以通过命令 +irb+ (一定，确定以及肯定！) 进入到 *irb* 模式。通过这种方法在你调用的位置启动一个irb会话。但是注意：这是一个实验性质的功能。
 
-The +var+ method is the most convenient way to show variables and their values:
++var+ 方法是显示变量和值的最方便的方法：
 
 <shell>
 var
@@ -432,14 +434,14 @@ var
 (rdb:1) v[ar] l[ocal]                   show local variables
 </shell>
 
-This is a great way to inspect the values of the current context variables. For example:
+这是一个查看当前上下文变量值的非常好的方法。比如：
 
 <shell>
 (rdb:9) var local
   __dbg_verbose_save => false
 </shell>
 
-You can also inspect for an object method this way:
+你也可以用这种方法检查一个对象方法：
 
 <shell>
 (rdb:9) var instance Post.new
@@ -448,30 +450,30 @@ You can also inspect for an object method this way:
 @new_record = true
 </shell>
 
-TIP: The commands +p+ (print) and +pp+ (pretty print) can be used to evaluate Ruby expressions and display the value of variables to the console.
+提示：命令 +p+ (print) 和 +pp+ (pretty print) 可以用来评估一个Ruby表达式并在终端中显示变量的值。
 
-You can use also +display+ to start watching variables. This is a good way of tracking the values of a variable while the execution goes on.
+你可以使用 +display+ 命令来开始查看变量。这是一个在代码执行过程中跟踪一个变量值的好方法。
 
 <shell>
 (rdb:1) display @recent_comments
 1: @recent_comments =
 </shell>
 
-The variables inside the displaying list will be printed with their values after you move in the stack. To stop displaying a variable use +undisplay _n_+ where _n_ is the variable number (1 in the last example).
+那些在显示列表内的变量和他们的值会在你移动到堆栈中后打印出来。如果要停止显示变量的话可以使用 +undisplay _n_+ 其中 _n_ 代表了变量编号(在上面的例子中为1)。
 
-h4. Step by Step
+h4. 单步调试
 
-Now you should know where you are in the running trace and be able to print the available variables. But lets continue and move on with the application execution.
+现在你应该知道你在执行的序列中处于的位置，并且能够打印出可用的变量。但我们继续探讨应用的执行。
 
-Use +step+ (abbreviated +s+) to continue running your program until the next logical stopping point and return control to ruby-debug.
+使用 +step+ (缩写形式为 +s+ ) 来继续程序的执行知道遇到下一个断点并且将控制权返回给ruby调试器。
 
-TIP: You can also use <tt>step<plus> n</tt> and <tt>step- n</tt> to move forward or backward +n+ steps respectively.
+提示：你可以使用<tt>step<plus> n</tt> 和 <tt>step- n</tt> 来分别向前或者先后运行 +n+ 步。
 
-You may also use +next+ which is similar to step, but function or method calls that appear within the line of code are executed without stopping. As with step, you may use plus sign to move _n_ steps.
+你也可以使用 +next+ 命令，它和step类似但是不会中断代码行中函数或方法调用。 和step一样，你也可以使用加号符号来移动 _n_ 步。
 
-The difference between +next+ and +step+ is that +step+ stops at the next line of code executed, doing just a single step, while +next+ moves to the next line without descending inside methods.
++next+ 和 +step+ 的不同之处在于，+step+ 在下一行执行代码前停下，它只是单步执行。而 +next+ 会移动到下一行代码但并不会进入到内部的方法中。
 
-For example, consider this block of code with an included +debugger+ statement:
+比如， 下面这个包含了 +debugger+ 语句的代码块：
 
 <ruby>
 class Author < ActiveRecord::Base
@@ -485,7 +487,7 @@ class Author < ActiveRecord::Base
 end
 </ruby>
 
-TIP: You can use ruby-debug while using +rails console+. Just remember to +require "ruby-debug"+ before calling the +debugger+ method.
+提示：你可以在使用 +rails console+ 时使用ruby调试器。记得在调用 +debugger+ 之前包含 +require "ruby-debug"+
 
 <shell>
 $ rails console
@@ -499,7 +501,7 @@ Loading development environment (Rails 3.1.0)
 )
 </shell>
 
-With the code stopped, take a look around:
+当代码停止下来后，可以查看一下：
 
 <shell>
 (rdb:1) list
@@ -514,7 +516,7 @@ With the code stopped, take a look around:
    9  end
 </shell>
 
-You are at the end of the line, but... was this line executed? You can inspect the instance variables.
+你现在位于代码行的结尾，但是...... 这行代码有没有被执行过哪？ 你可以通过查看实例变量值来确定。
 
 <shell>
 (rdb:1) var instance
@@ -522,7 +524,7 @@ You are at the end of the line, but... was this line executed? You can inspect t
 @attributes_cache = {}
 </shell>
 
-+@recent_comments+ hasn't been defined yet, so it's clear that this line hasn't been executed yet. Use the +next+ command to move on in the code:
++@recent_comments+ 还没有被定义，因此可以说明该行代码还没有被执行过。 使用 +next+ 命令继续代码：
 
 <shell>
 (rdb:1) next
@@ -535,26 +537,26 @@ You are at the end of the line, but... was this line executed? You can inspect t
 @recent_comments = []
 </shell>
 
-Now you can see that the +@comments+ relationship was loaded and @recent_comments defined because the line was executed.
+现在你可以看到 +@comments+ 关系已经被加载了并且 @recent_comments 已经被定义，因为该行代码已经执行完成。
 
-If you want to go deeper into the stack trace you can move single +steps+, through your calling methods and into Rails code. This is one of the best ways to find bugs in your code, or perhaps in Ruby or Rails.
+如果你想更深入的了解调用堆栈，你可以使用单步移动命令 +step+， 通过调用方法深入到Rails代码内部。这个查找到你代码中bug的最好的方法之一，或许是Ruby或Rails中的bug.
 
-h4. Breakpoints
+h4. 断点
 
-A breakpoint makes your application stop whenever a certain point in the program is reached. The debugger shell is invoked in that line.
+断点会使你的程序在当前位置停下来，并且一个调试shell会在当前行位置处被激活。
 
-You can add breakpoints dynamically with the command +break+ (or just +b+). There are 3 possible ways of adding breakpoints manually:
+你可以通过命令 +break+ (或 仅仅 +b+)来动态的添加断点。添加断点有三种方法：
 
-* +break line+: set breakpoint in the _line_ in the current source file.
-* +break file:line [if expression]+: set breakpoint in the _line_ number inside the _file_. If an _expression_ is given it must evaluated to _true_ to fire up the debugger.
-* +break class(.|\#)method [if expression]+: set breakpoint in _method_ (. and \# for class and instance method respectively) defined in _class_. The _expression_ works the same way as with file:line.
+* +break line+: 在当源文件的_line_ 行设置断点。
+* +break file:line [if expression]+: 在文件_file_ 的_line_行号处设置断点。如果提供了表达式 _expression_， 只有它的值为 _true_ 的时候调试器才会被激活。 
+* +break class(.|\#)method [if expression]+: 在定义在类 _class_ 中的方法 _method_ 设置断点(. 和 \# 分别代表类和实例方法)。 _expression_ 和 file:line 中的表达式工作方式一样。 
 
 <shell>
 (rdb:5) break 10
 Breakpoint 1 file /PathTo/project/vendor/rails/actionpack/lib/action_controller/filters.rb, line 10
 </shell>
 
-Use +info breakpoints _n_+ or +info break _n_+ to list breakpoints. If you supply a number, it lists that breakpoint. Otherwise it lists all breakpoints.
+使用 +info breakpoints _n_+ 或 +info break _n_+ 来列出断点。 如果你提供了一个数字，它会列出那个断点。否则的话，它会列出所有的断点。
 
 <shell>
 (rdb:5) info breakpoints
@@ -562,7 +564,7 @@ Num Enb What
   1 y   at filters.rb:10
 </shell>
 
-To delete breakpoints: use the command +delete _n_+ to remove the breakpoint number _n_. If no number is specified, it deletes all breakpoints that are currently active..
+使用命令 +delete _n_+ 来移除编号为 _n_ 的断点。 如果没有提供编号，她会移除所有当前激活的断点。
 
 <shell>
 (rdb:5) delete 1
@@ -570,51 +572,51 @@ To delete breakpoints: use the command +delete _n_+ to remove the breakpoint num
 No breakpoints.
 </shell>
 
-You can also enable or disable breakpoints:
+你也可以启用或禁用断点：
 
-* +enable breakpoints+: allow a list _breakpoints_ or all of them if no list is specified, to stop your program. This is the default state when you create a breakpoint.
-* +disable breakpoints+: the _breakpoints_ will have no effect on your program.
+* +enable breakpoints+: 允许一组断点或者所有的断点（如果没有提供断点列表的话）来停止你的程序。它是你创建断点是的默认状态。
+* +disable breakpoints+: _breakpoints_ 对程序没有任何作用。
 
-h4. Catching Exceptions
+h4. 捕捉异常
 
-The command +catch exception-name+ (or just +cat exception-name+) can be used to intercept an exception of type _exception-name_ when there would otherwise be is no handler for it.
+当存在异常时，命令 +catch exception-name+ (或仅 +cat exception-name+) 可以用来抢断一个类型为 _exception-name_ 的异常。否则的话，没有该异常的处理器。
 
-To list all active catchpoints use +catch+.
+使用 +catch+ 列出了所有激活的异常捕捉点。
 
-h4. Resuming Execution
+h4. 恢复执行
 
-There are two ways to resume execution of an application that is stopped in the debugger:
+有两种恢复被调试器中断的程序执行：
 
-* +continue+ [line-specification] (or +c+): resume program execution, at the address where your script last stopped; any breakpoints set at that address are bypassed. The optional argument line-specification allows you to specify a line number to set a one-time breakpoint which is deleted when that breakpoint is reached.
-* +finish+ [frame-number] (or +fin+): execute until the selected stack frame returns. If no frame number is given, the application will run until the currently selected frame returns. The currently selected frame starts out the most-recent frame or 0 if no frame positioning (e.g up, down or frame) has been performed. If a frame number is given it will run until the specified frame returns.
+* +continue+ [line-specification] (or +c+): 在脚本上次停止处，恢复程序执行；任何在那个位置所设置的断点都会被掉过。可选的参数line-specification 允许你制定一个行号，来设置一个一次性的断点。当这个断点到达时就会被删除掉。
+* +finish+ [frame-number] (or +fin+): 继续执行直到从指定的堆栈框架中返回。如没有提供框架号的话，应用会持续执行执行直到从当前选定的框架中返回。如果没有进行过框架定位（比如，up,down 或 frame), 当前选定的框架从最接近的框架或0框架开始。 如果提供了框架标号，那么它会持续执行知道从指定的框架中返回。
 
-h4. Editing
+h4. 编辑
 
-Two commands allow you to open code from the debugger into an editor:
+通过两个命令可以允许你在调试器状态下，在编辑器中打开代码：
 
-* +edit [file:line]+: edit _file_ using the editor specified by the EDITOR environment variable. A specific _line_ can also be given.
-* +tmate _n_+ (abbreviated +tm+): open the current file in TextMate. It uses n-th frame if _n_ is specified.
+* +edit [file:line]+: 使用环境变量EDITOR制定的编辑器编辑文件 _file_。同时也可以提供一个确定的行号。
+* +tmate _n_+ (abbreviated +tm+): 在TextMate中打开当前代码， 它使用第 _n_ 个框架如果指定了 _n_.
 
-h4. Quitting
+h4. 退出
 
-To exit the debugger, use the +quit+ command (abbreviated +q+), or its alias +exit+.
+退出调试器可是使用命令 +quit+ (简写为 +q+ ), 或者它的别名 +exit+.
 
-A simple quit tries to terminate all threads in effect. Therefore your server will be stopped and you will have to start it again.
+简单的退出会试图终止所有当前运行的线程。因此你的服务器会被停止而且你需要重新启动服务器。
 
-h4. Settings
+h4. 设置
 
-There are some settings that can be configured in ruby-debug to make it easier to debug your code. Here are a few of the available options:
+在ruby调试器中有一些设置可以使调试代码更加方便。下面是一些可用的选项：
 
-* +set reload+: Reload source code when changed.
-* +set autolist+: Execute +list+ command on every breakpoint.
-* +set listsize _n_+: Set number of source lines to list by default to _n_.
-* +set forcestep+: Make sure the +next+ and +step+ commands always move to a new line
+* +set reload+: 重新加载代码当代码改变的时候。
+* +set autolist+: 在每个断点处执行 +list+ 命令
+* +set listsize _n_+: 设置默认的list源代码行数为 _n_
+* +set forcestep+: 确保 +next+ 和 +step+ 命令总是移动到一个新行。
 
-You can see the full list by using +help set+. Use +help set _subcommand_+ to learn about a particular +set+ command.
+你可以通过 +help set+ 查看所有的设置选项。 使用 +help set _subcommand_+ 可以获得关于一个特定的 +set+  命令的详细信息。
 
-TIP: You can include any number of these configuration lines inside a +.rdebugrc+ file in your HOME directory. ruby-debug will read this file every time it is loaded and configure itself accordingly.
+提示：你可以在HOME文件夹下的 +.rdebugrc+ 文件中包含任意数量的这些配置。ruby调试器会在每次启动时读取这个文件并且根据它进行配置。
 
-Here's a good start for an +.rdebugrc+:
+下面是一个很好的初始配置文件 +.rdebugrc+:
 
 <shell>
 set autolist
@@ -622,37 +624,37 @@ set forcestep
 set listsize 25
 </shell>
 
-h3. Debugging Memory Leaks
+h3. 调试内存泄露
 
-A Ruby application (on Rails or not), can leak memory - either in the Ruby code or at the C code level.
+一个Ruby应用（不管是否基于Rails），都有可能泄露内存 - 或者在Ruby代码级别或者在C代码级别。
 
-In this section, you will learn how to find and fix such leaks by using tools such as BleakHouse and Valgrind.
+在这部分，会介绍如何通过工具查找并修复这些泄露，这些工具比如：BleakHouse 和 Valgrind
 
 h4. BleakHouse
 
-"BleakHouse":https://github.com/fauna/bleak_house/tree/master is a library for finding memory leaks.
+"BleakHouse":https://github.com/fauna/bleak_house/tree/master 是一个查找内存泄露的一个库。
 
-If a Ruby object does not go out of scope, the Ruby Garbage Collector won't sweep it since it is referenced somewhere. Leaks like this can grow slowly and your application will consume more and more memory, gradually affecting the overall system performance. This tool will help you find leaks on the Ruby heap.
+如果一个Ruby对象没有越界，Ruby垃圾收集器不会清除它，因为它在某些地方被引用到。像这样的泄露会慢慢的增长，并且你的应用会消耗掉越来越多的内存，并逐渐的影响到整个系统的性能。这个工具可以帮助你发现在Ruby堆上的泄露。
 
-To install it run:
+通过执行下面命令安装:
 
 <shell>
 $ sudo gem install bleak_house
 </shell>
 
-Then setup your application for profiling. Then add the following at the bottom of config/environment.rb:
+然后设置你的应用做分析. 接着在 config/environment.rb 底部添加下面的代码
 
 <ruby>
 require 'bleak_house' if ENV['BLEAK_HOUSE']
 </ruby>
 
-Start a server instance with BleakHouse integration:
+启动集成了BlackHouse的一个服务器实例：
 
 <shell>
 $ RAILS_ENV=production BLEAK_HOUSE=1 ruby-bleak-house rails server
 </shell>
 
-Make sure to run a couple hundred requests to get better data samples, then press +CTRL-C+. The server will stop and Bleak House will produce a dumpfile in +/tmp+:
+确保执行了至少数百个请求来得到一个好的采样数据，然后输入 +CTRL-C+。 服务器会停下来并且BleakHouse会在 +/tmp+ 文件夹下生成一个dump文件：
 
 <shell>
 ** BleakHouse: working...
@@ -660,7 +662,7 @@ Make sure to run a couple hundred requests to get better data samples, then pres
 ** Bleakhouse: run 'bleak /tmp/bleak.5979.0.dump' to analyze.
 </shell>
 
-To analyze it, just run the listed command. The top 20 leakiest lines will be listed:
+通过执行listed命令来分析结果。最高的20行泄露代码会被列出来：
 
 <shell>
   191691 total objects
@@ -677,30 +679,30 @@ To analyze it, just run the listed command. The top 20 leakiest lines will be li
   ...
 </shell>
 
-This way you can find where your application is leaking memory and fix it.
+通过这种方法你会找到你的应用在哪里发生泄露并且修复它。
 
-If "BleakHouse":https://github.com/fauna/bleak_house/tree/master doesn't report any heap growth but you still have memory growth, you might have a broken C extension, or real leak in the interpreter. In that case, try using Valgrind to investigate further.
+如果 "BleakHouse":https://github.com/fauna/bleak_house/tree/master 没有报告任何的堆增长，但是你仍然发现内存在增长。 你可能存在这一个C代码级的泄露，或解析器上的泄露。这种情况下，可以尝试使用Valgrind来进行进一步的调查。
 
 h4. Valgrind
 
-"Valgrind":http://valgrind.org/ is a Linux-only application for detecting C-based memory leaks and race conditions.
+"Valgrind":http://valgrind.org/ 是一个Linux环境下用于监测C级别的内存泄露和资源竞争的工具。
 
-There are Valgrind tools that can automatically detect many memory management and threading bugs, and profile your programs in detail. For example, a C extension in the interpreter calls +malloc()+ but is doesn't properly call +free()+, this memory won't be available until the app terminates.
+Valgrind工具可以自动探测许多内存管理和线程的bug，并且对你的应用进行很详细的分析。比如，在解析器里面一个C扩展调用了 +malloc()+ 但没有正确的调用 +free()+ 释放，这部分内存知道应用结束之前无法被使用。
 
-For further information on how to install Valgrind and use with Ruby, refer to "Valgrind and Ruby":http://blog.evanweaver.com/articles/2008/02/05/valgrind-and-ruby/ by Evan Weaver.
+你可以参照Evan Weaver的 "Valgrind and Ruby":http://blog.evanweaver.com/articles/2008/02/05/valgrind-and-ruby/ 来获取如何在ruby中安装和使用的进一步的详细信息。
 
-h3. Plugins for Debugging
+h3. 调试插件
 
-There are some Rails plugins to help you to find errors and debug your application. Here is a list of useful plugins for debugging:
+有一些Rails插件来帮助你查找Rails应用中的错误和调试Rails应用。下面是一些对于调试非常有用的插件：
 
-* "Footnotes":https://github.com/josevalim/rails-footnotes: Every Rails page has footnotes that give request information and link back to your source via TextMate.
-* "Query Trace":https://github.com/ntalbott/query_trace/tree/master: Adds query origin tracing to your logs.
-* "Query Stats":https://github.com/dan-manges/query_stats/tree/master: A Rails plugin to track database queries.
-* "Query Reviewer":http://code.google.com/p/query-reviewer/: This rails plugin not only runs "EXPLAIN" before each of your select queries in development, but provides a small DIV in the rendered output of each page with the summary of warnings for each query that it analyzed.
-* "Exception Notifier":https://github.com/smartinez87/exception_notification/tree/master: Provides a mailer object and a default set of templates for sending email notifications when errors occur in a Rails application.
-* "Exception Logger":https://github.com/defunkt/exception_logger/tree/master: Logs your Rails exceptions in the database and provides a funky web interface to manage them.
+* "Footnotes":https://github.com/josevalim/rails-footnotes:每个Rails页面都会包含一个包含了请求信息的脚注和一个通过TextMate连接到源代码的链接。
+* "Query Trace":https://github.com/ntalbott/query_trace/tree/master: 在日志中加入查询源跟踪信息。
+* "Query Stats":https://github.com/dan-manges/query_stats/tree/master: 一个跟踪数据库查询的插件
+* "Query Reviewer":http://code.google.com/p/query-reviewer/: 在开发过程中，这个Rails插件不但在每个查询请求前执行“EXPLAIN”命令，并且为每个页面提供了一个小的DIV，其中包含了它分析到的每条查询的警告信息的总结。
+* "Exception Notifier":https://github.com/smartinez87/exception_notification/tree/master: 提供一个mailer对象和一组默认模版，用来在Rails应用发生错误时发送email通知。
+* "Exception Logger":https://github.com/defunkt/exception_logger/tree/master:  在数据库中记录Rails异常并且提供了一个时髦的Web界面来管理他们。
 
-h3. References
+h3. 参考
 
 * "ruby-debug Homepage":http://www.datanoise.com/ruby-debug
 * "Article: Debugging a Rails application with ruby-debug":http://www.sitepoint.com/article/debug-rails-app-ruby-debug/
