@@ -741,7 +741,7 @@ h4. +rescue_from+
 
 当一个异常发生时，它会被一个 +rescue_from+ 指令捕捉到，这个异常对象会被传递到处理者那里。处理者可以是一个方法或一个通过 +:with+ 选项传递的 +Proc+ 对象。你也可以直接使用一个 block 来代替一个显式的 +Proc+ 对象。
 
-下面是如何使用 +rescue_from+ 来拦截所有 +ActiveRecore::RecordNotFound+ 错误并做一些处理。
+下面是如何使用 +rescue_from+ 来拦截所有 +ActiveRecord::RecordNotFound+ 错误并做一些处理。
 
 <ruby>
 class ApplicationController < ActionController::Base
