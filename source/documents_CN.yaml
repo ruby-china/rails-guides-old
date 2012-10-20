@@ -91,7 +91,6 @@
     -
       name: 调试 Rails 应用程序
       url: debugging_rails_applications.html
-      work_in_progress: true
       contributor: wooisland
       description: 这部分介绍如何调试Rails应用. 它包含了进行调试的几种不同方法，已经如何理解代码背后那些所发生的那些故事.
     -
