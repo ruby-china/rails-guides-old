@@ -86,6 +86,8 @@
       description: 这是一篇关于实作单元测试和功能测试的相当全面的指导。它包含了从“什么是一个测试”到测试 API 的所有内容。享用它吧！
     -
       name: Securing Rails Applications
+      work_in_process: true
+      contributor: woaigithub
       url: security.html
       description: This guide describes common security problems in web applications and how to avoid them with Rails.
     -
