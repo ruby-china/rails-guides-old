@@ -30,7 +30,7 @@ Rails 是一个基于 Ruby 程序语言的 web 程序框架。如果你没有预
 * "Programming Ruby":http://www.ruby-doc.org/docs/ProgrammingRuby/
 * "Why's (Poignant) Guide to Ruby":http://mislav.uniqpath.com/poignant-guide/
 
-同样，你可以在 "rails github":https://github.com/rails/rails 仓库找到这个教程的示例代码，本教程在（rails/railties/guides/code/getting_started）。
+同样，你可以在 "rails github":https://github.com/rails/rails 仓库找到这个教程的示例代码，本教程在（rails/guides/code/getting_started）。
 
 h3. Rails 是什么
 
