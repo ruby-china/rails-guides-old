@@ -9,11 +9,11 @@ h2. Rails 初上手指南
 
 endprologue.
 
-WARNING.  这个指导手册适用与 Rails 3.2，有些代码在 Rails 早期版本可能无法正常运行。
+WARNING.  这个指导手册适用于 Rails 3.2，有些代码在 Rails 早期版本可能无法正常运行。
 
 h3. 手册假设
 
-本指导设计给那些想大概的了解 Rails 应用创建的初学者。这里假设你对 Rails 没有任何预先的了解。要得到（本手册的）知识，你需要预先安装：
+本指导设计给那些想大概的了解 Rails 应用创建的初学者。这里假设你对 Rails 没有任何预先的了解。要掌握（本手册上的）知识，你需要预先安装：
 
 * "Ruby":http://www.ruby-lang.org/en/downloads 1.8.7 或者更高版本
 
@@ -24,7 +24,7 @@ TIP: 注意 Ruby 1.8.7 p248 和 p249 有 marshaling bugs ，会与 Rails 3.0 发
   ** 如果你想了解更多关于 RubyGems 的知识，请阅读 "RubyGems User Guide":http://docs.rubygems.org/read/book/1
 * 安装 "SQLite3 Database":http://www.sqlite.org
 
-Rails 是一个基于 Ruby 程序语言的 web 程序框架。如果你没有预先的学习 Ruby，你会发现直接的入门 Rails 学习很有跨度。这里有一些免费 Ruby 的学习资源。
+Rails 是一个基于 Ruby 程序语言的 web 程序框架。如果你没有预先的学习 Ruby，你会发现直接入门 Rails 学习很有跨度。这里有一些免费的 Ruby 学习资源。
 
 * "Mr. Neighborly's Humble Little Ruby Book":http://www.humblelittlerubybook.com
 * "Programming Ruby":http://www.ruby-doc.org/docs/ProgrammingRuby/
@@ -34,16 +34,16 @@ Rails 是一个基于 Ruby 程序语言的 web 程序框架。如果你没有预
 
 h3. Rails 是什么
 
-TIP: 这个章节开始就 Rails 框架的背景和来源做一个详细的描述。你可以安全的跳过这个章节并且在以后再回过头来看它。第三节你会开始你的的 Rails 之旅上的第一个 Rails 应用程序。
+TIP: 这个章节开始就 Rails 框架的背景和来源做一个详细的描述。你可以安全的跳过这个章节并且在以后再回过头来阅读它。第三节你会开始设计你的的 Rails 之旅上的第一个 Rails 应用程序。
 
-Rails是一个使用 Ruby 语言编写的的 web 框架应用程序。其设计目的是为了让每个着手开始编写 web 应用程序的开发人员更加容易的完成工作。它允许你写最少的代码完成超过其他任何语言和框架所完成的工作。经验丰富的 Rails 开发人员还告诉我们通过 Rails 使设计 web 应用程序更快乐。
+Rails是一个使用 Ruby 语言编写的的 web 框架应用程序。其设计目的是为了让每个编写 web 应用程序的开发人员更加容易地完成工作。它允许你用更少的代码完成超过其他语言和框架所完成的工作。经验丰富的 Rails 开发人员还告诉我们通过 Rails 使设计 web 应用程序更快乐。
 
-Rails 是一个值得骄傲的软件。它使得我们以最好的方式去做事情，它也鼓励这种方式——并在某些情况下，鼓励替代的思想，如果你学习 “Rails 方式” 你将会适时的发现生产力的巨大增长。如果你固守在来自其他语言的旧的习惯去进行你的 Rails 开发，以以它地方学来的模式尝试 Rails，那么你将会得到很少的快乐的经历。
+Rails 是一个值得骄傲的软件。它使得我们以最好的方式去做事情，它也鼓励这种方式——并在某些情况下，鼓励替代的思想，如果你学习 “Rails 方式” 你将会发现生产力的巨大增长。如果你固守其他语言的旧习惯去进行你的 Rails 开发，以其它地方学来的模式尝试 Rails，那么你将会得到很少的快乐经历。
 
 Rails 理念包含几个指导原则：
 
-* DRY - （Dont't repeat yourself）不要自己重复——建议一次又一次编写同样的代码是一件坏事请；
-* 约定优于配置——意思是 Rails 假设对于你想做什么以及你想怎么做的事情，刻意的做很少的事情比编写无尽的配置文件更好；
+* DRY - （Dont't repeat yourself）不要自己重复——一次又一次编写同样的代码可是一件坏事请；
+* 约定优于配置——意思是 Rails 假设你想做什么以及你想怎么做，而不是要求你设定一堆没完没了的配置文件；
 * "REST":http://zh.wikipedia.org/wiki/REST 是开发 WEB 程序的最好的模式——围绕资源和 HTTP 动作组织 WEB 应用是最快的方式。
 
 h4. MVC 架构
@@ -67,7 +67,7 @@ Controllers 提供了 Models 和 Views 间的粘合。在 Rails 中，Controller
 
 h3. Rails 的组件
 
-Rails 关联着许多独立的组件。对这些组件在下面给出简要的解释。如果你是 Rails 的新人，当你阅读到这个部分时，不要忽视任何一个组件的描述，但也没有必要了解的过于深入。例如，我们会构造应用骨架，但你不需要了解有关构造应用骨架的深层知识。
+Rails 关联着许多独立的组件。对这些组件在下面给出简要的解释。如果你是 Rails 的新人，当你阅读到这个部分时，不要忽视任何一个组件的描述，但也没有必要了解的过于深入。例如，我们会构造scaffold，但你不需要了解有关构造scaffold的深层知识。
 
 * Action Pack
   ** Action Controller
@@ -190,7 +190,7 @@ $ cd blog
 命令 +rails new blog+ 将会在你的工作目录中创建一个名为 <tt>blog</tt> 的文件夹。目录 <tt>blog</tt> 包含一些自动生成的文件（夹），它构成了 Rails  应用程序的结构。在这个体验中的大多数的工作都是在 app/ 这个文件夹中完成的，这里对 Rails 默认创建的每一个文件和文件夹的功能做出了一个概述：
 
 |_.File/Folder|_.Purpose|
-|app/|包含 controllers, models, views 和 你应用程序的 assets（资源），再接下面的手册中你主要的注意力应该放在这里。|
+|app/|包含 controllers, models, views 和 你应用程序的 assets（资源），再接下来的手册中你主要的注意力应该放在这里。|
 |config/|配置你的应用程序的运行的规则，（url）路由，数据库和其他，更多的信息查看 "Configuring Rails Applications":http://guides.rubyonrails.org/configuring.html|
 |config.ru|基于 Rack 服务器使用这个应用程序的 Rack 配置用于开始应用程序（Rack configuration for Rack based servers used to start the application）|
 |db/|显示你当前的数据库结构（database schema），同样也显示数据迁移。|
@@ -204,7 +204,7 @@ $ cd blog
 |script/|包含运行你的 app 的 rails 脚本，或者其他用来配置或运行你的应用程序的 scripts。|
 |test/|单元测试， fixtures，或者其他 test 工具。他们在 "Testing Rails Applications":http://guides.rubyonrails.org/testing.html 里面有完整的讲述。|
 |tmp/|临时文件|
-|vendor/|放置第三方代码的地方。在一个典型的 Rails 应用程序中，这里包含 Ruby Gems，Rails 源代码（如果你把 Rails 安装到你的项目中）还包含一些预先包装好的额外的插件|
+|vendor/|放置第三方代码的地方。在一个典型的 Rails 应用程序中，这里包含 Ruby Gems，Rails 源代码（如果你把 Rails 安装到你的项目中）还包含一些预先安装好的额外的插件|
 
 h3. 配置一个数据库
 
@@ -218,7 +218,7 @@ TIP: 你不必手动的更新数据库配置。如果你查看应用程序创建
 
 h4. 配置一个 SQLite3 数据库
 
-Rails 内置支持 "SQLite":http://www.sqlite.org/ ，这是一个轻量级的非服务器（serverless）数据库应用程序。即使一个繁忙的产品环境可能会超出 SQLite 的能力范围，它在开发和测试环境还是能够很好的工作的。Rails 在创建一个新的项目的时候默认使用一个 SQLite 数据库，但是你总是可以在以后改变它。
+Rails 内置支持 "SQLite":http://www.sqlite.org/ ，这是一个轻量级的非服务器（serverless）数据库应用程序。虽然 SQLite 可能无法应对繁忙的产品环境，但它在开发和测试环境可以很好的工作。Rails 在创建一个新的项目的时候默认使用一个 SQLite 数据库，但是你总是可以在以后改变它。
 
 这里是一个开发环境（数据库）连接信息默认配置文件(+config/database.yml+)的节选：
 
@@ -230,7 +230,7 @@ development:
   timeout: 5000
 </shell>
 
-TIP: 在这个教程中我们使用一个 SQLite3 数据库来存储数据，因为它是一个零配置就可以工作的数据库。Rails 同样也支持“开箱即用的” MySQL 和 PostgreSQL，以及很多数据库系统的插件。如果你正在产品环境中使用一个数据库，大多数情况下 Rails 都有一个与之相应的插件。
+TIP: 在这个教程中我们使用一个 SQLite3 数据库来存储数据，因为它无需配置就可以工作。Rails 同样也支持“开箱即用”的 MySQL 和 PostgreSQL，以及很多数据库系统的插件。如果你正在产品环境中使用一个数据库，大多数情况下 Rails 都有一个与之相应的插件。
 
 h4. 配置一个 MySQL 数据库
 
@@ -319,7 +319,7 @@ h4. Rails 说 Hello"
 $ rails generate controller home index
 </shell>
 
-TIP: 如果你在输入这个命令的时候出现没有这个命令错误，你需要明确的使用 ruby 来执行 Rails 命令。
+TIP: 如果你在输入这个命令的时候出现"没有这个命令"的错误，你需要明确的使用 ruby 来执行 Rails 命令。
 
 Rails 将会为你创建一些文件，包含 +app/views/home/index.html.erb+ 。这是一个模板，用来显示在 home controller 中的 index action (method) 的结果。在文本编辑器中打开这个文件并输入：
 
@@ -329,7 +329,7 @@ Rails 将会为你创建一些文件，包含 +app/views/home/index.html.erb+ �
 
 h4. 设置应用程序主页
 
-现在我们已经创建了 controller 和 view，我们还需要告诉 Rails 我们想在什么时候显示出来。在本例中，我们想让它在我们导航至站点 url 根目录 "http://localhost:3000":http://localhost:3000 的时候替代 “Welcome Aboard” 显示。
+现在我们已经创建了 controller 和 view，我们还需要告诉 Rails 我们想在什么时候显示出来。在本例中，我们想让它在我们访问站点 url 根目录 "http://localhost:3000":http://localhost:3000 的时候替代 “Welcome Aboard” 显示。
 
 首先移除应用程序中的默认页面。
 
@@ -352,13 +352,13 @@ Blog::Application.routes.draw do
 
 +root :to => "home#index"+ 告诉 Rails 映射请求到应用程序的 root action 到 home 控制器的 index action。
 
-现在你在浏览器中导航至 "http://localhost:3000":http://localhost:3000 ，你将会看到“Hello, Rails!”.
+现在你在浏览器中访问 "http://localhost:3000":http://localhost:3000 ，你将会看到“Hello, Rails!”.
 
 NOTE. 更多的信息请参见 "Rails Routing from the Outside In":routing.html.
 
 h3. 使用 Scaffolding 快速创建并运行
 
-Rails 'scaffolding' 是产生应用程序的一些重要组件的一个快速的方法。如果你想使用单行操作为新资源创建 models,views 和 controllers，Scaffolding 是一个不错的工具。
+Rails 'scaffolding' 是一个建立应用程序的一些重要组件的快速的方法。如果你想使用单行操作为新资源创建 models,views 和 controllers，Scaffolding 是一个不错的工具。
 
 h3. 创建一个资源
 
@@ -371,7 +371,7 @@ rails generate scaffold Post name:string title:string content:text
 创建器将会在应用程序中的一些文件夹中生成一些文件，并且还会编辑 +config/routes.rb+。下面是这些产生的文件的大概说明：
 
 |_.File/Folder|_.Purpose|
-|db/migrate/20100207214725_create_posts.rb |将创建的posts表单迁移到你的数据库（会在你的命名前面加上时间）|
+|db/migrate/20100207214725_create_posts.rb |将创建的posts表单迁移到你的数据库（会在你的命名前面加上时间戳）|
 |app/models/post.rb |Post模型|
 |test/unit/post_test.rb |posts 模型的单元测试工具|
 |test/fixtures/posts.yml |测试使用的 posts 样例|
