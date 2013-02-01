@@ -886,7 +886,7 @@ Active Record 允许你提前指定是否需要加载所有的 association 。�
 再来看上面的问题，我们可以在使用 +Client.all+ 时预先加载 address 。
 
 <ruby>
-clients - Client.includes(:address).limit(10)
+clients = Client.includes(:address).limit(10)
 
 client.each do |client|
   puts client.address.postcode
