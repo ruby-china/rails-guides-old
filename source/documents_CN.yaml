@@ -137,6 +137,8 @@
     -
       name: Rails 插件入门指南
       url: plugins.html
+      work_in_progress: true
+      contributor: hypernovagama
       description: 这篇文章将会告诉你如何在 Rails 上创建一个插件.
     -
       name: Rails on Rack
