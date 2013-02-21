@@ -20,7 +20,7 @@ h3. 控制器都做什么？
 
 控制器因此可以被看作模型和视图之间的中间人。它使得视图可以使用模型的数据，视图就可以显示数据给用户，并且从用户处得到要保存或者更新的数据给到模型。
 
-NOTE: 更多关于路由过程的细节，参考"深入浅出道路由":routing.html 。
+NOTE: 更多关于路由过程的细节，参考 "深入浅出道路由":routing.html 。
 
 h3. 方法与动作
 
@@ -177,7 +177,7 @@ CookieStore 能存储大约 4kb 的数据 -- 相对其他方法少很多 -- 但�
 
 如果你的用户的 session 不存储关键数据或不需要长时间存在（例如你只是使用 flash 显示提示信息），你可以考虑使用 ActionDispatch::Session::CacheStore。这种方法将会使用你为你的应用配置好的 cache 实现存储 session。这样做的好处是你可以使用已有的cache 基础来存储 session 而不需要任何额外设置或管理。当然坏处是，session 会是昙花一现的并且很可能随时消失。
 
-在"安全指南":security.html 中阅读更多有关 session 存储的内容。
+在 "安全指南":security.html 中阅读更多有关 session 存储的内容。
 
 如果你需要不同的 session 存储机制，你可以在 +config/initializers/session_store.rb+ 文件中改变它：
 
@@ -550,7 +550,7 @@ h3. 请求与响应对象
 
 h4. +request+ 对象
 
-请求对象包含很多关于来自客户端的请求的有用信息。参考"API 文档":http://api.rubyonrails.org/classes/ActionDispatch/Request.html 获得一份可用方法的完整列表。你可以在这个对象的这些属性中存储：
+请求对象包含很多关于来自客户端的请求的有用信息。参考 "API 文档":http://api.rubyonrails.org/classes/ActionDispatch/Request.html 获得一份可用方法的完整列表。你可以在这个对象的这些属性中存储：
 
 |_.+request+ 的属性|_.意图|
 |host|请求的主机名。|
@@ -572,6 +572,7 @@ Rails 收集所有随请求发送来的参数到 +params+ 哈希中，无论它�
 h4. +response+ 对象
 
 响应对象通常不被直接使用，但是它在动作执行中构建并且染发送回用户的数据，不过有时 - 就像一个后过滤器一样 - 直接存取响应可能会有用。一些存取器方法也可以设置，允许你改变它们的值。
+
 |_.+response+ 的属性|_.意图|
 |body|被发送回客户端的数据的字符串。通常是 HTML 。|
 |status|响应的 HTTP 状态代码，像是 200 表示一个成功的请求或是 404 表示文件未找到。|
@@ -787,7 +788,7 @@ class ClientsController < ApplicationController
 end
 </ruby>
 
-NOTE: 某些特定的异常只能被 +ApplicationController+ 类别捕获，因为它们是在控制器被初始化和动作被执行之前抛出的。参考 Pratik Naik 在该主题的"文章":http://m.onkey.org/2008/7/20/rescue-from-dispatching 获得更多信息。
+NOTE: 某些特定的异常只能被 +ApplicationController+ 类别捕获，因为它们是在控制器被初始化和动作被执行之前抛出的。参考 Pratik Naik 在该主题的 "文章":http://m.onkey.org/2008/7/20/rescue-from-dispatching 获得更多信息。
 
 h3. 强制 HTTPS 协议
 
