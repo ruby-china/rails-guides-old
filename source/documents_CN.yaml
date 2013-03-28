@@ -163,6 +163,8 @@
     -
       name: Ruby on Rails Guides Guidelines
       url: ruby_on_rails_guides_guidelines.html
+      work_in_progress: true
+      contributor: theLibra12
       description: This guide documents the Ruby on Rails guides guidelines.
 -
   name: Release Notes
