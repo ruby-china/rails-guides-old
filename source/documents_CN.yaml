@@ -146,9 +146,12 @@
       contributor: wolflee
       description: 这篇指南涵盖了 Rails 与 Rack 集成以及其他 Rack 组件的连接。
     -
-      name: Creating and Customizing Rails Generators
+      name: Rails 生成器的创建及定制
       url: generators.html
-      description: This guide covers the process of adding a brand new generator to your extension or providing an alternative to an element of a built-in Rails generator (such as providing alternative test stubs for the scaffold generator).
+      work_in_progress: true
+      contributor: wadexing
+      description: 本指南涵盖了 如何为您的扩展编写新的生成器，或是对Rails内置生成器进行定制(比如：为scaffold生成器提供与众不同的测试桩)
+
 -
   name: 为 Ruby on Rails 社区做出贡献
   documents:
