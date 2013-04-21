@@ -148,7 +148,6 @@
     -
       name: Rails 生成器的创建及定制
       url: generators.html
-      work_in_progress: true
       contributor: wadexing
       description: 本指南涵盖了 如何为您的扩展编写新的生成器，或是对Rails内置生成器进行定制(比如：为scaffold生成器提供与众不同的测试桩)
 

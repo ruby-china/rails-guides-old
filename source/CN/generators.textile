@@ -1,24 +1,24 @@
-h2. Creating and Customizing Rails Generators & Templates
+h2. Rails生成器及模板的创建与定制 
 
-Rails generators are an essential tool if you plan to improve your workflow. With this guide you will learn how to create generators and customize existing ones.
+如果您计划改善工作流程，Rails 生成器 (generators)必不可少。您将通过本指南学到如何创建它们及定制一个现成的。
 
-In this guide you will:
+将为您呈现：
 
-* Learn how to see which generators are available in your application
-* Create a generator using templates
-* Learn how Rails searches for generators before invoking them
-* Customize your scaffold by creating new generators
-* Customize your scaffold by changing generator templates
-* Learn how to use fallbacks to avoid overwriting a huge set of generators
-* Learn how to create an application template
+* 学习如何知道您的应用 (application) 中哪些生成器可用
+* 使用模板创建生成器
+* 学习如何在调用生成器前搜索它们
+* 通过创建新的生成器定制您的scaffold
+* 通过修改生成器模板定制您的scaffold
+* 学习如何使用回退 (fallbacks) 避免覆盖一个庞大的生成器集合。
+* 学习如何创建应用模板
 
 endprologue.
 
-NOTE: This guide is about generators in Rails 3, previous versions are not covered.
+NOTE: 本指南针对Rails 3，未涵盖之前的版本
 
-h3. First Contact
+h3. 初体验
 
-When you create an application using the +rails+ command, you are in fact using a Rails generator. After that, you can get a list of all available generators by just invoking +rails generate+:
+当您使用 +rails+ 命令创建一个应用，实际上就是在使用Rails 生成器。而后，您可以通过调用 +rails generate+ 得到一份可用生成器列表：
 
 <shell>
 $ rails new myapp
@@ -26,17 +26,17 @@ $ cd myapp
 $ rails generate
 </shell>
 
-You will get a list of all generators that comes with Rails. If you need a detailed description of the helper generator, for example, you can simply do:
+您将获得一份完整的Rails原生生成器列表。如果您需要一个生成器的详细描述，例如 helper生成器，您只需这样:
 
 <shell>
 $ rails generate helper --help
 </shell>
 
-h3. Creating Your First Generator
+h3. 创建您的首个生成器
 
-Since Rails 3.0, generators are built on top of "Thor":https://github.com/wycats/thor. Thor provides powerful options parsing and a great API for manipulating files. For instance, let's build a generator that creates an initializer file named +initializer.rb+ inside +config/initializers+.
+从Rails 3.0开始，生成器基于 "Thor":https://github.com/wycats/thor，Thor 提供强大的选项解析功能和一套牛逼的文件操纵API。例如，让我们创建一个生成器来生成 +config/initializers/initializer.rb+ 文件。
 
-The first step is to create a file at +lib/generators/initializer_generator.rb+ with the following content:
+首先创建文件 +lib/generators/initializer_generator.rb+ ，其内容如下：
 
 <ruby>
 class InitializerGenerator < Rails::Generators::Base
@@ -46,23 +46,23 @@ class InitializerGenerator < Rails::Generators::Base
 end
 </ruby>
 
-NOTE: +create_file+ is a method provided by +Thor::Actions+. Documentation for +create_file+ and other Thor methods can be found in "Thor's documentation":http://rdoc.info/github/wycats/thor/master/Thor/Actions.html
+NOTE: +create_file+ 方法由 +Thor::Actions+ 提供. 需要了解 +create_file+ 的文档及其他Thor方法敬请移步 "Thor's documentation":http://rdoc.info/github/wycats/thor/master/Thor/Actions.html
 
-Our new generator is quite simple: it inherits from +Rails::Generators::Base+ and has one method definition. When a generator is invoked, each public method in the generator is executed sequentially in the order that it is defined. Finally, we invoke the +create_file+ method that will create a file at the given destination with the given content. If you are familiar with the Rails Application Templates API, you'll feel right at home with the new generators API.
+我们的新生成器有点单薄：它继承自 +Rails::Generators::Base+ 并仅有一个方法定义。当生成器被调用，每个生成器中的公共方法依照定义的次序执行。最终，我们调用 +create_file+ 方法，将创建一个给定内容给定位置的文件。如果您熟悉Rails 应用的模板API，您将对新的生成器API有宾至如归的感觉。
 
-To invoke our new generator, we just need to do:
+调用我们的新生成器，您只需:
 
 <shell>
 $ rails generate initializer
 </shell>
 
-Before we go on, let's see our brand new generator description:
+在我们继续前，来看一下我们的全新生成器的描述：
 
 <shell>
 $ rails generate initializer --help
 </shell>
 
-Rails is usually able to generate good descriptions if a generator is namespaced, as +ActiveRecord::Generators::ModelGenerator+, but not in this particular case. We can solve this problem in two ways. The first one is calling +desc+ inside our generator:
+要是生成器在命名空间下，Rails 一般都能够生成不错的描述，像是 +ActiveRecord::Generators::ModelGenerator+ ，但是像咱们这种特殊情况 (译注：InitializerGenerator在::下) 就不行了。解决这个问题，有两个选择。第一个在我们的生成器里调用 +desc+ ：
 
 <ruby>
 class InitializerGenerator < Rails::Generators::Base
@@ -73,11 +73,12 @@ class InitializerGenerator < Rails::Generators::Base
 end
 </ruby>
 
-Now we can see the new description by invoking +--help+ on the new generator. The second way to add a description is by creating a file named +USAGE+ in the same directory as our generator. We are going to do that in the next step.
+现在我们能通过调用 +--help+ 看到新的生成器描述了。第二选择是在生成器同一目录下创建名为+USAGE+的文件。我们下一步就要这样做。
 
-h3. Creating Generators with Generators
 
-Generators themselves have a generator:
+h3.  用生成器创建生成器
+
+生成器自身拥有一个生成器：
 
 <shell>
 $ rails generate generator initializer
@@ -87,7 +88,7 @@ $ rails generate generator initializer
       create  lib/generators/initializer/templates
 </shell>
 
-This is the generator just created:
+刚建的生成器如下：
 
 <ruby>
 class InitializerGenerator < Rails::Generators::NamedBase
@@ -95,9 +96,9 @@ class InitializerGenerator < Rails::Generators::NamedBase
 end
 </ruby>
 
-First, notice that we are inheriting from +Rails::Generators::NamedBase+ instead of +Rails::Generators::Base+. This means that our generator expects at least one argument, which will be the name of the initializer, and will be available in our code in the variable +name+.
+首先，注意我们继承自 +Rails::Generators::NamedBase+ 而不是 +Rails::Generators::Base+ 了。这意味着我们的生成器预期 (expects) 至少一个参数, 这个参数将作为initializer的名字，在我们的代码中作为变量 +name+ 出现。
 
-We can see that by invoking the description of this new generator (don't forget to delete the old generator file):
+我们可以通过调用这个新生成器的描述看出来 (别忘了把之前的生成器文件删掉)
 
 <shell>
 $ rails generate initializer --help
@@ -105,15 +106,15 @@ Usage:
   rails generate initializer NAME [options]
 </shell>
 
-We can also see that our new generator has a class method called +source_root+. This method points to where our generator templates will be placed, if any, and by default it points to the created directory +lib/generators/initializer/templates+.
+我们还看到新的生成器拥有一个名为 +source_root+ 的类方法。这个方法指出我们的生成器模板在存放的位置 (如果有的话)，默认它指向被创建的目录 +lib/generators/initializer/templates+ 。
 
-In order to understand what a generator template means, let's create the file +lib/generators/initializer/templates/initializer.rb+ with the following content:
+为了理解生成器模板的意义，让我们创建文件 +lib/generators/initializer/templates/initializer.rb+ ，其内容如下：
 
 <ruby>
 # Add initialization content here
 </ruby>
 
-And now let's change the generator to copy this template when invoked:
+现在让我们修改生成器使其被调用时拷贝这个模板：
 
 <ruby>
 class InitializerGenerator < Rails::Generators::NamedBase
@@ -125,19 +126,19 @@ class InitializerGenerator < Rails::Generators::NamedBase
 end
 </ruby>
 
-And let's execute our generator:
+来执行我们的生成器：
 
 <shell>
 $ rails generate initializer core_extensions
 </shell>
 
-We can see that now an initializer named core_extensions was created at +config/initializers/core_extensions.rb+ with the contents of our template. That means that +copy_file+ copied a file in our source root to the destination path we gave. The method +file_name+ is automatically created when we inherit from +Rails::Generators::NamedBase+.
+我们可以看到现在一个名为core_extensions的initializer被创建在 +config/initializers/core_extensions.rb+ ，内容与我们模板中的相同。这意味着 +copy_file+ 方法拷贝了一个我们的原始文件到了给定的目标路径。当我们继承了 +Rails::Generators::NamedBase+ , 方法 +file_name+ 被自动创建。
 
-The methods that are available for generators are covered in the "final section":#generator-methods of this guide.
+本指南的 "final section":#9 涵盖了更多生成器可用方法。
 
-h3. Generators Lookup
+h3. 生成器查找
 
-When you run +rails generate initializer core_extensions+ Rails requires these files in turn until one is found:
+当您运行 +rails generate initializer core_extensions+ Rails 挨个儿引入这些文件直到生成器被发现为止：
 
 <shell>
 rails/generators/initializer/initializer_generator.rb
@@ -146,13 +147,13 @@ rails/generators/initializer_generator.rb
 generators/initializer_generator.rb
 </shell>
 
-If none is found you get an error message.
+如果没找到生成器您将收到一条错误信息。
 
-INFO: The examples above put files under the application's +lib+ because said directory belongs to +$LOAD_PATH+.
+INFO: 之前示例中将生成器文件放在应用的 +lib+ 目录下是因为这个目录属于 +$LOAD_PATH+
 
-h3. Customizing Your Workflow
+h3. 定制您的工作流程
 
-Rails own generators are flexible enough to let you customize scaffolding. They can be configured in +config/application.rb+, these are some defaults:
+Rails 自带的生成器提供足够的可定制性，让您定制脚手架 (scaffolding)。它们在可以在 +config/application.rb+ 中被配置， 以下是默认配置:
 
 <ruby>
 config.generators do |g|
@@ -162,7 +163,7 @@ config.generators do |g|
 end
 </ruby>
 
-Before we customize our workflow, let's first see what our scaffold looks like:
+在定制工作流程前，一块先看我们的scaffold是什么样的:
 
 <shell>
 $ rails generate scaffold User name:string
@@ -192,9 +193,9 @@ $ rails generate scaffold User name:string
       create    app/assets/stylesheets/scaffold.css
 </shell>
 
-Looking at this output, it's easy to understand how generators work in Rails 3.0 and above. The scaffold generator doesn't actually generate anything, it just invokes others to do the work. This allows us to add/replace/remove any of those invocations. For instance, the scaffold generator invokes the scaffold_controller generator, which invokes erb, test_unit and helper generators. Since each generator has a single responsibility, they are easy to reuse, avoiding code duplication.
+对照输出，很容易理解生成器在Rails 3.0及之前的版本是如何工作的。scaffold生成器实际上不生成任何东西，它只调用其它的生成器工作。这样就允许我们 添加、修改、删除 这些调用。例如，scaffold生成器调用scaffold_controller生成器, 从而调用erb、test_unit和helper生成器。从每个生成器的单一职责，它们极易重用，避免了重复代码。
 
-Our first customization on the workflow will be to stop generating stylesheets and test fixtures for scaffolds. We can achieve that by changing our configuration to the following:
+我们的第一个工作流程定制将阻止为scaffolds生成样式表和测试夹具。可以通过修改我们的工作流程config来实现：
 
 <ruby>
 config.generators do |g|
@@ -205,35 +206,36 @@ config.generators do |g|
 end
 </ruby>
 
-If we generate another resource with the scaffold generator, we can see that neither stylesheets nor fixtures are created anymore. If you want to customize it further, for example to use DataMapper and RSpec instead of Active Record and TestUnit, it's just a matter of adding their gems to your application and configuring your generators.
+如果我们要让scaffold生成另一个resource，可以看到样式表和测试夹具没有再被生成。如果您想定制进一步定制scaffold生成器，例如用DataMapper和RSpec 替代 Active Record和TestUnit，只需要添加这两个gem到您应用里，然后配置您的生成器。
 
-To demonstrate this, we are going to create a new helper generator that simply adds some instance variable readers. First, we create a generator within the rails namespace, as this is where rails searches for generators used as hooks:
+示范一下，我们将创建一个新的helper生成器，它可以简单添加一些实例变量reader。首先，我们在rails命名空间下创建一个生成器，以便rails能够搜索到生成器：
 
 <shell>
 $ rails generate generator rails/my_helper
 </shell>
 
-After that, we can delete both the +templates+ directory and the +source_root+ class method from our new generators, because we are not going to need them. So our new generator looks like the following:
+
+之后，我们可以从新的生成器里删掉 +templates+ 目录和 +source_root+ 类方法，因为我们不需要它们。现在我们的新生成器看起来就像这样：
 
 <ruby>
 class Rails::MyHelperGenerator < Rails::Generators::NamedBase
-  def create_helper_file
-    create_file "app/helpers/#{file_name}_helper.rb", <<-FILE
-module #{class_name}Helper
-  attr_reader :#{plural_name}, :#{plural_name.singularize}
-end
-    FILE
-  end
+    def create_helper_file
+        create_file "app/helpers/#{file_name}_helper.rb", <<-FILE
+            module #{class_name}Helper
+            attr_reader :#{plural_name}, :#{plural_name.singularize}
+        end
+        FILE
+    end
 end
 </ruby>
 
-We can try out our new generator by creating a helper for users:
+我们可以试一下新生成器来生成为products (一个resource)一个helper
 
 <shell>
 $ rails generate my_helper products
 </shell>
 
-And it will generate the following helper file in +app/helpers+:
+它会在 +app/helpers+ 目录下生成一下的helper文件:
 
 <ruby>
 module ProductsHelper
@@ -241,7 +243,7 @@ module ProductsHelper
 end
 </ruby>
 
-Which is what we expected. We can now tell scaffold to use our new helper generator by editing +config/application.rb+ once again:
+正是我们期望的那样。现在我们可以再一次通过编辑 +config/application.rb+  指挥scaffold使用我们的新生成器了。
 
 <ruby>
 config.generators do |g|
@@ -253,7 +255,7 @@ config.generators do |g|
 end
 </ruby>
 
-and see it in action when invoking the generator:
+调用scaffold生成器就可以看到my_helper起效了：
 
 <shell>
 $ rails generate scaffold Post body:text
@@ -262,40 +264,40 @@ $ rails generate scaffold Post body:text
       create      app/helpers/posts_helper.rb
 </shell>
 
-We can notice on the output that our new helper was invoked instead of the Rails default. However one thing is missing, which is tests for our new generator and to do that, we are going to reuse old helpers test generators.
+我们可以在输出上提示新生成器替代了Rails默认的。然而有个事儿忘了，还没生成helper的测试呢，我们要重用原来的helper测试生成器。
 
-Since Rails 3.0, this is easy to do due to the hooks concept. Our new helper does not need to be focused in one specific test framework, it can simply provide a hook and a test framework just needs to implement this hook in order to be compatible.
+从Rails 3.0开始，这事由于钩子机制 (hooks concept) 变得很容易了。我们的新helper无需关注特定的测试框架，它可以方便地提供一个hook，测试框架只需实现这个hook就可以兼容。
 
-To do that, we can change the generator this way:
+我们这样可以修改生成器：
 
 <ruby>
 class Rails::MyHelperGenerator < Rails::Generators::NamedBase
-  def create_helper_file
-    create_file "app/helpers/#{file_name}_helper.rb", <<-FILE
-module #{class_name}Helper
-  attr_reader :#{plural_name}, :#{plural_name.singularize}
-end
-    FILE
-  end
+    def create_helper_file
+       create_file "app/helpers/#{file_name}_helper.rb", <<-FILE
+           module #{class_name}Helper
+               attr_reader :#{plural_name}, :#{plural_name.singularize}
+           end
+       FILE
+    end
 
-  hook_for :test_framework
+    hook_for :test_framework
 end
 </ruby>
 
-Now, when the helper generator is invoked and TestUnit is configured as the test framework, it will try to invoke both +Rails::TestUnitGenerator+ and +TestUnit::MyHelperGenerator+. Since none of those are defined, we can tell our generator to invoke +TestUnit::Generators::HelperGenerator+ instead, which is defined since it's a Rails generator. To do that, we just need to add:
+现在，当helper生成器被调用，假设TestUnit被配置为测试框架，它将尝试调用 +Rails::TestUnitGenerator+ 和 +TestUnit::MyHelperGenerator+。由于这些没有被定义，我们可以告诉我们的生成器调用 +TestUnit::Generators::HelperGenerator+ 替代之，因为它是定义的Rails生成器。我们只需要添加：
 
 <ruby>
 # Search for :helper instead of :my_helper
 hook_for :test_framework, :as => :helper
 </ruby>
 
-And now you can re-run scaffold for another resource and see it generating tests as well!
+现在您可以重新运行scaffold生成另一个resource，并且看到它同时生成了测试！
 
-h3. Customizing Your Workflow by Changing Generators Templates
+h3. 通过修改生成器模板定制您的工作流程
 
-In the step above we simply wanted to add a line to the generated helper, without adding any extra functionality. There is a simpler way to do that, and it's by replacing the templates of already existing generators, in that case +Rails::Generators::HelperGenerator+.
+上一步我们简单地给生成的helper添了一行代码，没有添加什么额外功能。有个更简单的方法也能做到，即更换已存在生成器的模板，以 +Rails::Generators::HelperGenerator+ 为例。
 
-In Rails 3.0 and above, generators don't just look in the source root for templates, they also search for templates in other paths. And one of them is +lib/templates+. Since we want to customize +Rails::Generators::HelperGenerator+, we can do that by simply making a template copy inside +lib/templates/rails/helper+ with the name +helper.rb+. So let's create that file with the following content:
+在Rails 3.0 及之前版本，生成器不止在源目录搜索模板，它们也在其它的路径搜索。+lib/templates+ 就是其中之一 。由于我们想定制 +Rails::Generators::HelperGenerator+ ，我们能够简单地通过制作在 +lib/templates/rails/helper+ 下名为 +helper.rb+ 的模板副本来做到。其内容如下：
 
 <erb>
 module <%= class_name %>Helper
@@ -303,7 +305,7 @@ module <%= class_name %>Helper
 end
 </erb>
 
-and revert the last change in +config/application.rb+:
+复原 +config/application.rb+ 的最后一次修改：
 
 <ruby>
 config.generators do |g|
@@ -314,13 +316,13 @@ config.generators do |g|
 end
 </ruby>
 
-If you generate another resource, you can see that we get exactly the same result! This is useful if you want to customize your scaffold templates and/or layout by just creating +edit.html.erb+, +index.html.erb+ and so on inside +lib/templates/erb/scaffold+.
+如果您生成另一个resource，您将能够看到我们可以达到同样的效果！如果您想定仅通过创建 +lib/templates/erb/scaffold+ 目录下 +edit.html.erb+, +index.html.erb+ 等等，定制您的scaffold模板和（或者）结构，这个方法会很有用。
 
-h3. Adding Generators Fallbacks
+h3. 添加生成器回退
 
-One last feature about generators which is quite useful for plugin generators is fallbacks. For example, imagine that you want to add a feature on top of TestUnit like "shoulda":https://github.com/thoughtbot/shoulda does. Since TestUnit already implements all generators required by Rails and shoulda just wants to overwrite part of it, there is no need for shoulda to reimplement some generators again, it can simply tell Rails to use a +TestUnit+ generator if none was found under the +Shoulda+ namespace.
+关于生成器的最后一个特性对于插件中的生成器尤为有用，这就是 +回退+ 。举例来说，想象一下您想要在TestUint上添加一个特性，就如 "shoulda":https://github.com/thoughtbot/shoulda 做的那样。由于TestUnit已经实现了Rails所要求的所有生成器，shoulda覆盖部分生成器，shoulda无需重新实现一些生成器，可以简单地告知Rails 如果在 +Shoulda+ 命名空间下查无所获就使用 +TestUnit+ 生成器。
 
-We can easily simulate this behavior by changing our +config/application.rb+ once again:
+我们通过再次修改 +config/application.rb+ 可以简单地模拟这个行为：
 
 <ruby>
 config.generators do |g|
@@ -334,7 +336,7 @@ config.generators do |g|
 end
 </ruby>
 
-Now, if you create a Comment scaffold, you will see that the shoulda generators are being invoked, and at the end, they are just falling back to TestUnit generators:
+现在， 如果您创建一个 Comment (译注：resource名) scaffold， 你将看到shoulda生成器被调用了，并且最终，它们只是回退到了TestUnit生成器：
 
 <shell>
 $ rails generate scaffold Comment body:text
@@ -363,11 +365,11 @@ $ rails generate scaffold Comment body:text
       create        test/unit/helpers/comments_helper_test.rb
 </shell>
 
-Fallbacks allow your generators to have a single responsibility, increasing code reuse and reducing the amount of duplication.
+回退允许您的生成器拥有单一的职责，增强了代码复用和减少了重复。
 
-h3. Application Templates
+h3. 应用程序模板
 
-Now that you've seen how generators can be used _inside_ an application, did you know they can also be used to _generate_ applications too? This kind of generator is referred as a "template".
+现在您已经了解了生成器是如何在 _应用内_ 被使用的，您是否知道它们一样可以用来 _生成应用_ 呢? 这样一类生成器被成为 "应用程序模板" (译注：原文使用template，但和前文中的模板文件意义不同故酌情意译)。
 
 <ruby>
 gem("rspec-rails", :group => "test")
@@ -382,52 +384,52 @@ if yes?("Would you like to install Devise?")
 end
 </ruby>
 
-In the above template we specify that the application relies on the +rspec-rails+ and +cucumber-rails+ gem so these two will be added to the +test+ group in the +Gemfile+. Then we pose a question to the user about whether or not they would like to install Devise. If the user replies "y" or "yes" to this question, then the template will add Devise to the +Gemfile+ outside of any group and then runs the +devise:install+ generator. This template then takes the users input and runs the +devise+ generator, with the user's answer from the last question being passed to this generator.
+上面这个应用模板中我们指定应用依赖 +rspec-rails+ 和 +cucumber-rails+ 这两个gem，所以这个两个gem被加到了 +Gemfile+ 的 +test+ 组下。然后您提出问题问用户是不是要安装 Devise 。如果用户回复 "y" 或者 "yes"，应用程序模板会添加 Devise 到 +Gemfile+ 在所有组之外，之后运行 +devise:install+ 生成器。这个应用程序模板接着让用户回答最后一个问题，传给这个生成器输入和运行 +devise+ 生成器
 
-Imagine that this template was in a file called +template.rb+. We can use it to modify the outcome of the +rails new+ command by using the +-m+ option and passing in the filename:
+想象这个应用程序模板保存在 +template.rb+ 文件中。我们可以通过 +-m+ 选项传文件名来修改 +rails new+  命令的产生结果。
 
 <shell>
 $ rails new thud -m template.rb
 </shell>
 
-This command will generate the +Thud+ application, and then apply the template to the generated output.
+这个命令将生成 +Thud+ 应用，并依照应用程序模板生成输出。
 
-Templates don't have to be stored on the local system, the +-m+ option also supports online templates:
+应用程序模板不必存放在本地系统中，+-m+ 选项也支持在线的模板：
 
 <shell>
 $ rails new thud -m https://gist.github.com/722911.txt
 </shell>
 
-Whilst the final section of this guide doesn't cover how to generate the most awesome template known to man, it will take you through the methods available at your disposal so that you can develop it yourself. These same methods are also available for generators.
+虽然本指南的终章不涵盖如何写出人类已知的最凶残的应用程序模板，它会带给您过一遍可用的方法，这样您就能自个开发了。这些方法对生成器同样适用。
 
-h3. Generator methods
+h3. 生成器方法大全
 
-The following are methods available for both generators and templates for Rails.
+接下来的方法对Rails生成器和应用程序模板通吃。
 
-NOTE: Methods provided by Thor are not covered this guide and can be found in "Thor's documentation":http://rdoc.info/github/wycats/thor/master/Thor/Actions.html
+NOTE: 这些方法未涵盖Thor所提供的全部，详见 "Thor's documentation":http://rdoc.info/github/wycats/thor/master/Thor/Actions.html
 
 h4. +gem+
 
-Specifies a gem dependency of the application.
+指定一个应用的gem依赖
 
 <ruby>
 gem("rspec", :group => "test", :version => "2.1.0")
 gem("devise", "1.1.5")
 </ruby>
 
-Available options are:
+可用选项：
 
-* +:group+ - The group in the +Gemfile+ where this gem should go.
-* +:version+ - The version string of the gem you want to use. Can also be specified as the second argument to the method.
-* +:git+ - The URL to the git repository for this gem.
+* +:group+ - 这个gem会放到 +Gemfile+ 的哪个组里去。 
+* +:version+ - 您想使用的gem的版本字符串。也可指定这个方法的第二个参数。 
+* +:git+ -  gem的git库URL。
 
-Any additional options passed to this method are put on the end of the line:
+任何传给方法的附加选项都放在行尾。
 
 <ruby>
 gem("devise", :git => "git://github.com/plataformatec/devise", :branch => "master")
 </ruby>
 
-The above code will put the following line into +Gemfile+:
+以上的代码将在 +Gemfile+ 里添加如下一行：
 
 <ruby>
 gem "devise", :git => "git://github.com/plataformatec/devise", :branch => "master"
@@ -435,7 +437,7 @@ gem "devise", :git => "git://github.com/plataformatec/devise", :branch => "maste
 
 h4. +gem_group+
 
-Wraps gem entries inside a group:
+包裹gem 在一个组里
 
 <ruby>
 gem_group :development, :test do
@@ -445,7 +447,7 @@ end
 
 h4. +add_source+
 
-Adds a specified source to +Gemfile+:
+添加指定的gem源到 +Gemfile+
 
 <ruby>
 add_source "http://gems.github.com"
@@ -453,13 +455,13 @@ add_source "http://gems.github.com"
 
 h4. +application+
 
-Adds a line to +config/application.rb+ directly after the application class definition.
+直接添加一行代码到 +config/application.rb+ 的应用类定之后。
 
 <ruby>
 application "config.asset_host = 'http://example.com'"
 </ruby>
 
-This method can also take a block:
+这个方法还可以带一个block:
 
 <ruby>
 application do
@@ -467,9 +469,9 @@ application do
 end
 </ruby>
 
-Available options are:
+可用的选项如下:
 
-* +:env+ - Specify an environment for this configuration option. If you wish to use this option with the block syntax the recommended syntax is as follows:
+* +:env+ - 为这个配置指定一个环境。如果您希望和block语法一块使用这个选项，下面是推荐的写法：
 
 <ruby>
 application(nil, :env => "development") do
@@ -479,7 +481,7 @@ end
 
 h4. +git+
 
-Runs the specified git command:
+运行一条指定的git命令：
 
 <ruby>
 git :init
@@ -488,17 +490,17 @@ git :commit => "-m First commit!"
 git :add => "onefile.rb", :rm => "badfile.cxx"
 </ruby>
 
-The values of the hash here being the arguments or options passed to the specific git command. As per the final example shown here, multiple git commands can be specified at a time, but the order of their running is not guaranteed to be the same as the order that they were specified in.
+这里的hash值属于参数或是传给指定git命令的选项。如最后一个示例，多个git命令可以一块指定，但是不保证它们会按指定顺序执行。
 
 h4. +vendor+
 
-Places a file into +vendor+ which contains the specified code.
+在 +vendor+ 目录下放一个包含特定代码的文件
 
 <ruby>
 vendor("sekrit.rb", '#top secret stuff')
 </ruby>
 
-This method also takes a block:
+这个方法同样可以带block:
 
 <ruby>
 vendor("seeds.rb") do
@@ -508,13 +510,13 @@ end
 
 h4. +lib+
 
-Places a file into +lib+ which contains the specified code.
+在 +lib+ 目录下放一个包含特定代码的文件
 
 <ruby>
 lib("special.rb", 'p Rails.root')
 </ruby>
 
-This method also takes a block:
+这个方法同样可以带block:
 
 <ruby>
 lib("super_special.rb") do
@@ -524,13 +526,13 @@ end
 
 h4. +rakefile+
 
-Creates a Rake file in the +lib/tasks+ directory of the application.
+在应用的 +lib/tasks+ 目录下创建一个Rake文件
 
 <ruby>
 rakefile("test.rake", 'hello there')
 </ruby>
 
-This method also takes a block:
+这个方法还是可以带block:
 
 <ruby>
 rakefile("test.rake") do
@@ -544,13 +546,13 @@ end
 
 h4. +initializer+
 
-Creates an initializer in the +config/initializers+ directory of the application:
+在应用的 +config/initializers+ 目录下创建一个initializer文件
 
 <ruby>
 initializer("begin.rb", "puts 'this is the beginning'")
 </ruby>
 
-This method also takes a block:
+这个方法还是可以带block:
 
 <ruby>
 initializer("begin.rb") do
@@ -560,7 +562,7 @@ end
 
 h4. +generate+
 
-Runs the specified generator where the first argument is the generator name and the remaining arguments are passed directly to the generator.
+运行指定的生成器，第一个参数事生成器名称，剩余的参数直接传给生成器。
 
 <ruby>
 generate("scaffold", "forums title:string description:text")
@@ -569,20 +571,20 @@ generate("scaffold", "forums title:string description:text")
 
 h4. +rake+
 
-Runs the specified Rake task.
+运行指定的Rake任务。
 
 <ruby>
 rake("db:migrate")
 </ruby>
 
-Available options are:
+可用选项：
 
-* +:env+ - Specifies the environment in which to run this rake task.
-* +:sudo+ - Whether or not to run this task using +sudo+. Defaults to +false+.
+* +:env+ - 指定rake任务运行的环境。
+* +:sudo+ - 是否使用 +sudo+ 运行这个任务。默认是 +false+
 
 h4. +capify!+
 
-Runs the +capify+ command from Capistrano at the root of the application which generates Capistrano configuration.
+在应该个目录下用Capistrano运行 +capify+ 命令，从而生成 Capistrano 配置。
 
 <ruby>
 capify!
@@ -590,7 +592,7 @@ capify!
 
 h4. +route+
 
-Adds text to the +config/routes.rb+ file:
+添加文本到 +config/routes.rb+ 文件：
 
 <ruby>
 route("resources :people")
@@ -598,7 +600,7 @@ route("resources :people")
 
 h4. +readme+
 
-Output the contents of a file in the template's +source_path+, usually a README.
+输出在模板的 +source_path+ 下的文件内容，通常是一个 README
 
 <ruby>
 readme("README")
