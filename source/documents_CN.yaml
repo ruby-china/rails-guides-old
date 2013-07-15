@@ -24,8 +24,8 @@
       name: Active Record 数据表关联
       url: association_basics.html
       work_in_progress: true
-      contributor: sanatir
-      description: This guide covers all the associations provided by Active Record.
+      contributor: mingyuan0715
+      description: 该教程包含所有Active Record 提供的所有数据表关联功能。
     -
       name: Active Record 查询接口
       url: active_record_querying.html
