@@ -38,7 +38,7 @@
       name: Rails中的布局与渲染
       url: layouts_and_rendering.html
       work_in_progress: true
-      contributor: NaixSpirit
+      contributor: NaixSpirit athurg
       description: This guide covers the basic layout features of Action Controller and Action View, including rendering and redirecting, using content_for blocks, and working with partials.
     -
       name: Action View Form Helpers

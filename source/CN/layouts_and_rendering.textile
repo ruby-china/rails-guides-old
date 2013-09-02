@@ -1,21 +1,21 @@
-h2. Layouts and Rendering in Rails
+h2. Rails中的布局与渲染
 
-This guide covers the basic layout features of Action Controller and Action View. By referring to this guide, you will be able to:
+本向导包含Action Controller以及Action View的基本布局特性。通过学习这片文章，您可以学会：
 
-* Use the various rendering methods built into Rails
-* Create layouts with multiple content sections
+* 使用Rails内建的多种渲染方法
+* 创建包含多个部分的布局
 * Use partials to DRY up your views
-* Use nested layouts (sub-templates)
+* 使用嵌套式布局（子模板）
 
 endprologue.
 
-h3. Overview: How the Pieces Fit Together
+h3. 概览: 各个部分是怎么衔接的
 
 This guide focuses on the interaction between Controller and View in the Model-View-Controller triangle. As you know, the Controller is responsible for orchestrating the whole process of handling a request in Rails, though it normally hands off any heavy code to the Model. But then, when it's time to send a response back to the user, the Controller hands things off to the View. It's that handoff that is the subject of this guide.
 
 In broad strokes, this involves deciding what should be sent as the response and calling an appropriate method to create that response. If the response is a full-blown view, Rails also does some extra work to wrap the view in a layout and possibly to pull in partial views. You'll see all of those paths later in this guide.
 
-h3. Creating Responses
+h3. 创建响应（Responses）
 
 From the controller's point of view, there are three ways to create an HTTP response:
 
