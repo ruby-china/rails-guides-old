@@ -154,10 +154,14 @@
       name: Contributingaaa to Ruby on Rails
       url: contributing_to_ruby_on_rails.html
       description: Rails is not 'somebody else's framework. This guide covers a variety of ways that you can get involved in the ongoing development of Rails.
+      contributor: allenlsy
+      work_in_progress: true
     -
       name: API Documentation Guidelines
       url: api_documentation_guidelines.html
       description: This guide documents the Ruby on Rails API documentation guidelines.
+      contributor: allenlsy
+      work_in_progress: true
     -
       name: Ruby on Rails Guides Guidelines
       url: ruby_on_rails_guides_guidelines.html
