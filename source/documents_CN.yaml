@@ -151,17 +151,14 @@
   name: 为 Ruby on Rails 社区做出贡献
   documents:
     -
-      name: Contributingaaa to Ruby on Rails
+      name: 为 Ruby on Rails 做贡献
       url: contributing_to_ruby_on_rails.html
-      description: Rails is not 'somebody else's framework. This guide covers a variety of ways that you can get involved in the ongoing development of Rails.
+      description: Rails 不是“别人”的框架。这篇指南涵盖一系列参加正在开发的 Rails 项目的方法。
       contributor: allenlsy
-      work_in_progress: true
     -
       name: API Documentation Guidelines
       url: api_documentation_guidelines.html
       description: This guide documents the Ruby on Rails API documentation guidelines.
-      contributor: allenlsy
-      work_in_progress: true
     -
       name: Ruby on Rails Guides Guidelines
       url: ruby_on_rails_guides_guidelines.html
