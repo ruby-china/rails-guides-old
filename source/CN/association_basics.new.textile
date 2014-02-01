@@ -1,4 +1,4 @@
-h2. ActiveRecord模型关联
+h2. ActiveRecord 模型关联
 
 本篇指南涵盖ActiveRecord的模型关联特性。
 
@@ -71,8 +71,8 @@ h3. 模型关联的类型
 * +belongs_to+
 * +has_one+  一对一关联
 * +has_many+  一对多关联
-* +has_and_belongs_to_many+  多对多关联，通过中间表
-* +has_many :throug+  也是通过中间表，不过更灵活，一般建议使用 +through+ ，而不使用 +has_and_belongs_to_many+
+* +has_and_belongs_to_many+  多对多关联，通过联接表（join table）
+* +has_many :through+  也是通过联接表（join table），不过更灵活，一般建议使用 +:through+ ，而不使用 +has_and_belongs_to_many+
 * +has_one :through+
 
 
@@ -112,7 +112,7 @@ class CreateOrders < ActiveRecord::Migration
 end
 </ruby>
 
-h4. The +has_one+ Association
+h4. +has_one+
 
 和 +belongs_to+ 一样，+has_one+ 关系也建立和另一个模型的一对一关系，但语义（及结果）上有些许不同。这种关联表示每个模型的实例包含或拥有另一个模型的一个实例。例如如果在应用程序中的每个供应商（supplier）有且只有一个账号，我们可以这样定义供应商（supplier）模型：
 
@@ -143,7 +143,7 @@ class CreateSuppliers < ActiveRecord::Migration
 end
 </ruby>
 
-h4. The +has_many+ Association
+h4. +has_many+
 
 +has_many+ 关联表示和另一个模型的一对多关系。我们经常会在+belongs_to+的“另一端”发现这个关联。这个关联表示每个模型的实例有零或多个另一个模型的实例。例如在应用中的顾客和订单，顾客模型声明如下：
 
@@ -152,7 +152,8 @@ class Customer < ActiveRecord::Base
   has_many :orders
 end
 </ruby>
-NOTICE: 在+has_many+中另一个模型的的名字被复数化了。
+
+NOTE: 在+has_many+中另一个模型的的名字被复数化了。
 
 !images/has_many.png(has_many Association Diagram)!
 
@@ -175,7 +176,7 @@ class CreateCustomers < ActiveRecord::Migration
 end
 </ruby>
 
-h4. The +has_many :through+ Association
+h4. +has_many :through+
 
 +has_many :through+常用于建立与另一模型的多对多关系。声明这种关联的模型可以 _通过_ 第三方的模型对应另一模型的零或多个实例。例如，考虑看病时病人通过预约和医生见面。相应的声明如下：
 
@@ -257,7 +258,7 @@ end
 @document.paragraphs
 </ruby>
 
-h4. The +has_one :through+ Association
+h4. +has_one :through+
 
 +has_one :through+ 和另一模型建立一对一的关系。它表示声明的模型可以 _通过_ 第三方的模型，对应另一模型的某个实例。比如，如果每个供应商（supplier）有一个账户，而每个账户又和一个账户历史记录有关联，那么供应商的模型看上去是这样的：
 
@@ -304,7 +305,7 @@ class CreateAccountHistories < ActiveRecord::Migration
 end
 </ruby>
 
-h4. The +has_and_belongs_to_many+ Association
+h4. +has_and_belongs_to_many+
 
 +has_and_belongs_to_many+ 和另一模型直接建立一个多对多关系，而不需要任何中间模型。例如，假如应用中包括装配（assemblies）和零件（parts），每个装配有很多零件，而每个零件会出现在不同的装配中。我们可以这样声明模型：
 
@@ -378,7 +379,7 @@ class CreateSuppliers < ActiveRecord::Migration
 end
 </ruby>
 
-NOTE: 使用 +t.integer :supplier_id+ 使得外键命名更明显。在最新版本的Rails中你可以使用 +t.references  :supplier+ 抽象这个实现细节。
+NOTE: 使用 +t.integer :supplier_id+ 使得外键命名更明显。在最新版本的Rails中你可以使用 +t.references :supplier+ 抽象这个实现细节。
 
 h4. 选择 +has_many+ 还是 +has_and_belongs_to_many+
 
@@ -394,7 +395,7 @@ class Part < ActiveRecord::Base
 end
 </ruby>
 
-另一种方式是使用 +has_many :through+ ，通过一个join模型间接建立关联：
+另一种方式是使用 +has_many :through+ ，通过一个联接模型（join model）间接建立关联：
 
 <ruby>
 class Assembly < ActiveRecord::Base
@@ -413,7 +414,7 @@ class Part < ActiveRecord::Base
 end
 </ruby>
 
-最简单的原则是：当你需要对关系本身的模型作为独立的实体进行处理时，建立一个 +has_many :through+ 关系。如果你不需要对关系本身的模型做任何事情，建立一个 +has_and_belongs_to_many+ 更简单（但仍需要记得建立在数据库中建立中间表）。
+最简单的原则是：当你需要对关系本身的模型作为独立的实体进行处理时，建立一个 +has_many :through+ 关系。如果你不需要对关系本身的模型做任何事情，建立一个 +has_and_belongs_to_many+ 更简单（但仍需要记得建立在数据库中建立联接表（join table））。
 
 当需要在join模型中进行数据校验，回调函数或添加额外属性时，应该使用 +has_many :through+
 
@@ -548,13 +549,13 @@ end
 
 如果在建立了模型之后添加关联，你需要记得新建 +add_column+ migration来提供必要的外键。
 
-h5. 为 +has_and_belongs_to_many+ 新建中间表（Join Tables）
+h5. 为 +has_and_belongs_to_many+ 新建联接表（Join Tables）
 
-当你新建一个 +has_and_belongs_to_many+ 关联时，你需要显式建立中间表（Join  Table）。除非中间表的名字通过 +:join_table+ 选项被显式指定，否则ActiveRecord将用类名按字典序新建中间表的名字。所以一个介于customer和order模型的表的默认名字为"customers_orders"，因为在字典中"c"比"o"靠前。
+当你新建一个 +has_and_belongs_to_many+ 关联时，你需要显式建立联接表（Join Table）。除非联接表的名字通过 +:join_table+ 选项被显式指定，否则ActiveRecord将用类名按字典序新建联接表的名字。所以一个介于customer和order模型的表的默认名字为"customers_orders"，因为在字典中"c"比"o"靠前。
 
-WARNING: 模型名字的优先顺序是通过 +String+ 类的 @<@ 运算符计算得到的。这意味着如果比较的两个字符串长度不同，且较短的字串包含在较长的字串中（如ab和abc比较），则较长的字符串会优先于比较短的字符串。当两个模型名字相同时会产生一些易混淆的地方，比如认为"paper_boxes"和"papers"的中间表（join table）应该叫"papers_paper_boxes"，因为"paper_boxes"的名字较长。但实际上正确的中间表的名字是"paper_boxes_papers"（因为下划线'_'在编码中 _小于_ 's'）。【译者注：'_'在ASCII码中值为95，'s'为115】
+WARNING: 模型名字的优先顺序是通过 +String+ 类的 @<@ 运算符计算得到的。这意味着如果比较的两个字符串长度不同，且较短的字串包含在较长的字串中（如ab和abc比较），则较长的字符串会优先于比较短的字符串。当两个模型名字相同时会产生一些易混淆的地方，比如认为"paper_boxes"和"papers"的联接表（join table）应该叫"papers_paper_boxes"，因为"paper_boxes"的名字较长。但实际上正确的联接表的名字是"paper_boxes_papers"（因为下划线'_'在编码中 _小于_ 's'）。【译者注：'_'在ASCII码中值为95，'s'为115】
 
-不管名字如何，你都必须手动通过migration添加中间表（join table），例如考虑以下模型关联：
+不管名字如何，你都必须手动通过migration添加联接表（join table），例如考虑以下模型关联：
 
 <ruby>
 class Assembly < ActiveRecord::Base
@@ -566,7 +567,7 @@ class Part < ActiveRecord::Base
 end
 </ruby>
 
-以上关联需要建立+assemblies_parts+表的migration来支持。这个表不需要主键：
+以上关联需要建立 +assemblies_parts+ 表的migration来支持。这个表不需要主键：
 
 <ruby>
 class CreateAssembliesPartsJoinTable < ActiveRecord::Migration
@@ -651,8 +652,6 @@ class Order < ActiveRecord::Base
 end
 </ruby>
 
-By default, Active Record doesn't know about the connection between these associations. This can lead to two copies of an object getting out of sync:
-
 在默认情况下，ActiveRecord不知道这些模型关联之间的联系，这会造成一个对象的两个副本出现不同步的情况：
 
 <ruby>
@@ -695,10 +694,10 @@ c.first_name == o.customer.first_name # => true
 这并不意味着在所有的双向关联中都必须显式设置 +:inverse_of+ 选项，因为所有的模型关联都会自动尝试找到其对应的反向关联，并试探性地设置 +:inverse_of+（基于关联的名字）。
 大多数关联都有上述功能支持。但包含以下选项的模型关联不会自动设定反向关联：
 
-* :conditions
-* :through
-* :polymorphic
-* :foreign_key
+* +:conditions+
+* +:through+
+* +:polymorphic+
+* +:foreign_key+
 
 h3. 详细模型关联参考
 
@@ -746,7 +745,7 @@ h6. +association(force_reload = false)+
 @customer = @order.customer
 </ruby>
 
-如果关联对象先前已从数据库中取出，以上方法将返回缓存的版本。为覆盖这一行为（并强制读取数据库），传入 +true+ 作为参数 +force_reload+ 的值。
+如果关联对象先前已从数据库中取出，以上方法将返回缓存的版本。为覆盖这个行为（并强制读取数据库），传入 +true+ 作为参数 +force_reload+ 的值。
 
 h6. +association=(associate)+
 
@@ -767,7 +766,7 @@ h6. +build_association(attributes = {})+
 
 h6. +create_association(attributes = {})+
 
-+create_association+方法返回一个关联类型的一个新对象。这个对象将根据传入的属性值被初始化，且通过该对象的外键的连接将被设置，且一旦对象通过了相应模型的模型校验，这个关联对象将 _会_ 被保存。
++create_association+ 方法返回一个关联类型的一个新对象。这个对象将根据传入的属性值被初始化，且通过该对象的外键的连接将被设置，且一旦对象通过了相应模型的模型校验，这个关联对象将 _会_ 被保存。
 
 <ruby>
 @customer = @order.create_customer(customer_number: 123,
@@ -803,7 +802,7 @@ end
 
 h6. +:autosave+
 
-如果设置+:autosave+选项为+true+，Rails会在保存父对象【译者注：指当前定义的类的实例对象，即拥有+belongs_to+的对象】的同时保存所有载入的关联成员，删除所有标记为删除的关联成员。【译者注：如果设为+false+，则无论如何不保存或删除任何关联对象；默认情况下只保存新建的关联对象】
+如果设置 +:autosave+ 选项为 +true+ ，Rails会在保存父对象【译者注：指当前定义的类的实例对象，即拥有 +belongs_to+ 的对象】的同时保存所有载入的关联成员，删除所有标记为删除的关联成员。【译者注：如果设为 +false+ ，则无论如何不保存或删除任何关联对象；默认情况下只保存新建的关联对象】
 
 h6. +:class_name+
 
@@ -856,7 +855,7 @@ Counter cache字段通过 +attr_readonly+ 添加到其模型的只读属性中�
 
 h6. +:dependent+
 
-如果设置 +:dependent+选项的值为+:destroy+ ，则删除这个对象时会调用其关联的对象的 +destroy+ 方法来删除关联对象。如果设置 +:dependent+ 的值为 +:delete+，则删除这个对象时将删除关联对象，但 _不会_ 调用关联对象的 +destroy+ 方法。如果设置 +:dependent+ 的值为 +:restrict+ ，则当这个对象有关联对象时，删除这个对象会导致一个 +ActiveRecord::DeleteRestrictionError+ 的异常。
+如果设置 +:dependent+ 选项的值为 +:destroy+ ，则删除这个对象时会调用其关联的对象的 +destroy+ 方法来删除关联对象。如果设置 +:dependent+ 的值为 +:delete+，则删除这个对象时将删除关联对象，但 _不会_ 调用关联对象的 +destroy+ 方法。如果设置 +:dependent+ 的值为 +:restrict+ ，则当这个对象有关联对象时，删除这个对象会导致一个 +ActiveRecord::DeleteRestrictionError+ 的异常。
 
 WARNING: 当 +belongs_to+ 关联和另一个类中的 +has_many+ 关联有关时，不应指定这个选项。这样做可能会导致数据库中产生孤立的数据【译者注：即不能通过belongs_to或has_many得到的数据】。
 
@@ -993,10 +992,9 @@ h6. +readonly+
 
 h6. +select+
 
-+select+方法允许我们覆写获取关联对象数据的SQL语句+SELECT+。默认情况下Rails获取所有的字段。
++select+ 方法允许我们覆写获取关联对象数据的SQL语句 +SELECT+ 。默认情况下Rails获取所有的字段。
 
 TIP: 如果使用在 +belongs_to+ 关联中使用 +select+ 方法，应该设置 +:foreign_key+ 选项的值以保证正确的结果。
-TIP: If you use the +select+ method on a +belongs_to+ association, you should also set the +:foreign_key+ option to guarantee the correct results.
 
 h5. 关联对象存在吗？
 
@@ -1014,7 +1012,7 @@ h5. 什么时候保存对象？
 
 h4. +has_one+ 关联参考
 
-+has_one+关联新建一个和另一模型的一一对应。从数据库角度看，这个关联表明外键在另一个类中。如果外键属于当前的类，则应使用+belongs_to+关联代替。
++has_one+ 关联新建一个和另一模型的一一对应。从数据库角度看，这个关联表明外键在另一个类中。如果外键属于当前的类，则应使用 +belongs_to+ 关联代替。
 
 h5. +has_one+ 添加的方法
 
@@ -1168,15 +1166,15 @@ h6. +:primary_key+
 
 h6. +:source+
 
-+:source+ 选项指定 +has_one :through+ 所指向模型源的名字。【译者注：Stackoverflow上有个 "很好的例子":http://stackoverflow.com/questions/4632408/need-help-to-understand-source-option-of-has-one-has-many-through-of-rails】
++:source+ 选项指定 +has_one :through+ 所指向模型源的名字。【译者注：Stackoverflow上有个 "很好的例子":http://stackoverflow.com/questions/4632408/need-help-to-understand-source-option-of-has-one-has-many-through-of-rails 】
 
 h6. +:source_type+
 
-+:source_type+ 在多态关联中使用。它指定 +has_one :through+ 所指向模型源的类型。【译者注：Stackoverflow上的 "例子":http://stackoverflow.com/questions/9500922/need-help-to-understand-source-type-option-of-has-one-has-many-through-of-rails】
++:source_type+ 在多态关联中使用。它指定 +has_one :through+ 所指向模型源的类型。【译者注：Stackoverflow上的 "例子":http://stackoverflow.com/questions/9500922/need-help-to-understand-source-type-option-of-has-one-has-many-through-of-rails 】
 
 h6. +:through+
 
-+:through+ 指定完成查询所通过的join模型。 关于+has_one :through+ 关联，本文在<a href="#the-has-one-through-association">之前部分</a>有详细讨论。
++:through+ 指定完成查询所通过的join模型。 关于 +has_one :through+ 关联，本文在<a href="#the-has-one-through-association">之前部分</a>有详细讨论。
 
 h6. +:validate+
 
@@ -1387,7 +1385,7 @@ h6. +collection.empty?+
 
 如果集合中没有任何关联对象，则 +collection.empty?+ 方法返回 +true+ 。
 
-</ruby>erb
+<ruby>erb
 <% if @customer.orders.empty? %>
   No Orders Found
 <% end %>
@@ -1446,7 +1444,7 @@ h6. +collection.create!(attributes = {})+
 
 h5. +has_many+ 的选项
 
-While Rails uses intelligent defaults that will work well in most situations, there may be times when you want to customize the behavior of the +has_many+ association reference. Such customizations can easily be accomplished by passing options when you create the association. For example, this association uses two such options:
+尽管Rails机智的默认设定在大多数情况下都工作良好，但有些时候我们想定制 +has_many+ 关联引用的行为。通过在创建关联时传入选项，可以轻松完成定制。例如，以下关联使用了两个选项：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1470,15 +1468,15 @@ end
 
 h6. +:as+
 
-Setting the +:as+ option indicates that this is a polymorphic association, as discussed <a href="#polymorphic-associations">earlier in this guide</a>.
+设置 +:as+ 选项表明这是一个多态关联。多态关联在本文<a href="#polymorphic-associations">之前部分</a>已有讨论。
 
 h6. +:autosave+
 
-If you set the +:autosave+ option to +true+, Rails will save any loaded members and destroy members that are marked for destruction whenever you save the parent object.
+如果设置 +:autosave+ 选项为 +true+ ， 当保存父对象时Rails会自动保存任何载入的（关联对象）成员以及销毁带有销毁标记的（关联对象）成员。
 
 h6. +:class_name+
 
-If the name of the other model cannot be derived from the association name, you can use the +:class_name+ option to supply the model name. For example, if a customer has many orders, but the actual name of the model containing orders is +Transaction+, you'd set things up this way:
+如果无法从关联名中推导出另一模型的名字，我们可以使用 +:class_name+ 选项来提供模型名。例如，如果一个customer有许多orders，但包含orders的模型的实际名字是 +Transaction+ ，我们可以这样设定：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1488,19 +1486,19 @@ end
 
 h6. +:dependent+
 
-Controls what happens to the associated objects when their owner is destroyed:
+当被关联的对象的owner被销毁时，控制它们的行为：
 
-* +:destroy+ causes all the associated objects to also be destroyed
-* +:delete_all+ causes all the associated objects to be deleted directly from the database (so callbacks will not execute)
-* +:nullify+ causes the foreign keys to be set to +NULL+. Callbacks are not executed.
-* +:restrict_with_exception+ causes an exception to be raised if there are any associated records
-* +:restrict_with_error+ causes an error to be added to the owner if there are any associated objects
+* +:destroy+ 所有的关联对象也被销毁
+* +:delete_all+ 所有的关联对象将从数据库中直接被删除（所以回调函数不会被调用）
+* +:nullify+ 关联对象的外键设为 +NULL+ ，回调函数不被调用
+* +:restrict_with_exception+ 如果存在任何关联对象，将抛出一个异常 
+* +:restrict_with_error+ 如果任何关联对象存在，将给owner添加一个error 
 
-NOTE: This option is ignored when you use the +:through+ option on the association.
+NOTE: 当使用 +:through+ 选项时这个选项将被忽略。
 
 h6. +:foreign_key+
 
-By convention, Rails assumes that the column used to hold the foreign key on the other model is the name of this model with the suffix +_id+ added. The +:foreign_key+ option lets you set the name of the foreign key directly:
+按惯例，Rails假设另一模型外键的字段的名字是模型的名字加上 +_id+ 后缀。 +:foreign_key+ 选项使我们可以直接设置外键名：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1508,11 +1506,11 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-TIP: In any case, Rails will not create foreign key columns for you. You need to explicitly define them as part of your migrations.
+TIP: 在任何情形下，Rails不会自动生成外键。我们需要在migration中显式定义它们。
 
 h6. +:inverse_of+
 
-The +:inverse_of+ option specifies the name of the +belongs_to+ association that is the inverse of this association. Does not work in combination with the +:through+ or +:as+ options.
++:inverse_of+ 选项指定 +belongs_to+ 关联的名字，这个关联是当前关联的反面。不能和 +:through+ 或 +:as+ 选项同时使用。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1526,11 +1524,9 @@ end
 
 h6. +:primary_key+
 
-By convention, Rails assumes that the column used to hold the primary key of the association is +id+. You can override this and explicitly specify the primary key with the +:primary_key+ option.
+按惯例，Rails假定主键的字段名为 +id+ 。可以通过 +:primary_key+ 选项显式指定主键名来覆写之。
 
-Let's say that +users+ table has +id+ as the primary_key but it also has
-+guid+ column. And the requirement is that +todos+ table should hold
-+guid+ column value and not +id+ value. This can be achieved like this
+比如说 +users+ 数据表有 +id+ 作为主键但同时又有 +guid+ 字段。需求是 +todo+ 数据表应使用 +guid+ 字段的值而不是 +id+ 字段的值。这个需求可以这样来完成：
 
 <ruby>
 class User < ActiveRecord::Base
@@ -1538,29 +1534,29 @@ class User < ActiveRecord::Base
 end
 </ruby>
 
-Now if we execute `@user.todos.create+ then +@todo` record will have
-+user_id+ value as the +guid+ value of +@user+.
-
+现在如果我们调用 +@user.todos.create+ 方法那么 +@todo+ 记录的 +user_id+ 的值将和 +@user+ 的 +guid+ 的值一样。
 
 h6. +:source+
 
-The +:source+ option specifies the source association name for a +has_many :through+ association. You only need to use this option if the name of the source association cannot be automatically inferred from the association name.
++:source+ 选项指定 +has_one :through+ 所指向模型源的名字。【译者注：Stackoverflow上有个 "很好的例子":http://stackoverflow.com/questions/4632408/need-help-to-understand-source-option-of-has-one-has-many-through-of-rails 】
+
+这个选项只有在源关联（即 +:through+ 选项指定的关联）不能通过关联名字推导出来的情况下使用。
 
 h6. +:source_type+
 
-The +:source_type+ option specifies the source association type for a +has_many :through+ association that proceeds through a polymorphic association.
++:source_type+ 在多态关联中使用。它指定 +has_one :through+ 所指向模型源的类型。【译者注：Stackoverflow上的 "例子":http://stackoverflow.com/questions/9500922/need-help-to-understand-source-type-option-of-has-one-has-many-through-of-rails 】
 
 h6. +:through+
 
-The +:through+ option specifies a join model through which to perform the query. +has_many :through+ associations provide a way to implement many-to-many relationships, as discussed <a href="#the-has-many-through-association">earlier in this guide</a>.
++:through+ 选项指定一个中间模型（join model），通过这个中间模型来完成查询。 +has_many :through+ 关联提供了一种实现多对多关系的途径，在本文<a href="#the-has-many-through-association">之前部分</a>有讨论。
 
 h6. +:validate+
 
-If you set the +:validate+ option to +false+, then associated objects will not be validated whenever you save this object. By default, this is +true+: associated objects will be validated when this object is saved.
+如果设置 +:validate+ 选项为 +false+ ，那么当保存当前对象时，关联对象不会被校验。默认值为 +true+： 关联对象在保存当前对象时会被校验。
 
-h5. Scopes for +has_many+
+h5. +has_many+ 的关联范围
 
-There may be times when you wish to customize the query used by +has_many+. Such customizations can be achieved via a scope block. For example:
+有些时候我们需要定制 +has_many+ 使用的查询。可以通过scope block来完成定制。例如：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1568,7 +1564,7 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-You can use any of the standard [querying methods](active_record_querying.html) inside the scope block. The following ones are discussed below:
+我们可以在scope block里使用任意的标准 "查询方法":active_record_querying.html 。以下将讨论这几点：
 
 * +where+
 * +extending+
@@ -1583,7 +1579,7 @@ You can use any of the standard [querying methods](active_record_querying.html) 
 
 h6. +where+
 
-The +where+ method lets you specify the conditions that the associated object must meet.
++where+ 指定了关联对象必须满足的条件。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1592,7 +1588,7 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-You can also set conditions via a hash:
+我们也可以通过哈希表来设定条件：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1601,15 +1597,15 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-If you use a hash-style +where+ option, then record creation via this association will be automatically scoped using the hash. In this case, using `@customer.confirmed_orders.create+ or +@customer.confirmed_orders.build` will create orders where the confirmed column has the value +true+.
+如果使用哈希风格的 +where+ 选项，那么通过关联新建的记录将会自动用这个哈希表来限定。在这个例子中，使用 +@customer.confirmed_orders.create+ 或 +@customer.confirmed_orders.build+ 新建的orders的confirmed字段的值都为 +true+ 。
 
 h6. +extending+
 
-The +extending+ method specifies a named module to extend the association proxy. Association extensions are discussed in detail <a href="#association-extensions">later in this guide</a>.
++extending+ 方法指定一个命名模块来拓展association proxy。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
 
 h6. +group+
 
-The +group+ method supplies an attribute name to group the result set by, using a +GROUP BY+ clause in the finder SQL.
++group+ 方法提供一个字段名来将得到的结果分组，在查询的SQL中使用 +GROUP BY+ 语句。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1620,7 +1616,7 @@ end
 
 h6. +includes+
 
-You can use the +includes+ method to specify second-order associations that should be eager-loaded when this association is used. For example, consider these models:
+我们可以使用 +includes+ 方法来指定这个关联被调用时需要被eager-loaded的第二层关联。例如考虑以下模型：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1637,7 +1633,7 @@ class LineItem < ActiveRecord::Base
 end
 </ruby>
 
-If you frequently retrieve line items directly from customers (+@customer.orders.line_items+), then you can make your code somewhat more efficient by including line items in the association from customers to orders:
+如果经常从customers中直接获得line items（+@customer.orders.line_items+），那么可以通过在customers和orders的模型关联中包含line items来使得代码变得更有效率：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1656,7 +1652,7 @@ end
 
 h6. +limit+
 
-The +limit+ method lets you restrict the total number of objects that will be fetched through an association.
++limit+ 方法限定通过关联获取的关联对象的数量。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1668,11 +1664,11 @@ end
 
 h6. +offset+
 
-The +offset+ method lets you specify the starting offset for fetching objects via an association. For example, `-> { offset(11) }` will skip the first 11 records.
++offset+ 方法指定通过关联获取对象的起始偏移位置。例如， +-> { offset(11) }+ 会跳过前11个记录。
 
 h6. +order+
 
-The +order+ method dictates the order in which associated objects will be received (in the syntax used by an SQL +ORDER BY+ clause).
++order+ 方法规定了获取关联对象的顺序（在语法方面使用一个SQL的 +ORDER BY+ 语句）。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -1682,18 +1678,17 @@ end
 
 h6. +readonly+
 
-If you use the +readonly+ method, then the associated objects will be read-only when retrieved via the association.
+如果使用 +readonly+ 方法，那么通过关联获取的对象都是只读的。
 
 h6. +select+
 
-The +select+ method lets you override the SQL +SELECT+ clause that is used to retrieve data about the associated objects. By default, Rails retrieves all columns.
++select+ 方法覆写 用于获取关联对象的SQL +SELECT+ 语句。默认情形下Rails获取所有的字段。
 
-WARNING: If you specify your own +select+, be sure to include the primary key and foreign key columns of the associated model. If you do not, Rails will throw an error.
+WARNING: 如果指定了自己的 +select+ ，确认其包含了主键和关联模型的外键，否则Rails会抛出一个错误。
 
 h6. +distinct+
 
-Use the +distinct+ method to keep the collection free of duplicates. This is
-mostly useful together with the +:through+ option.
+使用 +distinct+ 方法来使（关联对象的）集合避免重复。和 +:through+ 选项同时使用时，这个选项通常很有用。
 
 <ruby>
 class Person < ActiveRecord::Base
@@ -1709,10 +1704,9 @@ person.posts.inspect # => [#<Post id: 5, name: "a1">, #<Post id: 5, name: "a1">]
 Reading.all.inspect  # => [#<Reading id: 12, person_id: 5, post_id: 5>, #<Reading id: 13, person_id: 5, post_id: 5>]
 </ruby>
 
-In the above case there are two readings and +person.posts+ brings out both of
-them even though these records are pointing to the same post.
+在以上例子中有两个readings， +person.posts+ 取出它们（两个post对象），尽管这两个记录都指向（数据库里的）同一个post记录。
 
-Now let's set +distinct+:
+现在让我们来设置 +distinct+：
 
 <ruby>
 class Person
@@ -1728,66 +1722,56 @@ person.posts.inspect # => [#<Post id: 7, name: "a1">]
 Reading.all.inspect  # => [#<Reading id: 16, person_id: 7, post_id: 7>, #<Reading id: 17, person_id: 7, post_id: 7>]
 </ruby>
 
-In the above case there are still two readings. However +person.posts+ shows
-only one post because the collection loads only unique records.
+在上述例子中仍然有两个readings。但 +person.posts+ 只有一个post，因为这个集合只加载唯一的记录。
 
-If you want to make sure that, upon insertion, all of the records in the
-persisted association are distinct (so that you can be sure that when you
-inspect the association that you will never find duplicate records), you should
-add a unique index on the table itself. For example, if you have a table named
-+person_posts+ and you want to make sure all the posts are unique, you could
-add the following in a migration:
+如果想确定在插入时，所有已存在的关联所包含的记录是各自不同的（这样可以确定在查看关联时我们不会找到重复的记录），应该在数据表里添加一个唯一的索引。例如，如果有一个名为 +person_posts+ 的数据表，我们希望确定所有的posts是唯一的，我们可以在migration中添加以下内容：
 
 <ruby>
 add_index :person_posts, :post, unique: true
 </ruby>
 
-Note that checking for uniqueness using something like `include?` is subject
-to race conditions. Do not attempt to use `include?` to enforce distinctness
-in an association. For instance, using the post example from above, the
-following code would be racy because multiple users could be attempting this
-at the same time:
+需要注意的是，用类似 +include?+ 的方法来检查唯一性会受制于 "竞争条件":http://en.wikipedia.org/wiki/Race_condition 。不要尝试使用 +include?+ 来在一个关联中实行唯一性。例如用上述的post例子，以下代码很可能造成竞争，因为多个用户可能在同一时间尝试以下操作：
 
 <ruby>
 person.posts << post unless person.posts.include?(post)
 </ruby>
 
-h5. When are Objects Saved?
+h5. 什么时候保存对象？
 
-When you assign an object to a +has_many+ association, that object is automatically saved (in order to update its foreign key). If you assign multiple objects in one statement, then they are all saved.
+当向一个 +has_many+ 关联赋值一个对象时，这个对象会自动保存（以便更新其外键）。如果在一个语句里赋值多个对象，这些对象全部都会保存。
 
-If any of these saves fails due to validation errors, then the assignment statement returns +false+ and the assignment itself is cancelled.
+如果其中某个对象因校验错误而保存失败，那么赋值语句将返回 +false+ ，赋值被取消。
 
-If the parent object (the one declaring the +has_many+ association) is unsaved (that is, `new_record?` returns +true+) then the child objects are not saved when they are added. All unsaved members of the association will automatically be saved when the parent is saved.
+如果父对象（声明 +has_many+ 关联的对象）未保存（即是其 +new_record?+ 方法返回 +true+ ），那么其子对象在添加（到对象集合）时不会保存。当父对象保存时，所有关联中未保存的成员会自动保存。
 
-If you want to assign an object to a +has_many+ association without saving the object, use the +collection.build+ method.
+如果想向一个 +has_many+ 关联赋值一个对象，但不希望保存这个对象，使用 +collection.build+ 方法。
 
 h4. +has_and_belongs_to_many+ 关联参考
 
-The +has_and_belongs_to_many+ association creates a many-to-many relationship with another model. In database terms, this associates two classes via an intermediate join table that includes foreign keys referring to each of the classes.
++has_and_belongs_to_many+ 新建一个和另一模型的多对多关系。从数据库角度看，它通过一个中间的联接表（join table）关联两个类。这个联接表分别包含指向两个类的外键。
 
-h5. Methods Added by +has_and_belongs_to_many+
+h5. +has_and_belongs_to_many+ 添加的方法
 
-When you declare a +has_and_belongs_to_many+ association, the declaring class automatically gains 13 methods related to the association:
+当声明一个 +has_and_belongs_to_many+ 关联时，声明的类自动获得16个和这个关联相关的方法：
 
-* `collection(force_reload = false)`
-* `collection<<(object, ...)`
-* `collection.delete(object, ...)`
-* `collection.destroy(object, ...)`
-* `collection=objects`
+* +collection(force_reload = false)+
+* +collection<<(object, ...)+
+* +collection.delete(object, ...)+
+* +collection.destroy(object, ...)+
+* +collection=objects+
 * +collection_singular_ids+
-* `collection_singular_ids=ids`
+* +collection_singular_ids=ids+
 * +collection.clear+
-* `collection.empty?`
+* +collection.empty?+
 * +collection.size+
-* `collection.find(...)`
-* `collection.where(...)`
-* `collection.exists?(...)`
-* `collection.build(attributes = {})`
-* `collection.create(attributes = {})`
-* `collection.create!(attributes = {})`
+* +collection.find(...)+
+* +collection.where(...)+
+* +collection.exists?(...)+
+* +collection.build(attributes = {})+
+* +collection.create(attributes = {})+
+* +collection.create!(attributes = {})+
 
-In all of these methods, +collection+ is replaced with the symbol passed as the first argument to +has_and_belongs_to_many+, and +collection_singular+ is replaced with the singularized version of that symbol. For example, given the declaration:
+在这些方法中， +collection+ 用第一个传入 +has_and_belongs_to_many+ 的symbol参数名取代， +collection_singular+ 用这个symbol的单数形式取代。例如在以下声明中：
 
 <ruby>
 class Part < ActiveRecord::Base
@@ -1795,7 +1779,7 @@ class Part < ActiveRecord::Base
 end
 </ruby>
 
-Each instance of the part model will have these methods:
+每个part模型的实例会有以下方法：
 
 <ruby>
 assemblies(force_reload = false)
@@ -1816,72 +1800,71 @@ assemblies.create(attributes = {})
 assemblies.create!(attributes = {})
 </ruby>
 
-h6. Additional Column Methods
+h6. Additional Column Methods 额外的字段方法
 
-If the join table for a +has_and_belongs_to_many+ association has additional columns beyond the two foreign keys, these columns will be added as attributes to records retrieved via that association. Records returned with additional attributes will always be read-only, because Rails cannot save changes to those attributes.
+如果一个 +has_and_belongs_to_many+ 的联接表（join table）除了两个外键外有额外的字段，这些字段会被当做属性，添加到从关联中获得的记录中。这些带有额外属性的记录总是只读的，因为Rails不能保存对这些（额外）属性的修改。
 
-WARNING: The use of extra attributes on the join table in a +has_and_belongs_to_many+ association is deprecated. If you require this sort of complex behavior on the table that joins two models in a many-to-many relationship, you should use a +has_many :through+ association instead of +has_and_belongs_to_many+.
+WARNING: 在 +has_and_belongs_to_many+ 的联接表中使用额外属性的做法已经被弃用了。如果需要对在多对多关系中联接两个模型的数据表做这样的复杂操作，应该使用 +has_many :through+ 来代替 has_and_belongs_to_many+ 。
 
+h6. +collection(force_reload = false)+
 
-h6. `collection(force_reload = false)`
-
-The +collection+ method returns an array of all of the associated objects. If there are no associated objects, it returns an empty array.
++collection+ 方法返回包含所有关联对象的一个数组。如果没有关联对象，它返回一个空数组。
 
 <ruby>
 @assemblies = @part.assemblies
 </ruby>
 
-h6. `collection<<(object, ...)`
+h6. +collection<<(object, ...)+
 
-The `collection<<` method adds one or more objects to the collection by creating records in the join table.
++collection<<+ 方法向（关联对象的）集合中添加一个或多个对象。它在联接表中新建记录。
 
 <ruby>
-@part.assemblies << @assembly1
+@part.assemblies << @assembly
 </ruby>
 
-NOTE: This method is aliased as `collection.concat+ and +collection.push`.
+NOTE: 这个方法的别名是 +collection.concat+ 和 +collection.push+ 。
 
-h6. `collection.delete(object, ...)`
+h6. +collection.delete(object, ...)+
 
-The +collection.delete+ method removes one or more objects from the collection by deleting records in the join table. This does not destroy the objects.
++collection.delete+ 方法从（关联对象的）集合中去掉一个或多个对象。它在联接表中删除记录。这不会删除（关联）对象。
 
 <ruby>
 @part.assemblies.delete(@assembly1)
 </ruby>
 
-WARNING: This does not trigger callbacks on the join records.
+WARNING: 这个方法不会触发联接模型的回调函数。
 
-h6. `collection.destroy(object, ...)`
+h6. +collection.destroy(object, ...)+
 
-The +collection.destroy+ method removes one or more objects from the collection by running +destroy+ on each record in the join table, including running callbacks. This does not destroy the objects.
++collection.destroy+ 方法调用每个联接表中的记录的 +destory+ 方法，从（关联对象的）集合中去掉一个或多个对象，包括调用回调函数。这个方法不会销毁（关联）对象。
 
 <ruby>
 @part.assemblies.destroy(@assembly1)
 </ruby>
 
-h6. `collection=objects`
+h6. +collection=objects+
 
-The `collection=` method makes the collection contain only the supplied objects, by adding and deleting as appropriate.
++collection=+ 方法通过适当的添加和删除，使（关联对象的）集合只包含赋值提供的对象。
 
 h6. +collection_singular_ids+
 
-The +collection_singular_ids+ method returns an array of the ids of the objects in the collection.
++collection_singular_id+ 方法返回集合中关联对象的id的一个数组。
 
 <ruby>
 @assembly_ids = @part.assembly_ids
 </ruby>
 
-h6. `collection_singular_ids=ids`
+h6. +collection_singular_ids=ids+
 
-The `collection_singular_ids=` method makes the collection contain only the objects identified by the supplied primary key values, by adding and deleting as appropriate.
++collection_singular_ids=+ 方法接收一个数组，通过适当的添加和删除，使（关联对象的）集合里的对象由数组里的主键值确定。
 
 h6. +collection.clear+
 
-The +collection.clear+ method removes every object from the collection by deleting the rows from the joining table. This does not destroy the associated objects.
++collection.clear+ 方法通过删除联接表中的行，清除所有集合中的对象。这个方法不会销毁关联的对象。
 
-h6. `collection.empty?`
+h6. +collection.empty?+
 
-The `collection.empty?` method returns +true+ if the collection does not contain any associated objects.
+如果集合中没有任何关联对象， +collection.empty?+ 方法返回 +true+ 。
 
 <ruby>
 <% if @part.assemblies.empty? %>
@@ -1891,55 +1874,55 @@ The `collection.empty?` method returns +true+ if the collection does not contain
 
 h6. +collection.size+
 
-The +collection.size+ method returns the number of objects in the collection.
++collection.size+ 方法返回集合中的对象个数。
 
 <ruby>
 @assembly_count = @part.assemblies.size
 </ruby>
 
-h6. `collection.find(...)`
+h6. +collection.find(...)+
 
-The +collection.find+ method finds objects within the collection. It uses the same syntax and options as `ActiveRecord::Base.find`. It also adds the additional condition that the object must be in the collection.
++collection.find+ 方法从集合中寻找对象。它和 +ActiveRecord::Base.find+ 的语法和选项一样。它还添加了“对象必须在集合内” 这一附加条件。
 
 <ruby>
 @assembly = @part.assemblies.find(1)
 </ruby>
 
-h6. `collection.where(...)`
+h6. +collection.where(...)+
 
-The +collection.where+ method finds objects within the collection based on the conditions supplied but the objects are loaded lazily meaning that the database is queried only when the object(s) are accessed. It also adds the additional condition that the object must be in the collection.
++collection.where+ 方法在集合内基于提供的条件寻找对象。但这些对象会被延迟加载（loaded lazily），意思是只有到这些对象被访问的时候才会查询数据库。它还添加了“对象必须在集合内” 这一附加条件。
 
 <ruby>
 @new_assemblies = @part.assemblies.where("created_at > ?", 2.days.ago)
 </ruby>
 
-h6. `collection.exists?(...)`
+h6. +collection.exists?(...)+
 
-The `collection.exists?` method checks whether an object meeting the supplied conditions exists in the collection. It uses the same syntax and options as `ActiveRecord::Base.exists?`.
++collection.exists?+ 方法检查集合中是否存在一个对象满足给出的条件。它和 +ActiveRecord::Base.exists?+ 的语法和选项一样。
 
-h6. `collection.build(attributes = {})`
+h6. +collection.build(attributes = {})+
 
-The +collection.build+ method returns a new object of the associated type. This object will be instantiated from the passed attributes, and the link through the join table will be created, but the associated object will _not_ yet be saved.
++collection.build+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过联接表的链接也会被创建，但这些关联对象还 _没有_ 被保存。
 
 <ruby>
 @assembly = @part.assemblies.build({assembly_name: "Transmission housing"})
 </ruby>
 
-h6. `collection.create(attributes = {})`
+h6. +collection.create(attributes = {})+
 
-The +collection.create+ method returns a new object of the associated type. This object will be instantiated from the passed attributes, the link through the join table will be created, and, once it passes all of the validations specified on the associated model, the associated object _will_ be saved.
++collection.create+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过联接表的链接也会被创建。一旦这个对象通过关联模型指定的所有校验，这个关联对象将 _会_ 保存。
 
 <ruby>
 @assembly = @part.assemblies.create({assembly_name: "Transmission housing"})
 </ruby>
 
-h6. `collection.create!(attributes = {})`
+h6. +collection.create!(attributes = {})+
 
-Does the same as +collection.create+, but raises +ActiveRecord::RecordInvalid+ if the record is invalid.
+和 +collection.create+ 一样，但在记录无效时抛出 +ActiveRecord::RecordInvalid+ 的异常。
 
-h5. Options for +has_and_belongs_to_many+
+h5. +has_and_belongs_to_many+ 的选项
 
-While Rails uses intelligent defaults that will work well in most situations, there may be times when you want to customize the behavior of the +has_and_belongs_to_many+ association reference. Such customizations can easily be accomplished by passing options when you create the association. For example, this association uses two such options:
+尽管Rails机智的默认设定在大多数情况下都工作良好，但有些时候我们想定制 +has_and_belongs_to_many+ 关联引用的行为。通过在创建关联时传入选项，可以轻松完成定制。例如，以下关联使用了两个选项：
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -1948,7 +1931,7 @@ class Parts < ActiveRecord::Base
 end
 </ruby>
 
-The +has_and_belongs_to_many+ association supports these options:
++has_and_belongs_to_many+ 支持以下选项：
 
 * +:association_foreign_key+
 * +:autosave+
@@ -1959,9 +1942,9 @@ The +has_and_belongs_to_many+ association supports these options:
 
 h6. +:association_foreign_key+
 
-By convention, Rails assumes that the column in the join table used to hold the foreign key pointing to the other model is the name of that model with the suffix +_id+ added. The +:association_foreign_key+ option lets you set the name of the foreign key directly:
+按惯例，Rails假定联接表中用于保存指向另一模型的外键的字段名是另一模型的名字加上 +_id+ 后缀。 +:association_foreign_key+ 使我们可以直接设定这个外键名：
 
-TIP: The +:foreign_key+ and +:association_foreign_key+ options are useful when setting up a many-to-many self-join. For example:
+TIP: 在设定多对多的自连接（self-join）时，会用到 +:foreign_key+ 和 +:association_foreign_key+ 。例如：
 
 <ruby>
 class User < ActiveRecord::Base
@@ -1974,11 +1957,11 @@ end
 
 h6. +:autosave+
 
-If you set the +:autosave+ option to +true+, Rails will save any loaded members and destroy members that are marked for destruction whenever you save the parent object.
+如果设置 +:autosave+ 选项为 +true+ ，Rails会在保存父对象时，保存所有载入的成员并销毁所有标记为销毁的成员。
 
 h6. +:class_name+
 
-If the name of the other model cannot be derived from the association name, you can use the +:class_name+ option to supply the model name. For example, if a part has many assemblies, but the actual name of the model containing assemblies is +Gadget+, you'd set things up this way:
+如果另一模型的名字无法通过关联名推导出来，我们可以用 +:class_name+ 选项提供模型名。例如，如果一个part有很多assemblies，但实际上assemblies的模型名是 +Garget+ ，我们可以这样设定：
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -1988,7 +1971,7 @@ end
 
 h6. +:foreign_key+
 
-By convention, Rails assumes that the column in the join table used to hold the foreign key pointing to this model is the name of this model with the suffix +_id+ added. The +:foreign_key+ option lets you set the name of the foreign key directly:
+按惯例，Rails假定联接表上用于保存指向当前模型的外键的字段名是当前模型的名字加上 +_id+ 后缀。 +:foreign_key+ 使我们可以直接设定这个外键名：
 
 <ruby>
 class User < ActiveRecord::Base
@@ -2001,15 +1984,15 @@ end
 
 h6. +:join_table+
 
-If the default name of the join table, based on lexical ordering, is not what you want, you can use the +:join_table+ option to override the default.
+如果联接表的基于字典序的默认名不是我们想要的，我们可以用 +:join_table+ 选项来覆写默认值。
 
 h6. +:validate+
 
-If you set the +:validate+ option to +false+, then associated objects will not be validated whenever you save this object. By default, this is +true+: associated objects will be validated when this object is saved.
+如果设置 +:validate+ 选项值为 +false+ ，那么当保存当前对象时，关联的对象将不会被校验。默认值为 +true+: 关联对象在保存当前对象时会被校验。
 
-h5. Scopes for +has_and_belongs_to_many+
+h5. +has_and_belongs_to_many+ 的关联范围
 
-There may be times when you wish to customize the query used by +has_and_belongs_to_many+. Such customizations can be achieved via a scope block. For example:
+有些时候我们需要定制 +has_and_belongs_to_many+ 使用的查询。可以通过scope block来完成定制。例如：
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2017,7 +2000,7 @@ class Parts < ActiveRecord::Base
 end
 </ruby>
 
-You can use any of the standard [querying methods](active_record_querying.html) inside the scope block. The following ones are discussed below:
+我们可以在scope block里使用任意的标准 "查询方法":active_record_querying.html 。以下将讨论这几点：
 
 * +where+
 * +extending+
@@ -2032,7 +2015,7 @@ You can use any of the standard [querying methods](active_record_querying.html) 
 
 h6. +where+
 
-The +where+ method lets you specify the conditions that the associated object must meet.
++where+ 方法指定关联对象必须满足的条件。
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2041,7 +2024,7 @@ class Parts < ActiveRecord::Base
 end
 </ruby>
 
-You can also set conditions via a hash:
+也可以通过哈希表来设置条件：
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2050,15 +2033,15 @@ class Parts < ActiveRecord::Base
 end
 </ruby>
 
-If you use a hash-style +where+, then record creation via this association will be automatically scoped using the hash. In this case, using `@parts.assemblies.create+ or +@parts.assemblies.build` will create orders where the +factory+ column has the value "Seattle".
+如果使用了哈希风格的 +where+ ，那么通过关联新建的记录将会自动用这个哈希表来限定。在这个例子中，使用 +@parts.assemblies.create+ 或 +@parts.assemblies.build+ 新建的orders的factory字段的值都为 "Seattle" 。
 
 h6. +extending+
 
-The +extending+ method specifies a named module to extend the association proxy. Association extensions are discussed in detail <a href="#association-extensions">later in this guide</a>.
++extending+ 方法指定一个命名模块来拓展association proxy。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
 
 h6. +group+
 
-The +group+ method supplies an attribute name to group the result set by, using a +GROUP BY+ clause in the finder SQL.
++group+ 方法提供一个字段名来将得到的结果分组，在查询的SQL中使用 +GROUP BY+ 语句。
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2068,11 +2051,11 @@ end
 
 h6. +includes+
 
-You can use the +includes+ method to specify second-order associations that should be eager-loaded when this association is used.
+我们可以使用 +includes+ 方法来指定这个关联被调用时需要被eager-loaded的第二层关联。
 
 h6. +limit+
 
-The +limit+ method lets you restrict the total number of objects that will be fetched through an association.
++limit+ 方法限定通过关联获取的关联对象的数量。
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2083,11 +2066,11 @@ end
 
 h6. +offset+
 
-The +offset+ method lets you specify the starting offset for fetching objects via an association. For example, if you set `offset(11)`, it will skip the first 11 records.
++offset+ 方法指定通过关联获取对象的起始偏移位置。例如， +-> { offset(11) }+ 会跳过前11个记录。
 
 h6. +order+
 
-The +order+ method dictates the order in which associated objects will be received (in the syntax used by an SQL +ORDER BY+ clause).
++order+ 方法规定了获取关联对象的顺序（在语法方面使用一个SQL的 +ORDER BY+ 语句）。
 
 <ruby>
 class Parts < ActiveRecord::Base
@@ -2098,38 +2081,38 @@ end
 
 h6. +readonly+
 
-If you use the +readonly+ method, then the associated objects will be read-only when retrieved via the association.
+如果使用 +readonly+ 方法，那么通过关联获取的对象都是只读的。
 
 h6. +select+
 
-The +select+ method lets you override the SQL +SELECT+ clause that is used to retrieve data about the associated objects. By default, Rails retrieves all columns.
++select+ 方法覆写用于获取关联对象的SQL +SELECT+ 语句。默认情形下Rails获取所有的字段。
 
 h6. +uniq+
 
-Use the +uniq+ method to remove duplicates from the collection.
++uniq+ 方法去掉集合中重复的对象。
 
-h5. When are Objects Saved?
+h5. 什么时候保存对象？
 
-When you assign an object to a +has_and_belongs_to_many+ association, that object is automatically saved (in order to update the join table). If you assign multiple objects in one statement, then they are all saved.
+当向一个 +has_and_belongs_to_many+ 赋值一个对象时，这个对象会自动保存（以便更新联接表）。如果在一个语句中赋值多个对象，这些对象都会保存。
 
-If any of these saves fails due to validation errors, then the assignment statement returns +false+ and the assignment itself is cancelled.
+如果这些对象其中一个因校验错误保存失败，那么赋值语句返回 +false+ ，赋值取消。
 
-If the parent object (the one declaring the +has_and_belongs_to_many+ association) is unsaved (that is, `new_record?` returns +true+) then the child objects are not saved when they are added. All unsaved members of the association will automatically be saved when the parent is saved.
+如果父对象（指声明 +has_and_belongs_to_many+ 的关联）未保存（即是其 +new_record?+ 方法返回 +true+ ），那么当子对象被添加时它们不会保存。当父对象保存时，关联中所有的未保存成员会自动保存。
 
-If you want to assign an object to a +has_and_belongs_to_many+ association without saving the object, use the +collection.build+ method.
+如果向 +has_and_belongs_to_many+ 赋值一个对象，但不希望这个对象保存，使用 +collection.build+ 方法。
 
 h4. Association Callbacks 关联回调函数
 
-Normal callbacks hook into the life cycle of Active Record objects, allowing you to work with those objects at various points. For example, you can use a +:before_save+ callback to cause something to happen just before an object is saved.
+一般回调函数挂接到（hook into） ActiveRecord对象的生存期（life cycle）中，使我们可以在不同的点上对这些对象进行操作。例如，我们可以使用一个 +:before_save+ 回调函数来让某些事情在对象保存前发生。
 
-Association callbacks are similar to normal callbacks, but they are triggered by events in the life cycle of a collection. There are four available association callbacks:
+关联回调函数和一般回调函数类似，但它们是由（关联对象）集合的生存期（life cycle）中的事件触发。以下是4种可用的关联回调函数：
 
 * +before_add+
 * +after_add+
 * +before_remove+
 * +after_remove+
 
-You define association callbacks by adding options to the association declaration. For example:
+通过在关联声明中添加选项来定义关联回调函数，例如：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -2141,9 +2124,9 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-Rails passes the object being added or removed to the callback.
+Rails将添加或删除的对象作为参数传给回调函数。
 
-You can stack callbacks on a single event by passing them as an array:
+将多个回调函数作为一个数组传入声明中，可以将它们堆叠在一个事件上：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -2160,11 +2143,11 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-If a +before_add+ callback throws an exception, the object does not get added to the collection. Similarly, if a +before_remove+ callback throws an exception, the object does not get removed from the collection.
+如果 +before_add+ 回调函数抛出一个异常，这个对象将不会被添加到集合中。类似的，如果 +before_remove+ 回调函数抛出一个异常，这个对象也不会从集合中删除。
 
-h4. Association Extensions 关联的补充
+h4. Association Extensions 关联的拓展
 
-You're not limited to the functionality that Rails automatically builds into association proxy objects. You can also extend these objects through anonymous modules, adding new finders, creators, or other methods. For example:
+我们所拥有的功能不仅仅局限在Rails自动内建到关联代理对象（association proxy object）的方法。我们还可以通过匿名模块拓展这些对象，添加新的finders，creators，或其他方法。例如：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -2176,7 +2159,7 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-If you have an extension that should be shared by many associations, you can use a named extension module. For example:
+如果有一个可供许多关联共享的拓展，可以用命名拓展模块。例如：
 
 <ruby>
 module FindRecentExtension
@@ -2194,8 +2177,8 @@ class Supplier < ActiveRecord::Base
 end
 </ruby>
 
-Extensions can refer to the internals of the association proxy using these three attributes of the +proxy_association+ accessor:
+拓展可以利用以下三个 +proxy_association+ accessor的属性来引用关联代理（association proxy）的内部：
 
-* +proxy_association.owner+ returns the object that the association is a part of.
-* +proxy_association.reflection+ returns the reflection object that describes the association.
-* +proxy_association.target+ returns the associated object for +belongs_to+ or +has_one+, or the collection of associated objects for +has_many+ or +has_and_belongs_to_many+.
+* +proxy_association.owner+ 返回关联的持有对象；这个模型关联是对象的一部分。
+* +proxy_association.reflection+ 返回描述这个关联的reflection object。 【译者注：ActiveRecord中的association对应的类是 "ActiveRecord::Reflection::AssociationReflection":https://github.com/rails/rails/blob/828134b7561bf4473580d76bd8d7ae97e9b1db92/activerecord/lib/active_record/reflection.rb#L176 】
+* +proxy_association.target+ 对于 +belongs_to+ 和 +has_one+ 返回关联的对象；对于 +has_many+ 和 +has_and_belongs_to_many+ 返回关联的对象集合。
