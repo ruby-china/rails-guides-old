@@ -12,7 +12,7 @@ endprologue.
 
 h3. 为什么使用模型关联?
 
-通过使用模型关联，可以简化一些数据查询的操作。比如一个rails程序中包含一个顾客模型 +customer+ 和一个订单模型 +order+ ，每个顾客可能有多个订单。
+通过使用模型关联，可以简化一些数据查询的操作。比如一个Rails程序中包含一个顾客模型和一个订单模型，每个顾客可能有多个订单。
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -38,7 +38,7 @@ end
 @customer.destroy
 </ruby>
 
-使用模型关联，我们可以让刚才的操作变得自动化。下面我们为 +Customer+ 和 +Order+ 添加关联模型，有个小技巧是在拥有外键的模型添加 +belongs_to+ ：
+使用模型关联，我们可以让刚才的操作变得自动化。我们告诉Rails +Customer+ 和 +Order+ 之间有一个联系。以下是修改之后的代码：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -56,7 +56,7 @@ end
 @order = @customer.orders.create(order_date: Time.now)
 </ruby>
 
-+:dependent => :destroy+ 这行代码会在删除顾客时，同时删除相关联的订单:
+通过 +:dependent => :destroy+ ，以下这行代码会在删除顾客时，同时删除相关联的所有订单:
 
 <ruby>
 @customer.destroy
@@ -66,7 +66,7 @@ end
 
 h3. 模型关联的类型
 
-在Rails中, +association+ 将两个模型关联起来。模型关联采用类宏的调用实现，你可以在模型中声明之。如果要声明一个模型属于（belongs_to）另一个，需要在这个模型中维护一个外键，Rails支持以下6种关联关系:
+在Rails中, _association_ 将两个模型关联起来。模型关联采用类宏的调用实现，你可以在模型中声明之。如果要声明一个模型属于（belongs_to）另一个，需要在这个模型中维护一个外键，Rails支持以下6种关联关系:
 
 * +belongs_to+
 * +has_one+  一对一关联
@@ -145,7 +145,7 @@ end
 
 h4. +has_many+
 
-+has_many+ 关联表示和另一个模型的一对多关系。我们经常会在+belongs_to+的“另一端”发现这个关联。这个关联表示每个模型的实例有零或多个另一个模型的实例。例如在应用中的顾客和订单，顾客模型声明如下：
++has_many+ 关联表示和另一个模型的一对多关系。我们经常会在 +belongs_to+ 的“另一端”发现这个关联。这个关联表示每个模型的实例有零或多个另一个模型的实例。例如在应用中的顾客和订单，顾客模型声明如下：
 
 <ruby>
 class Customer < ActiveRecord::Base
@@ -153,7 +153,7 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-NOTE: 在+has_many+中另一个模型的的名字被复数化了。
+NOTE: 在 +has_many+ 中另一个模型的名字被复数化了。
 
 !images/has_many.png(has_many Association Diagram)!
 
@@ -228,13 +228,12 @@ end
 <ruby>
 physician.patients = patients
 </ruby>
-将为新的关联对象建立连接模型，如果某些对象消失了，其在数据库中对应的行会被删除。
 
-new join models are created for newly associated objects, and if some are gone their rows are deleted.
+将为新的关联对象建立联接模型（join model），如果某些对象消失了，其在数据库中对应的行会被删除。
 
-WARNING: 连接模型的自动删除是直接的，不触发destroy的回调函数。
+WARNING: 联接模型的自动删除是直接的，不触发destroy的回调函数。
 
-+has_many :through+ 还可以用于在嵌套的+has_many+关联中建立“快捷方法”。例如，如果一篇文档有很多章节，每个章节有很多段落，有时我们希望得到某篇文档的所有段落，可以这样设置：
++has_many :through+ 还可以用于在嵌套的 +has_many+ 关联中建立“快捷方法”。例如，如果一篇文档有很多章节，每个章节有很多段落，有时我们希望得到某篇文档的所有段落，可以这样设置：
 
 <ruby>
 class Document < ActiveRecord::Base
@@ -252,7 +251,7 @@ class Paragraph < ActiveRecord::Base
 end
 </ruby>
 
-通过指定+through: :sections+, Rails现在会理解以下代码：
+通过指定 +through: :sections+ ，Rails现在会理解以下代码：
 
 <ruby>
 @document.paragraphs
@@ -416,7 +415,7 @@ end
 
 最简单的原则是：当你需要对关系本身的模型作为独立的实体进行处理时，建立一个 +has_many :through+ 关系。如果你不需要对关系本身的模型做任何事情，建立一个 +has_and_belongs_to_many+ 更简单（但仍需要记得建立在数据库中建立联接表（join table））。
 
-当需要在join模型中进行数据校验，回调函数或添加额外属性时，应该使用 +has_many :through+
+当需要在联接模型（join model）中进行数据校验，回调函数或添加额外属性时，应该使用 +has_many :through+
 
 h4. Polymorphic Associations 多态关联
 
@@ -436,7 +435,7 @@ class Product < ActiveRecord::Base
 end
 </ruby>
 
-我们可以将一个多态的 +belongs_to+ 声明看做是建立了一个其他模型可以使用的接口（interface）。例如在 +Employee+ 模型中可以得到图片（pictures）的集合： +@employee.pictures`+ 。
+我们可以将一个多态的 +belongs_to+ 声明看做是建立了一个其他模型可以使用的接口（interface）。例如在 +Employee+ 模型中可以得到图片（pictures）的集合： +@employee.pictures+ 。
 
 类似地，我们可以得到 +@product.pictures+ 。
 
@@ -484,10 +483,10 @@ class Employee < ActiveRecord::Base
 end
 </ruby>
 
-通过这样的设定，我们可以得到+@employee.subordinates+和+@employee.manager+。
+通过这样的设定，我们可以得到 +@employee.subordinates+ 和 +@employee.manager+ 。
 
 
-h3. Tips, Tricks, and Warnings
+h3. 技巧、窍门和注意事项
 
 想在Rails应用中充分利用ActiveRecord的模型关联，你需要知道以下内容：
 
@@ -521,7 +520,7 @@ h4. 避免命名冲突
 
 h4. 更新schema
 
-模型关联非常有用，但它们不是魔法。你需要维护schema，以匹配你定义的模型关联。在实践中，根据不同类型的关联你需要做两件事。对于 +belongs_to+ 关联你需要建立外键，对于 +has_and_belongs_to_many+ 关联你需要建立合适的连接表（join table）。【译者注：对于用 +has_many :through+ 建立的多对多关系，需要确定连接表是否和两端的表都建立了一对多的关系，并建立外键】
+模型关联非常有用，但它们不是魔法。你需要维护schema，以匹配你定义的模型关联。在实践中，根据不同类型的关联你需要做两件事。对于 +belongs_to+ 关联你需要建立外键，对于 +has_and_belongs_to_many+ 关联你需要建立合适的联接表（join table）。【译者注：对于用 +has_many :through+ 建立的多对多关系，需要确定联接表是否和两端的表都建立了一对多的关系，并建立外键】
 
 h5. 为 +belongs_to+ 新建外键
 
@@ -547,7 +546,7 @@ class CreateOrders < ActiveRecord::Migration
 end
 </ruby>
 
-如果在建立了模型之后添加关联，你需要记得新建 +add_column+ migration来提供必要的外键。
+如果在建立了模型之后添加关联，你需要记得新建一个 +add_column+ 的migration来提供必要的外键。
 
 h5. 为 +has_and_belongs_to_many+ 新建联接表（Join Tables）
 
@@ -948,8 +947,6 @@ h6. +includes+
 
 +includes+ 方法使我们指定当这个关联被调用时需要被eager-loaded的第二层关联。例如考虑以下模型：
 
-You can use the +includes+ method let you specify second-order associations that should be eager-loaded when this association is used. For example, consider these models:
-
 <ruby>
 class LineItem < ActiveRecord::Base
   belongs_to :order
@@ -965,9 +962,7 @@ class Customer < ActiveRecord::Base
 end
 </ruby>
 
-如果你经常从line items中直接检索customers（+@line_item.order.customer+），那么在line items和orders之间的关系中包含customers会使得代码更有效率：
-
-If you frequently retrieve customers directly from line items (+@line_item.order.customer+), then you can make your code somewhat more efficient by including customers in the association from line items to orders:
+如果你经常从line_items中直接检索customers（+@line_item.order.customer+），那么在line_items和orders之间的关系中包含customers会使得代码更有效率：
 
 <ruby>
 class LineItem < ActiveRecord::Base
@@ -1024,7 +1019,7 @@ h5. +has_one+ 添加的方法
 * +create_association(attributes = {})+
 * +create_association!(attributes = {})+
 
-在所有方法中， +association+ 用传入 +has_one+ 方法的第一个参数名代替。例如以下声明：
+在所有方法中， +association+ 用传入 +has_one+ 方法的第一个symbol参数代替。例如以下声明：
 
 <ruby>
 class Supplier < ActiveRecord::Base
@@ -1174,7 +1169,7 @@ h6. +:source_type+
 
 h6. +:through+
 
-+:through+ 指定完成查询所通过的join模型。 关于 +has_one :through+ 关联，本文在<a href="#the-has-one-through-association">之前部分</a>有详细讨论。
++:through+ 指定完成查询所通过的联接模型（join model）。 关于 +has_one :through+ 关联，本文在<a href="#the-has-one-through-association">之前部分</a>有详细讨论。
 
 h6. +:validate+
 
@@ -1349,7 +1344,7 @@ h6. +collection.delete(object, ...)+
 @customer.orders.delete(@order1)
 </ruby>
 
-WARNING: 另外，如果这些（从集合中去掉的）对象是通过 +dependent: :destroy+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被destroy；如果这些对象是通过 +dependent: :delete_all+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被delete。【译者注：+dependent+ 选项值为 +destroy+ 时，父对象在执行 +collection.delete+ 方法时也会被删除，当 +dependent+ 为 +delete+ 时，父对象不会被删除】
+WARNING: 另外，如果这些（从集合中去掉的）对象是通过 +dependent: :destroy+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被destroy；如果这些对象是通过 +dependent: :delete_all+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被delete。【译者注：+dependent+ 选项值为 +destroy+ 时，父对象在执行 +collection.delete+ 方法时也会被删除，当 +dependent+ 为 +delete_all+ 时，父对象不会被删除】
 
 h6. +collection.destroy(object, ...)+
 
@@ -1601,7 +1596,7 @@ end
 
 h6. +extending+
 
-+extending+ 方法指定一个命名模块来拓展association proxy。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
++extending+ 方法指定一个命名模块来拓展关联代理（association proxy）。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
 
 h6. +group+
 
@@ -1742,7 +1737,7 @@ h5. 什么时候保存对象？
 
 如果其中某个对象因校验错误而保存失败，那么赋值语句将返回 +false+ ，赋值被取消。
 
-如果父对象（声明 +has_many+ 关联的对象）未保存（即是其 +new_record?+ 方法返回 +true+ ），那么其子对象在添加（到对象集合）时不会保存。当父对象保存时，所有关联中未保存的成员会自动保存。
+如果父对象（声明 +has_many+ 关联的对象）未保存（即其 +new_record?+ 方法返回 +true+ ），那么其子对象在添加（到对象集合）时不会保存。当父对象保存时，所有关联中未保存的成员会自动保存。
 
 如果想向一个 +has_many+ 关联赋值一个对象，但不希望保存这个对象，使用 +collection.build+ 方法。
 
@@ -1804,7 +1799,7 @@ h6. Additional Column Methods 额外的字段方法
 
 如果一个 +has_and_belongs_to_many+ 的联接表（join table）除了两个外键外有额外的字段，这些字段会被当做属性，添加到从关联中获得的记录中。这些带有额外属性的记录总是只读的，因为Rails不能保存对这些（额外）属性的修改。
 
-WARNING: 在 +has_and_belongs_to_many+ 的联接表中使用额外属性的做法已经被弃用了。如果需要对在多对多关系中联接两个模型的数据表做这样的复杂操作，应该使用 +has_many :through+ 来代替 has_and_belongs_to_many+ 。
+WARNING: 在 +has_and_belongs_to_many+ 的联接表中使用额外属性的做法已经被弃用了。如果需要对在多对多关系中联接两个模型的数据表做这样的复杂操作，应该使用 +has_many :through+ 来代替 +has_and_belongs_to_many+ 。
 
 h6. +collection(force_reload = false)+
 
