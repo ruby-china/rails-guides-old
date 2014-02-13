@@ -123,7 +123,7 @@ module RailsGuides
       if guide =~/\.textile$/
         guide.sub(/\.textile$/, '.html')
       elsif guide=~/\.(markdown|md)$/
-        guide.sub(/\.markdown|md$/,'.html')
+        guide.sub(/\.(markdown|md)$/,'.html')
       else
         guide.sub(/\.erb$/, '')
       end
