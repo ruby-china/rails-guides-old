@@ -6,14 +6,14 @@ module RailsGuides
       result = content_tag(:dt, link)
       result <<
       if options[:work_in_progress]
-         content_tag(:dd, "施工中！贡献者: <a href='http://github.com/#{options[:contributor]}'>#{options[:contributor] || '匿名'}</a>".html_safe, :class => 'work-in-progress')
+         content_tag(:dd, "施工中！贡献者: #{generate_contributors_link(options[:contributor])}".html_safe, :class => 'work-in-progress')
       elsif !options[:contributor]
          content_tag(:dd, :class => 'work-in-progress' ) do
           "这篇还没有人翻译，我要<a href='https://github.com/ruby-china/rails-guides'>翻译本文</a>".html_safe
         end
       else
          content_tag(:dd, :class => 'contributor' ) do
-             "贡献者：<a href='http://github.com/#{options[:contributor]}'>#{options[:contributor] || '匿名'}</a>".html_safe
+             "贡献者：#{generate_contributors_link(options[:contributor])}".html_safe
         end
       end
       result << content_tag(:dd, capture(&block))
@@ -48,6 +48,17 @@ module RailsGuides
     def code(&block)
       c = capture(&block)
       content_tag(:code, c)
+    end
+
+  private
+    def generate_contributors_link(contributors_string = '')
+      result = []
+      contributors = contributors_string.split(/\,\s/)
+      contributors.each do |name|
+        result << content_tag('a', name, :href => "https://github.com/#{name}")
+      end
+
+      return result.join(', ')
     end
   end
 end
