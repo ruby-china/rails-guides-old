@@ -5,7 +5,7 @@
     -
       name: Rails 初上手指南
       url: getting_started.html
-      contributor: jhjguxin
+      contributor: jhjguxin, hozaka
       description: 关于安装和建立一个全新的 Rails 程序你所需要知道的一切.
 -
   name: 模型(Models)
