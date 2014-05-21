@@ -1,0 +1,2179 @@
+h2. ActiveRecord 模型关联
+
+本篇指南涵盖ActiveRecord的模型关联特性。
+
+通过这个指南，你将学会：
+
+* 如何定义两个模型之间的关联
+* 如何理解ActiveRecord中不同种类的模型关联
+* 如何使用定义模型关联的方法
+
+endprologue.
+
+h3. 为什么使用模型关联?
+
+通过使用模型关联，可以简化一些数据查询的操作。比如一个Rails程序中包含一个顾客模型和一个订单模型，每个顾客可能有多个订单。
+
+<ruby>
+class Customer < ActiveRecord::Base
+end
+
+class Order < ActiveRecord::Base
+end
+</ruby>
+
+给某个顾客添加一个订单，没有添加模型关联时需要这样写：
+
+<ruby>
+@order = Order.create(order_date: Time.now, customer_id: @customer.id)
+</ruby>
+
+删除一个顾客，同时也删除这个顾客相关的订单，没有添加模型关联时需要这样写：
+
+<ruby>
+@orders = Order.where(customer_id: @customer.id)
+@orders.each do |order|
+  order.destroy
+end
+@customer.destroy
+</ruby>
+
+使用模型关联，我们可以让刚才的操作变得自动化。我们告诉Rails +Customer+ 和 +Order+ 之间有一个联系。以下是修改之后的代码：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, :dependent => :destroy
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+</ruby>
+
+添加模型关联后，为某个顾客添加订单将更容易：
+
+<ruby>
+@order = @customer.orders.create(order_date: Time.now)
+</ruby>
+
+通过 +:dependent => :destroy+ ，以下这行代码会在删除顾客时，同时删除相关联的所有订单:
+
+<ruby>
+@customer.destroy
+</ruby>
+
+下一节将进一步介绍不同的关联模型，以及一些模型关联的技巧，最后是完整的模型关联方法和选项的参考。
+
+h3. 模型关联的类型
+
+在Rails中, _association_ 将两个模型关联起来。模型关联采用类宏的调用实现，你可以在模型中声明之。如果要声明一个模型属于（belongs_to）另一个，需要在这个模型中维护一个外键，Rails支持以下6种关联关系:
+
+* +belongs_to+
+* +has_one+  一对一关联
+* +has_many+  一对多关联
+* +has_and_belongs_to_many+  多对多关联，通过联接表（join table）
+* +has_many :through+  也是通过联接表（join table），不过更灵活，一般建议使用 +:through+ ，而不使用 +has_and_belongs_to_many+
+* +has_one :through+
+
+
+接下来你将学习如何声明并使用不同形式的模型关联。首先介绍各种关联模型的应用场景：
+
+h4.  +belongs_to+
+
++belongs_to+ 建立和另一个模型的一对一关系，使得声明模型的每个实例“属于” 另一个模型的一个实例。例如在应用程序中我们有顾客和订单，每个订单只有一个顾客，我们可以这样定义订单模型：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+</ruby>
+
+!images/belongs_to.png(belongs_to Association Diagram)!
+
+注意： +belongs_to+ 须使用单数形式。
+如果在上述例子的Order模型中使用了'顾客'的复数形式，会出现 +uninitialized constant Order::Customers+ 的报错。这是因为Rails自动从关联名字中推导出类的名字。如果关联中的名字被错误的复数化，那么推导出的类也将被复数化。
+
+相应的migration应该是这样的：
+
+<ruby>
+class CreateOrders < ActiveRecord::Migration
+  def change
+    create_table :customers do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :orders do |t|
+      t.belongs_to :customer
+      t.datetime :order_date
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+h4. +has_one+
+
+和 +belongs_to+ 一样，+has_one+ 关系也建立和另一个模型的一对一关系，但语义（及结果）上有些许不同。这种关联表示每个模型的实例包含或拥有另一个模型的一个实例。例如如果在应用程序中的每个供应商（supplier）有且只有一个账号，我们可以这样定义供应商（supplier）模型：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account
+end
+</ruby>
+
+!images/has_one.png(has_one Association Diagram)!
+
+相应的migration大概是这样的：
+
+<ruby>
+class CreateSuppliers < ActiveRecord::Migration
+  def change
+    create_table :suppliers do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :accounts do |t|
+      t.belongs_to :supplier
+      t.string :account_number
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+h4. +has_many+
+
++has_many+ 关联表示和另一个模型的一对多关系。我们经常会在 +belongs_to+ 的“另一端”发现这个关联。这个关联表示每个模型的实例有零或多个另一个模型的实例。例如在应用中的顾客和订单，顾客模型声明如下：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+NOTE: 在 +has_many+ 中另一个模型的名字被复数化了。
+
+!images/has_many.png(has_many Association Diagram)!
+
+相应的migration大概是这样的：
+
+<ruby>
+class CreateCustomers < ActiveRecord::Migration
+  def change
+    create_table :customers do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :orders do |t|
+      t.belongs_to :customer
+      t.datetime :order_date
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+h4. +has_many :through+
+
++has_many :through+常用于建立与另一模型的多对多关系。声明这种关联的模型可以 _通过_ 第三方的模型对应另一模型的零或多个实例。例如，考虑看病时病人通过预约和医生见面。相应的声明如下：
+
+<ruby>
+class Physician < ActiveRecord::Base
+  has_many :appointments
+  has_many :patients, through: :appointments
+end
+
+class Appointment < ActiveRecord::Base
+  belongs_to :physician
+  belongs_to :patient
+end
+
+class Patient < ActiveRecord::Base
+  has_many :appointments
+  has_many :physicians, through: :appointments
+end
+</ruby>
+
+!images/has_many_through.png(has_many :through Association Diagram)!
+
+相应的migration大概是这样的：
+
+<ruby>
+class CreateAppointments < ActiveRecord::Migration
+  def change
+    create_table :physicians do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :patients do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :appointments do |t|
+      t.belongs_to :physician
+      t.belongs_to :patient
+      t.datetime :appointment_date
+      t.timestamps
+    end
+  end
+end
+</ruby>
+连接的模型集合可以通过API进行管理。例如我们对其进行赋值：
+
+<ruby>
+physician.patients = patients
+</ruby>
+
+将为新的关联对象建立联接模型（join model），如果某些对象消失了，其在数据库中对应的行会被删除。
+
+WARNING: 联接模型的自动删除是直接的，不触发destroy的回调函数。
+
++has_many :through+ 还可以用于在嵌套的 +has_many+ 关联中建立“快捷方法”。例如，如果一篇文档有很多章节，每个章节有很多段落，有时我们希望得到某篇文档的所有段落，可以这样设置：
+
+<ruby>
+class Document < ActiveRecord::Base
+  has_many :sections
+  has_many :paragraphs, through: :sections
+end
+
+class Section < ActiveRecord::Base
+  belongs_to :document
+  has_many :paragraphs
+end
+
+class Paragraph < ActiveRecord::Base
+  belongs_to :section
+end
+</ruby>
+
+通过指定 +through: :sections+ ，Rails现在会理解以下代码：
+
+<ruby>
+@document.paragraphs
+</ruby>
+
+h4. +has_one :through+
+
++has_one :through+ 和另一模型建立一对一的关系。它表示声明的模型可以 _通过_ 第三方的模型，对应另一模型的某个实例。比如，如果每个供应商（supplier）有一个账户，而每个账户又和一个账户历史记录有关联，那么供应商的模型看上去是这样的：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account
+  has_one :account_history, through: :account
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :supplier
+  has_one :account_history
+end
+
+class AccountHistory < ActiveRecord::Base
+  belongs_to :account
+end
+</ruby>
+
+!images/has_one_through.png(has_one :through Association Diagram)!
+
+相应的migration大概是这样的：
+
+<ruby>
+class CreateAccountHistories < ActiveRecord::Migration
+  def change
+    create_table :suppliers do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :accounts do |t|
+      t.belongs_to :supplier
+      t.string :account_number
+      t.timestamps
+    end
+
+    create_table :account_histories do |t|
+      t.belongs_to :account
+      t.integer :credit_rating
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+h4. +has_and_belongs_to_many+
+
++has_and_belongs_to_many+ 和另一模型直接建立一个多对多关系，而不需要任何中间模型。例如，假如应用中包括装配（assemblies）和零件（parts），每个装配有很多零件，而每个零件会出现在不同的装配中。我们可以这样声明模型：
+
+<ruby>
+class Assembly < ActiveRecord::Base
+  has_and_belongs_to_many :parts
+end
+
+class Part < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies
+end
+</ruby>
+
+!images/habtm.png(has_and_belongs_to_many Association Diagram)!
+
+相应的migration看上去是这样的：
+
+<ruby>
+class CreateAssembliesAndParts < ActiveRecord::Migration
+  def change
+    create_table :assemblies do |t|
+      t.string :name
+      t.timestamps
+    end
+
+    create_table :parts do |t|
+      t.string :part_number
+      t.timestamps
+    end
+
+    create_table :assemblies_parts do |t|
+      t.belongs_to :assembly
+      t.belongs_to :part
+    end
+  end
+end
+</ruby>
+
+h4. +belongs_to+ 和 +has_one+ 的选择
+
+如果你想在两个模型中建立一对一的关系，你需要在其中一个（模型）中添加 +belongs_to+ ，在另一个中添加 +has_one+ 。如何知道该用哪个？
+
+区别在于我们在哪一个表放置外键（外键在声明 +belongs_to+ 的类对应的表中），但你同时还需要考虑数据的真实含义。 +has_one+ 关系表示某件东西是你的——也就是说，某件东西指向你。例如，“一个供应商有一个账号”比“一个账号有一个供应商”听上去更合理，这表明正确的关系是这样的：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :supplier
+end
+</ruby>
+
+相应的migration大概是这样的：
+
+<ruby>
+class CreateSuppliers < ActiveRecord::Migration
+  def change
+    create_table :suppliers do |t|
+      t.string  :name
+      t.timestamps
+    end
+
+    create_table :accounts do |t|
+      t.integer :supplier_id
+      t.string  :account_number
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+NOTE: 使用 +t.integer :supplier_id+ 使得外键命名更明显。在最新版本的Rails中你可以使用 +t.references :supplier+ 抽象这个实现细节。
+
+h4. 选择 +has_many+ 还是 +has_and_belongs_to_many+
+
+Rails提供两种不同方式声明模型间的多对多关系。简单点的方法是使用 +has_and_belongs_to_many+ ，它允许你直接建立关联：
+
+<ruby>
+class Assembly < ActiveRecord::Base
+  has_and_belongs_to_many :parts
+end
+
+class Part < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies
+end
+</ruby>
+
+另一种方式是使用 +has_many :through+ ，通过一个联接模型（join model）间接建立关联：
+
+<ruby>
+class Assembly < ActiveRecord::Base
+  has_many :manifests
+  has_many :parts, through: :manifests
+end
+
+class Manifest < ActiveRecord::Base
+  belongs_to :assembly
+  belongs_to :part
+end
+
+class Part < ActiveRecord::Base
+  has_many :manifests
+  has_many :assemblies, through: :manifests
+end
+</ruby>
+
+最简单的原则是：当你需要对关系本身的模型作为独立的实体进行处理时，建立一个 +has_many :through+ 关系。如果你不需要对关系本身的模型做任何事情，建立一个 +has_and_belongs_to_many+ 更简单（但仍需要记得建立在数据库中建立联接表（join table））。
+
+当需要在联接模型（join model）中进行数据校验，回调函数或添加额外属性时，应该使用 +has_many :through+
+
+h4. Polymorphic Associations 多态关联
+
+_多态关联_ 是相对更复杂的模型关联。通过多态关联，一个模型可以在一个模型关联中属于多个模型。例如，我们有一个图片（picture）模型，它既属于员工（employee）模型又属于商品（product）模型。这样的关系可以声明如下：
+
+<ruby>
+class Picture < ActiveRecord::Base
+  belongs_to :imageable, polymorphic: true
+end
+
+class Employee < ActiveRecord::Base
+  has_many :pictures, as: :imageable
+end
+
+class Product < ActiveRecord::Base
+  has_many :pictures, as: :imageable
+end
+</ruby>
+
+我们可以将一个多态的 +belongs_to+ 声明看做是建立了一个其他模型可以使用的接口（interface）。例如在 +Employee+ 模型中可以得到图片（pictures）的集合： +@employee.pictures+ 。
+
+类似地，我们可以得到 +@product.pictures+ 。
+
+如果有一个 +Picture+ 的实例，我们可以通过 +@picture.imageable+ 获取其父对象。为使上述操作有效，我们需要在声明多态接口的模型中声明一个外键字段和类型字段：
+
+<ruby>
+class CreatePictures < ActiveRecord::Migration
+  def change
+    create_table :pictures do |t|
+      t.string  :name
+      t.integer :imageable_id
+      t.string  :imageable_type
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+可以用 +t.references+ 简化：
+
+<ruby>
+class CreatePictures < ActiveRecord::Migration
+  def change
+    create_table :pictures do |t|
+      t.string :name
+      t.references :imageable, polymorphic: true
+      t.timestamps
+    end
+  end
+end
+</ruby>
+
+!images/polymorphic.png(Polymorphic Association Diagram)!
+
+h4. Self Joins 自连接
+
+在设计数据模型时，我们有时会发现一个需要和自身相关的模型，例如我们想用一个模型储存所有的员工（employee），同时需要跟踪经理（manager）和下属（subordinate）的关系。这种情形可以使用自连接（self-joining）关联完成：
+
+<ruby>
+class Employee < ActiveRecord::Base
+  has_many :subordinates, class_name: "Employee",
+                          foreign_key: "manager_id"
+
+  belongs_to :manager, class_name: "Employee"
+end
+</ruby>
+
+通过这样的设定，我们可以得到 +@employee.subordinates+ 和 +@employee.manager+ 。
+
+
+h3. 技巧、窍门和注意事项
+
+想在Rails应用中充分利用ActiveRecord的模型关联，你需要知道以下内容：
+
+* 控制缓存（caching）
+* 避免命名冲突（name collisions）
+* 更新schema
+* 控制模型关联的作用域（association scope）
+* 双向关联（Bi-directional associations）
+
+h4. 控制缓存（caching）
+
+所有的模型关联方法都是围绕缓存建立的。缓存保留最近一次查询结果供进一步的操作。缓存甚至在不同的方法中共享。例如：
+
+<ruby> 
+customer.orders                 # 从数据库中获取订单（orders）
+customer.orders.size            # 使用订单的缓存副本（cached copy）
+customer.orders.empty?          # 使用订单的缓存副本
+</ruby>
+
+但如果应用中其他部分修改了数据，需要加载缓存呢？只需要在调用关联时传入 +true+ ：
+
+<ruby>
+customer.orders                 # 从数据库中获取订单（orders）
+customer.orders.size            # 使用订单的缓存副本
+customer.orders(true).empty?    # 抛弃缓存副本，回到数据库中（提取数据）
+</ruby>
+
+h4. 避免命名冲突
+
+并不是所有的名字都可以在模型关联中使用，因为新建一个关联会在模型中添加一个同名的（实例）方法。所以给关联取名为 +ActiveRecord::Base+ 中定义的实例方法是一个糟糕的主意。关联方法会覆盖原有的方法，把事情搞糟。例如，+attributes+ 或 +connection+ 是关联中的坏名字。
+
+h4. 更新schema
+
+模型关联非常有用，但它们不是魔法。你需要维护schema，以匹配你定义的模型关联。在实践中，根据不同类型的关联你需要做两件事。对于 +belongs_to+ 关联你需要建立外键，对于 +has_and_belongs_to_many+ 关联你需要建立合适的联接表（join table）。【译者注：对于用 +has_many :through+ 建立的多对多关系，需要确定联接表是否和两端的表都建立了一对多的关系，并建立外键】
+
+h5. 为 +belongs_to+ 新建外键
+
+当你声明一个 +belongs_to+ 关联时，你需要新建合适的外键。例如考虑以下模型：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+</ruby>
+
+这个声明需要在orders表中声明合适的外键来支持：
+
+<ruby>
+class CreateOrders < ActiveRecord::Migration
+  def change
+    create_table :orders do |t|
+      t.datetime :order_date
+      t.string   :order_number
+      t.integer  :customer_id
+    end
+  end
+end
+</ruby>
+
+如果在建立了模型之后添加关联，你需要记得新建一个 +add_column+ 的migration来提供必要的外键。
+
+h5. 为 +has_and_belongs_to_many+ 新建联接表（Join Tables）
+
+当你新建一个 +has_and_belongs_to_many+ 关联时，你需要显式建立联接表（Join Table）。除非联接表的名字通过 +:join_table+ 选项被显式指定，否则ActiveRecord将用类名按字典序新建联接表的名字。所以一个介于customer和order模型的表的默认名字为"customers_orders"，因为在字典中"c"比"o"靠前。
+
+WARNING: 模型名字的优先顺序是通过 +String+ 类的 @<@ 运算符计算得到的。这意味着如果比较的两个字符串长度不同，且较短的字串包含在较长的字串中（如ab和abc比较），则较长的字符串会优先于比较短的字符串。当两个模型名字相同时会产生一些易混淆的地方，比如认为"paper_boxes"和"papers"的联接表（join table）应该叫"papers_paper_boxes"，因为"paper_boxes"的名字较长。但实际上正确的联接表的名字是"paper_boxes_papers"（因为下划线'_'在编码中 _小于_ 's'）。【译者注：'_'在ASCII码中值为95，'s'为115】
+
+不管名字如何，你都必须手动通过migration添加联接表（join table），例如考虑以下模型关联：
+
+<ruby>
+class Assembly < ActiveRecord::Base
+  has_and_belongs_to_many :parts
+end
+
+class Part < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies
+end
+</ruby>
+
+以上关联需要建立 +assemblies_parts+ 表的migration来支持。这个表不需要主键：
+
+<ruby>
+class CreateAssembliesPartsJoinTable < ActiveRecord::Migration
+  def change
+    create_table :assemblies_parts, id: false do |t|
+      t.integer :assembly_id
+      t.integer :part_id
+    end
+  end
+end
+</ruby>
+
+由于这个表没有相应的模型，我们向 +create_table+ 传递参数 +id: false+，以便模型关联正常工作。如果你发现 +has_and_belongs_to_many+ 关联中的奇怪现象如混乱的模型ID或关于ID冲突的异常，可能是因为你忘记了这一步。
+
+h4. Controlling Association Scope 控制关联作用域
+
+默认情况下，模型关联仅在当前模块作用域内寻找相应对象。当我们在模块内声明ActiveRecord模型时，这一点非常重要。例如：
+
+<ruby>
+module MyApplication
+  module Business
+    class Supplier < ActiveRecord::Base
+       has_one :account
+    end
+
+    class Account < ActiveRecord::Base
+       belongs_to :supplier
+    end
+  end
+end
+</ruby>
+
+以上代码工作正常，因为 +Supplier+ 和 +Account+ 类在同一个模块范围内定义。但当 +Supplier+ 和 +Account+ 在不同的（模块）区域时，模型关联将无法工作，如下例：
+
+<ruby>
+module MyApplication
+  module Business
+    class Supplier < ActiveRecord::Base
+       has_one :account
+    end
+  end
+
+  module Billing
+    class Account < ActiveRecord::Base
+       belongs_to :supplier
+    end
+  end
+end
+</ruby>
+
+在关联不同名字空间中的两个模型时，必须在声明关联中指明完整的类名：
+
+<ruby>
+module MyApplication
+  module Business
+    class Supplier < ActiveRecord::Base
+       has_one :account,
+        class_name: "MyApplication::Billing::Account"
+    end
+  end
+
+  module Billing
+    class Account < ActiveRecord::Base
+       belongs_to :supplier,
+        class_name: "MyApplication::Business::Supplier"
+    end
+  end
+end
+</ruby>
+
+h4. Bi-directional Associations 双向关联
+
+双向工作的模型关联十分常见，需要在两个不同的模型中声明：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+</ruby>
+
+在默认情况下，ActiveRecord不知道这些模型关联之间的联系，这会造成一个对象的两个副本出现不同步的情况：
+
+<ruby>
+c = Customer.first
+o = c.orders.first
+c.first_name == o.customer.first_name # => true
+c.first_name = 'Manny'
+c.first_name == o.customer.first_name # => false
+</ruby>
+
+这是因为c和o.customer是同一份数据在内存中的两个不同的表示，二者都不会因为对方的改变而自动改变。ActiveRecord提供了 +:inverse_of+ 选项，你可以在定义模型关联时声明这种关系。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, inverse_of: :customer
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer, inverse_of: :orders
+end
+</ruby>
+
+通过这样的声明，ActiveRecord只会加载一份customer对象的副本，避免数据不一致性，并让你的应用更有效率：
+
+<ruby>
+c = Customer.first
+o = c.orders.first
+c.first_name == o.customer.first_name # => true
+c.first_name = 'Manny'
+c.first_name == o.customer.first_name # => true
+</ruby>
+
+对于 +inverse of+ 的使用有以下限制：
+
+* 不适用于 +:through+ 的模型关联
+* 不适用于 +:polymorphic+ 的模型关联
+* 不适用于 +:as+ 模型关联
+* 对于 +belongs_to+ 模型关联，+has_many+ 的反向关联会被忽略
+
+这并不意味着在所有的双向关联中都必须显式设置 +:inverse_of+ 选项，因为所有的模型关联都会自动尝试找到其对应的反向关联，并试探性地设置 +:inverse_of+（基于关联的名字）。
+大多数关联都有上述功能支持。但包含以下选项的模型关联不会自动设定反向关联：
+
+* +:conditions+
+* +:through+
+* +:polymorphic+
+* +:foreign_key+
+
+h3. 详细模型关联参考
+
+本节将详细描述每种类型的模型关联，包括它们为对象添加的方法以及你在声明关联时可以使用的选项。
+
+h4. +belongs_to+ 关联参考
+
++belongs_to+ 关联和另一个模型新建一个一一对应。从数据库角度看，这个关联表示这个类包含一个外键。如果另一个类包含这个外键，你应该用 +has_one+ 来代替。
+
+h5. +belongs_to+ 添加的方法
+
+当你声明一个 +belongs_to+ 关联时，处于声明中的类自动获得以下相关方法：
+
+* +association(force_reload = false)+
+* +association=(associate)+
+* +build_association(attributes = {})+
+* +create_association(attributes = {})+
+* +create_association!(attributes = {})+
+
+在这些方法中，+association+ 会用传给 +belongs_to+ 的第一个参数取代，例如在以下声明中：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+</ruby>
+
+每个order模型都有以下方法：
+
+<ruby>
+customer
+customer=
+build_customer
+create_customer
+create_customer!
+</ruby>
+
+NOTE: 当初始化一个新的 +has_one+ 或 +belongs_to+ 关联时必须用 +build_+ 前缀来建立关联，而不是使用 +association.build+ 方法。后者是在 +has_many+ 或 +has_and_belongs_to_many+ 方法中使用的。如果创建一个关联则使用 +create_+ 前缀。
+
+h6. +association(force_reload = false)+
+
+这个 +association+ 方法返回关联对象。如果找不到关联对象，则返回 +nil+【译者注：这里的"association"要用具体的关联名替代，如下例中的"customer"。下文中的各个方法同理】
+
+<ruby>
+@customer = @order.customer
+</ruby>
+
+如果关联对象先前已从数据库中取出，以上方法将返回缓存的版本。为覆盖这个行为（并强制读取数据库），传入 +true+ 作为参数 +force_reload+ 的值。
+
+h6. +association=(associate)+
+
++association=+ 方法向当前对象的一个关联对象赋值。在这背后意味着从关联对象中提取主键并设定为当前对象的外键。
+
+<ruby>
+@order.customer = @customer
+</ruby>
+
+h6. +build_association(attributes = {})+
+
++build_association+ 方法返回关联类型的一个新对象。这个对象将根据传入的属性值被初始化，且通过该对象的外键的连接将被设置，但关联的对象还 _没有_ 保存到数据库中。
+
+<ruby>
+@customer = @order.build_customer(customer_number: 123,
+                                  customer_name: "John Doe")
+</ruby>
+
+h6. +create_association(attributes = {})+
+
++create_association+ 方法返回一个关联类型的一个新对象。这个对象将根据传入的属性值被初始化，且通过该对象的外键的连接将被设置，且一旦对象通过了相应模型的模型校验，这个关联对象将 _会_ 被保存。
+
+<ruby>
+@customer = @order.create_customer(customer_number: 123,
+                                   customer_name: "John Doe")
+</ruby>
+
+h6. +create_association!(attributes = {})+
+
+和 +create_association+ 做相同的工作，但会在数据记录不合法时抛出 +ActiveRecord::RecordInvalid+ 的错误。
+
+h5. +belongs_to+ 的选项
+
+尽管Rails机智的默认设定在大多数情况下都工作良好，但有些时候我们想定制 +belongs_to+ 关联引用的行为。通过在创建关联时传入选项和scope block，可以轻松完成定制。例如，以下关联使用了两个选项：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, dependent: :destroy,
+    counter_cache: true
+end
+</ruby>
+
++belongs_to+ 关联支持以下选项：
+
+* +:autosave+
+* +:class_name+
+* +:counter_cache+
+* +:dependent+
+* +:foreign_key+
+* +:inverse_of+
+* +:polymorphic+
+* +:touch+
+* +:validate+
+
+h6. +:autosave+
+
+如果设置 +:autosave+ 选项为 +true+ ，Rails会在保存父对象【译者注：指当前定义的类的实例对象，即拥有 +belongs_to+ 的对象】的同时保存所有载入的关联成员，删除所有标记为删除的关联成员。【译者注：如果设为 +false+ ，则无论如何不保存或删除任何关联对象；默认情况下只保存新建的关联对象】
+
+h6. +:class_name+
+
+如果另一个模型的名字不能从关联名字中导出，可以用 +:class_name+ 选项提供模型名字。例如，如果一个订单（order）属于一个顾客（customer），但实际上顾客们的模型名是 +Patron+ ，可以这样设定：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, class_name: "Patron"
+end
+</ruby>
+
+h6. +:counter_cache+
+
++:counter_cache+ 选项用于使计算从属对象的个数更加有效率。考虑以下模型：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer
+end
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+使用以上声明时，对 +@customer.orders.size+ 求值需要在数据库中执行一个 +COUNT(*)+ 查询。可以向 _从属的_ 模型加入一个counter cache来避免这个调用：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, counter_cache: true
+end
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+使用这个声明，Rails会保存并更新这个缓存值，并当调用+size+方法时返回这个值。
+
+尽管 +:counter_cache+ 选择在包含 +belongs_to+ 的模型中被声明， _关联_ 的模型必须添加一个实际字段。在刚才的例子中，你需要在 +Customer+ 模型中添加 +orders_count+ 字段。如果需要的话，可以覆写默认的字段名：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, counter_cache: :count_of_orders
+end
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+Counter cache字段通过 +attr_readonly+ 添加到其模型的只读属性中。
+
+h6. +:dependent+
+
+如果设置 +:dependent+ 选项的值为 +:destroy+ ，则删除这个对象时会调用其关联的对象的 +destroy+ 方法来删除关联对象。如果设置 +:dependent+ 的值为 +:delete+，则删除这个对象时将删除关联对象，但 _不会_ 调用关联对象的 +destroy+ 方法。如果设置 +:dependent+ 的值为 +:restrict+ ，则当这个对象有关联对象时，删除这个对象会导致一个 +ActiveRecord::DeleteRestrictionError+ 的异常。
+
+WARNING: 当 +belongs_to+ 关联和另一个类中的 +has_many+ 关联有关时，不应指定这个选项。这样做可能会导致数据库中产生孤立的数据【译者注：即不能通过belongs_to或has_many得到的数据】。
+
+h6. +:foreign_key+
+
+按照惯例，Rails假设模型中作为外键的字段的名字是关联名加上 +_id+ 的后缀。使用 +:foreign_key+ 选项可以直接设置外键名：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, class_name: "Patron",
+                        foreign_key: "patron_id"
+end
+</ruby>
+
+TIP: 在任何情况下，Rails都不会自动创建外键字段。需要在migrations中显式定义它们。
+
+h6. +:inverse_of+
+
++:inverse_of+ 选项指定 +has_many+ 或 +has_one+ 关联的名字，这个关联是当前关联的反面。不能和 +:polymorphic+ 选项同时使用。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, inverse_of: :customer
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer, inverse_of: :orders
+end
+</ruby>
+
+h6. +:polymorphic+
+
++:polymorphic+ 选项取值为 +true+ 表示这是一个多态关联。多态关联在本文<a href="#polymorphic-associations">之前部分</a>已有详细讨论。
+
+h6. +:touch+
+
+如果 +:touch+ 选项值为 +:true+，那么每当当前对象保存或销毁时，关联对象的 +updated_at+ 或 +updated_on+ 时间戳的值将被设为当前时间。
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, touch: true
+end
+
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+在这个例子中，保存或删除order会更新关联的customer的时间戳。也可以指定被更新的时间戳属性：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, touch: :orders_updated_at
+end
+</ruby>
+
+h6. +:validate+
+
+如果设置 +:validate+ 选项为 +true+ ，那么每当保存当前对象时，关联对象将被校验。这个选项默认为 +false+ ：当前对象保存时关联对象不会被校验。
+
+h5. +belongs_to+ 的关联范围
+
+有时我们需要定制 +belongs_to+ 使用的查询。这样的定制可以通过scope block来完成。例如：
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, -> { where active: true },
+                        dependent: :destroy
+end
+</ruby>
+
+你可以在scope block中使用任何标准的 "查询方法":active_record_querying.html 。以下将讨论这几点：
+
+* +where+
+* +includes+
+* +readonly+
+* +select+
+
+h6. +where+
+
++where+ 方法可使我们指定关联对象必须满足的条件。
+
+<ruby>
+class Order < ActiveRecord::Base
+  belongs_to :customer, -> { where active: true }
+end
+</ruby>
+
+h6. +includes+
+
++includes+ 方法使我们指定当这个关联被调用时需要被eager-loaded的第二层关联。例如考虑以下模型：
+
+<ruby>
+class LineItem < ActiveRecord::Base
+  belongs_to :order
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+  has_many :line_items
+end
+
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+如果你经常从line_items中直接检索customers（+@line_item.order.customer+），那么在line_items和orders之间的关系中包含customers会使得代码更有效率：
+
+<ruby>
+class LineItem < ActiveRecord::Base
+  belongs_to :order, -> { includes :customer }
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+  has_many :line_items
+end
+
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+NOTE: 在直接关联时不需要使用 +includes+ ——也就是说，如果 +Order belongs_to customer+ ，那么当需要时，customer会被自动地eager-loaded。
+
+h6. +readonly+
+
+如果使用 +readonly+ ，那么在（调用）模型关联获得关联对象时，它们是只读的。
+
+h6. +select+
+
++select+ 方法允许我们覆写获取关联对象数据的SQL语句 +SELECT+ 。默认情况下Rails获取所有的字段。
+
+TIP: 如果使用在 +belongs_to+ 关联中使用 +select+ 方法，应该设置 +:foreign_key+ 选项的值以保证正确的结果。
+
+h5. 关联对象存在吗？
+
+通过 +association.nil?+ 方法可以查看关联对象是否存在：
+
+<ruby>
+if @order.customer.nil?
+  @msg = "No customer found for this order"
+end
+</ruby>
+
+h5. 什么时候保存对象？
+
+向 +belongs_to+ 模型关联赋值一个对象 _不会_ 自动保存当前对象，也不会自动保存关联的对象。【译者注：赋值后需要调用两个对象各自的save方法才可以保存。设置 +autosave+ 选项的值可以使保存父对象（拥有'belongs_to'的对象）时保存关联对象】
+
+h4. +has_one+ 关联参考
+
++has_one+ 关联新建一个和另一模型的一一对应。从数据库角度看，这个关联表明外键在另一个类中。如果外键属于当前的类，则应使用 +belongs_to+ 关联代替。
+
+h5. +has_one+ 添加的方法
+
+当声明 +has_one+ 关联时，声明的类自动获得5个关于模型关联的方法：
+
+* +association(force_reload = false)+
+* +association=(associate)+
+* +build_association(attributes = {})+
+* +create_association(attributes = {})+
+* +create_association!(attributes = {})+
+
+在所有方法中， +association+ 用传入 +has_one+ 方法的第一个symbol参数代替。例如以下声明：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account
+end
+</ruby>
+
+每个 +Supplier+ 模型的实例会有以下方法：
+
+<ruby>
+account
+account=
+build_account
+create_account
+create_account!
+</ruby>
+
+NOTE: 当初始化 +has_one+ 或 +belongs_to+ 关联时必须使用 +build_+ 前缀来建立关联，而在 +has_many+ 或 +has_and_belongs_to_many+中使用 +association.build+ 方法。使用 +create_+ 前缀来新建关联。
+
+h6. +association(force_reload = false)+
+
++association+ 方法返回关联对象。当没有关联对象时返回 +nil+。
+
+<ruby>
+@account = @supplier.account
+</ruby>
+
+如果关联对象之前从数据库中通过当前对象获取过，则会返回缓存的副本。传入 +true+ 作为 +force_reload+ 的值来覆写这个行为，强制读取数据库。
+
+h6. +association=(associate)+
+
++association=+ 方法向当前对象赋值一个关联对象。在这背后意味着提取当前对象的主键的值，设定为关联对象的外键值。
+
+<ruby>
+@supplier.account = @account
+</ruby>
+
+h6. +build_association(attributes = {})+
+
++build_association+ 方法返回关联类型的一个新对象。这个对象将用传入的属性值进行初始化，且通过该对象的外键的连接将被设置，但这个关联对象还 _没有_ 被保存。
+
+<ruby>
+@account = @supplier.build_account(terms: "Net 30")
+</ruby>
+
+h6. +create_association(attributes = {})+
+
++create_association+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过该对象的外键的连接将被设置，且当该对象通过关联模型的指定验证后，该对象将 _会_ 被保存。
+
+<ruby>
+@account = @supplier.create_account(terms: "Net 30")
+</ruby>
+
+h6. +create_association!(attributes = {})+
+
+和刚才的 +create_association+ 一样，但当数据记录无效时抛出 +ActiveRecord::RecordInvalid+ 的异常。
+
+h5. +has_one+ 的选项
+
+尽管Rails机智的默认设定在大多数情况下工作良好，但有时候我们想定制 +has_one+ 关联引用的行为。在新建关联时传入选项可以轻松完成这样的定制。例如这个关联使用两个选项：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, class_name: "Billing", dependent: :nullify
+end
+</ruby>
+
++has_one+ 关联支持以下选项：
+
+* +:as+
+* +:autosave+
+* +:class_name+
+* +:dependent+
+* +:foreign_key+
+* +:inverse_of+
+* +:primary_key+
+* +:source+
+* +:source_type+
+* +:through+
+* +:validate+
+
+h6. +:as+
+
+设置 +as+ 选项表明这是一个多态关联。关于多态关联，本文 <a href="#polymorphic-associations">之前部分</a> 有详细讨论。
+
+h6. +:autosave+
+
+如果设置 +:autosave+ 选项为 +true+ ，Rails会在保存父对象【译者注：指当前定义的类的实例对象，即拥有 +belongs_to+ 的对象】的同时保存所有载入的关联成员，删除所有标记为删除的关联成员。【译者注：如果设为 +false+ ，则无论如何不保存或删除任何关联对象；默认情况下只保存新建的关联对象】
+
+h6. +:class_name+
+
+如果另一模型的名字不能从关联名中推导出来，可以使用 +:class_name+ 选项来应用模型名。例如，假如一个supplier有一个account，但包含accounts的模型的实际名字是 +Billing+ ，可以这样设置：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, class_name: "Billing"
+end
+</ruby>
+
+h6. +:dependent+
+
+控制当关联对象的所有者被删除时对关联对象的处理：
+
+* +:destroy+ 使关联对象也被删除
+* +:delete+ 使关联对象直接从数据库中被删除（因此不执行回调函数）
+* +:nullify+ 使关联对象的外键值设为 +NULL+ 。不执行回调函数。
+* +:restrict_with_exception+ 如果有关联记录时会抛出一个异常
+* +:restrict_with_error+ 如果有关联记录时会向关联对象的所有者添加一个错误
+
+h6. +:foreign_key+
+
+按惯例，Rails假设另一模型外键的字段的名字是模型的名字加上 +_id+ 后缀。 +:foreign_key+ 选项使我们可以直接设置外键名：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, foreign_key: "supp_id"
+end
+</ruby>
+
+TIP: 在任何情况下，Rails不会创建外键字段。必须在migrations中显式定义外键。
+
+h6. +:inverse_of+
+
++:inverse_of+ 选项指定 +belongs_to+ 关联的名字，这个关联是当前关联的反面。不能和 +:through+ 或 +:as+ 选项同时使用。
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, inverse_of: :supplier
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :supplier, inverse_of: :account
+end
+</ruby>
+
+h6. +:primary_key+
+
+按惯例，Rails假定主键的字段名为 +id+ 。可以通过 +:primary_key+ 选项显式指定主键名来覆写之。
+
+h6. +:source+
+
++:source+ 选项指定 +has_one :through+ 所指向模型源的名字。【译者注：Stackoverflow上有个 "很好的例子":http://stackoverflow.com/questions/4632408/need-help-to-understand-source-option-of-has-one-has-many-through-of-rails 】
+
+h6. +:source_type+
+
++:source_type+ 在多态关联中使用。它指定 +has_one :through+ 所指向模型源的类型。【译者注：Stackoverflow上的 "例子":http://stackoverflow.com/questions/9500922/need-help-to-understand-source-type-option-of-has-one-has-many-through-of-rails 】
+
+h6. +:through+
+
++:through+ 指定完成查询所通过的联接模型（join model）。 关于 +has_one :through+ 关联，本文在<a href="#the-has-one-through-association">之前部分</a>有详细讨论。
+
+h6. +:validate+
+
+如果设定 +:validate+ 选项为 +true+，则在保存当前对象时，其关联的对象将被验证。这个选项的默认值是 +false+ ：在保存当前对象时，其关联的对象不会被验证。
+
+h5. +has_one+ 的关联范围
+
+有时候我们需要定制 +has_one+ 使用的查询。可以通过scope block来实现定制。例如：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, -> { where active: true }
+end
+</ruby>
+
+我们可以在scope block中使用任何标准的 "查询方法":active_record_querying.html 。以下将讨论这几点：
+
+* +where+
+* +includes+
+* +readonly+
+* +select+
+
+h6. +where+
+
++where+ 方法使我们可以指定关联对象必须满足的条件。
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, -> { where "confirmed = 1" }
+end
+</ruby>
+
+h6. +includes+
+
+我们可以使用 +includes+ 方法来指定这个关联被调用时需要被eager-loaded的第二层关联。例如考虑以下模型：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :supplier
+  belongs_to :representative
+end
+
+class Representative < ActiveRecord::Base
+  has_many :accounts
+end
+</ruby>
+
+如果经常从suppliers中直接获得representatives（+@supplier.account.representative+），那么可以通过在suppliers和accounts的模型关联中包含representatives来使得代码变得更有效率：
+
+<ruby>
+class Supplier < ActiveRecord::Base
+  has_one :account, -> { includes :representative }
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :supplier
+  belongs_to :representative
+end
+
+class Representative < ActiveRecord::Base
+  has_many :accounts
+end
+</ruby>
+
+h6. +readonly+
+
+如果使用 +readonly+ 方法，通过模型关联获取的关联对象是只读的。
+
+h6. +select+
+
++select+ 方法使我们可以覆写获取关联对象的SQL语句 +SELECT+ 。在默认情况下，Rails获取对象所有的字段。
+
+h5. 关联对象存在吗？
+
+我们可以通过使用 +association.nil?+ 方法来查看是否存在关联对象。
+
+<ruby>
+if @supplier.account.nil?
+  @msg = "No account found for this supplier"
+end
+</ruby>
+
+h5. 什么时候保存对象？
+
+当我们向一个 +has_one+ 关联赋值一个对象时，被赋值的对象会自动保存（为了更新其外键）。此外，任何被代替的对象也会自动保存，因为其外键也会改变。【译者注：被代替的对象的外键值变为nil】
+
+如果其中一个保存因为验证失败导致不成功，则赋值语句返回 +false+ ，赋值也被取消。
+
+如果父对象（声明 +has_one+ 关联的对象）未被保存（也就是，其 +new_record?+ 方法的返回值为 +true+ ），那么这些子对象不会被保存。它们会在父对象被保存时自动保存。
+
+如果想向一个 +has_one+ 关联赋值一个对象但不希望这个赋值对象被保存，应使用 +association.build+ 方法。
+
+h4. +has_many+ 关联参考
+
++has_many+ 关联建立和另一模型的一对多关系。从数据库角度看，这个关联表示另一个类会有一个外键指向当前类的对象。
+
+h5. +has_many+ 添加的方法
+
+当声明 +has_many+ 关联时，声明的类自动获得16个和这个关联有关的方法：
+
+* +collection(force_reload = false)+
+* +collection<<(object, ...)+
+* +collection.delete(object, ...)+
+* +collection.destroy(object, ...)+
+* +collection=objects+
+* +collection_singular_ids+
+* +collection_singular_ids=ids+
+* +collection.clear+
+* +collection.empty?+
+* +collection.size+
+* +collection.find(...)+
+* +collection.where(...)+
+* +collection.exists?(...)+
+* +collection.build(attributes = {}, ...)+
+* +collection.create(attributes = {})+
+* +collection.create!(attributes = {})+
+
+在这些方法中， +collection+ 用第一个传入 +has_many+ 的symbol参数名取代， +collection_singular+ 用这个symbol的单数形式取代。例如在以下声明中：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+</ruby>
+
+每个customer模型的实例会有以下方法：
+
+<ruby>
+orders(force_reload = false)
+orders<<(object, ...)
+orders.delete(object, ...)
+orders.destroy(object, ...)
+orders=objects
+order_ids
+order_ids=ids
+orders.clear
+orders.empty?
+orders.size
+orders.find(...)
+orders.where(...)
+orders.exists?(...)
+orders.build(attributes = {}, ...)
+orders.create(attributes = {})
+orders.create!(attributes = {})
+</ruby>
+
+h6. +collection(force_reload = false)+
+
++collection+ 方法返回一个包含所有关联对象的数组。如果没有关联的对象，会返回一个空数组。
+
+<ruby>
+@orders = @customer.orders
+</ruby>
+
+h6. +collection<<(object, ...)+
+
++collection<<+ 方法向（关联对象的）集合添加一个或多个对象，将这些对象的外键值设置为调用该方法的模型的主键。
+
+<ruby>
+@customer.orders << @order1
+</ruby>
+
+h6. +collection.delete(object, ...)+
+
++collection.delete+ 方法从（关联对象的）集合中去掉一个或多个对象，将这些对象的外键值设置为 +NULL+ 【译者注：这里应为nil?】
+
+<ruby>
+@customer.orders.delete(@order1)
+</ruby>
+
+WARNING: 另外，如果这些（从集合中去掉的）对象是通过 +dependent: :destroy+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被destroy；如果这些对象是通过 +dependent: :delete_all+ 被关联的，那么在执行 +collection.delete+ 方法时它们会被delete。【译者注：+dependent+ 选项值为 +destroy+ 时，父对象在执行 +collection.delete+ 方法时也会被删除，当 +dependent+ 为 +delete_all+ 时，父对象不会被删除】
+
+h6. +collection.destroy(object, ...)+
+
++collection.destroy+ 方法在（关联对象的）集合中去掉一个或多个对象，它调用每个对象的 +destroy+ 方法。
+
+<ruby>
+@customer.orders.destroy(@order1)
+</ruby>
+
+WARNING: 无论 +:dependent+ 选项的值是什么，这些对象都会从数据库中被删除。
+
+h6. +collection=objects+
+
++collection=+ 方法通过适当的添加和删除，使（关联对象的）集合只包含赋值的对象，。
+
+h6. +collection_singular_ids+
+
++collection_singular_ids+ 方法返回所有集合里的对象的id，是一个数组。
+
+<ruby>
+@order_ids = @customer.order_ids
+</ruby>
+
+h6. +collection_singular_ids=ids+
+
++collection_singular_ids=+ 方法接收一个数组，通过适当的添加和删除，使（关联对象的）集合里的对象由数组里的主键值确定。
+
+h6. +collection.clear+
+
++collection.clear+ 方法去掉（关联对象的）集合里的所有对象。如果这些对象关联时有 +dependent: :destroy+，则这些对象会被destroy；如果 +dependent: :delete_all+ ， 则这些对象会直接从数据库中被删除【译者注：有别于被destroy，这些对象这时不会调用任何回调函数】，否则只会将这些对象的外键值设为 +NULL+ 【译者注：应为nil?】
+
+h6. +collection.empty?+
+
+如果集合中没有任何关联对象，则 +collection.empty?+ 方法返回 +true+ 。
+
+<ruby>erb
+<% if @customer.orders.empty? %>
+  No Orders Found
+<% end %>
+</ruby>
+
+h6. +collection.size+
+
++collection.size+ 方法返回集合中对象的个数。
+
+<ruby>
+@order_count = @customer.orders.size
+</ruby>
+
+h6. +collection.find(...)+
+
++collection.find+ 方法在集合中寻找对象。它和 +ActiveRecord::Base.find+ 的语法和选项相同。
+
+<ruby>
+@open_orders = @customer.orders.find(1)
+</ruby>
+
+h6. +collection.where(...)+
+
++collection.where+ 方法在集合中用提供的条件寻找对象。但这些对象会被延迟加载（loaded lazily），意思是只有到这些对象被访问的时候才会查询数据库。
+
+<ruby>
+@open_orders = @customer.orders.where(open: true) # 还没有查询 
+@open_order = @open_orders.first # 现在数据库会被查询 
+</ruby>
+
+h6. +collection.exists?(...)+
+
++collection.exists?+ 方法查看集合中是否有一个对象满足提供的条件。它和 +ActiveRecord::Base.exists?+ 使用相同的语法和选项。
+
+h6. +collection.build(attributes = {}, ...)+
+
++collection.build+ 方法返回一个或多个关联类型的新对象。这些对象将用传入的属性值进行初始化，且通过它们的外键的链接也会被创建，但这些关联对象还 _没有_ 被保存。
+
+<ruby>
+@order = @customer.orders.build(order_date: Time.now,
+                                order_number: "A12345")
+</ruby>
+
+h6. +collection.create(attributes = {})+
+
++collection.create+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过它们的外键的链接也会被创建，只要它通过所有的模型检验，这个关联对象将 _会_ 被保存。
+
+<ruby>
+@order = @customer.orders.create(order_date: Time.now,
+                                 order_number: "A12345")
+</ruby>
+
+h6. +collection.create!(attributes = {})+
+
+和 +collection.create+ 一样，但在记录不通过数据校验时抛出一个 +ActiveRecord::RecordInvalid+ 的异常。
+
+h5. +has_many+ 的选项
+
+尽管Rails机智的默认设定在大多数情况下都工作良好，但有些时候我们想定制 +has_many+ 关联引用的行为。通过在创建关联时传入选项，可以轻松完成定制。例如，以下关联使用了两个选项：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, dependent: :delete_all, validate: :false
+end
+</ruby>
+
++has_many+ 关联支持以下选项：
+
+* +:as+
+* +:autosave+
+* +:class_name+
+* +:dependent+
+* +:foreign_key+
+* +:inverse_of+
+* +:primary_key+
+* +:source+
+* +:source_type+
+* +:through+
+* +:validate+
+
+h6. +:as+
+
+设置 +:as+ 选项表明这是一个多态关联。多态关联在本文<a href="#polymorphic-associations">之前部分</a>已有讨论。
+
+h6. +:autosave+
+
+如果设置 +:autosave+ 选项为 +true+ ， 当保存父对象时Rails会自动保存任何载入的（关联对象）成员以及销毁带有销毁标记的（关联对象）成员。
+
+h6. +:class_name+
+
+如果无法从关联名中推导出另一模型的名字，我们可以使用 +:class_name+ 选项来提供模型名。例如，如果一个customer有许多orders，但包含orders的模型的实际名字是 +Transaction+ ，我们可以这样设定：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, class_name: "Transaction"
+end
+</ruby>
+
+h6. +:dependent+
+
+当被关联的对象的owner被销毁时，控制它们的行为：
+
+* +:destroy+ 所有的关联对象也被销毁
+* +:delete_all+ 所有的关联对象将从数据库中直接被删除（所以回调函数不会被调用）
+* +:nullify+ 关联对象的外键设为 +NULL+ ，回调函数不被调用
+* +:restrict_with_exception+ 如果存在任何关联对象，将抛出一个异常 
+* +:restrict_with_error+ 如果任何关联对象存在，将给owner添加一个error 
+
+NOTE: 当使用 +:through+ 选项时这个选项将被忽略。
+
+h6. +:foreign_key+
+
+按惯例，Rails假设另一模型外键的字段的名字是模型的名字加上 +_id+ 后缀。 +:foreign_key+ 选项使我们可以直接设置外键名：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, foreign_key: "cust_id"
+end
+</ruby>
+
+TIP: 在任何情形下，Rails不会自动生成外键。我们需要在migration中显式定义它们。
+
+h6. +:inverse_of+
+
++:inverse_of+ 选项指定 +belongs_to+ 关联的名字，这个关联是当前关联的反面。不能和 +:through+ 或 +:as+ 选项同时使用。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, inverse_of: :customer
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer, inverse_of: :orders
+end
+</ruby>
+
+h6. +:primary_key+
+
+按惯例，Rails假定主键的字段名为 +id+ 。可以通过 +:primary_key+ 选项显式指定主键名来覆写之。
+
+比如说 +users+ 数据表有 +id+ 作为主键但同时又有 +guid+ 字段。需求是 +todo+ 数据表应使用 +guid+ 字段的值而不是 +id+ 字段的值。这个需求可以这样来完成：
+
+<ruby>
+class User < ActiveRecord::Base
+  has_many :todos, primary_key: :guid
+end
+</ruby>
+
+现在如果我们调用 +@user.todos.create+ 方法那么 +@todo+ 记录的 +user_id+ 的值将和 +@user+ 的 +guid+ 的值一样。
+
+h6. +:source+
+
++:source+ 选项指定 +has_one :through+ 所指向模型源的名字。【译者注：Stackoverflow上有个 "很好的例子":http://stackoverflow.com/questions/4632408/need-help-to-understand-source-option-of-has-one-has-many-through-of-rails 】
+
+这个选项只有在源关联（即 +:through+ 选项指定的关联）不能通过关联名字推导出来的情况下使用。
+
+h6. +:source_type+
+
++:source_type+ 在多态关联中使用。它指定 +has_one :through+ 所指向模型源的类型。【译者注：Stackoverflow上的 "例子":http://stackoverflow.com/questions/9500922/need-help-to-understand-source-type-option-of-has-one-has-many-through-of-rails 】
+
+h6. +:through+
+
++:through+ 选项指定一个中间模型（join model），通过这个中间模型来完成查询。 +has_many :through+ 关联提供了一种实现多对多关系的途径，在本文<a href="#the-has-many-through-association">之前部分</a>有讨论。
+
+h6. +:validate+
+
+如果设置 +:validate+ 选项为 +false+ ，那么当保存当前对象时，关联对象不会被校验。默认值为 +true+： 关联对象在保存当前对象时会被校验。
+
+h5. +has_many+ 的关联范围
+
+有些时候我们需要定制 +has_many+ 使用的查询。可以通过scope block来完成定制。例如：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, -> { where processed: true }
+end
+</ruby>
+
+我们可以在scope block里使用任意的标准 "查询方法":active_record_querying.html 。以下将讨论这几点：
+
+* +where+
+* +extending+
+* +group+
+* +includes+
+* +limit+
+* +offset+
+* +order+
+* +readonly+
+* +select+
+* +uniq+
+
+h6. +where+
+
++where+ 指定了关联对象必须满足的条件。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :confirmed_orders, -> { where "confirmed = 1" },
+    class_name: "Order"
+end
+</ruby>
+
+我们也可以通过哈希表来设定条件：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :confirmed_orders, -> { where confirmed: true },
+                              class_name: "Order"
+end
+</ruby>
+
+如果使用哈希风格的 +where+ 选项，那么通过关联新建的记录将会自动用这个哈希表来限定。在这个例子中，使用 +@customer.confirmed_orders.create+ 或 +@customer.confirmed_orders.build+ 新建的orders的confirmed字段的值都为 +true+ 。
+
+h6. +extending+
+
++extending+ 方法指定一个命名模块来拓展关联代理（association proxy）。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
+
+h6. +group+
+
++group+ 方法提供一个字段名来将得到的结果分组，在查询的SQL中使用 +GROUP BY+ 语句。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :line_items, -> { group 'orders.id' },
+                        through: :orders
+end
+</ruby>
+
+h6. +includes+
+
+我们可以使用 +includes+ 方法来指定这个关联被调用时需要被eager-loaded的第二层关联。例如考虑以下模型：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+  has_many :line_items
+end
+
+class LineItem < ActiveRecord::Base
+  belongs_to :order
+end
+</ruby>
+
+如果经常从customers中直接获得line items（+@customer.orders.line_items+），那么可以通过在customers和orders的模型关联中包含line items来使得代码变得更有效率：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, -> { includes :line_items }
+end
+
+class Order < ActiveRecord::Base
+  belongs_to :customer
+  has_many :line_items
+end
+
+class LineItem < ActiveRecord::Base
+  belongs_to :order
+end
+</ruby>
+
+h6. +limit+
+
++limit+ 方法限定通过关联获取的关联对象的数量。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :recent_orders,
+    -> { order('order_date desc').limit(100) },
+    class_name: "Order",
+end
+</ruby>
+
+h6. +offset+
+
++offset+ 方法指定通过关联获取对象的起始偏移位置。例如， +-> { offset(11) }+ 会跳过前11个记录。
+
+h6. +order+
+
++order+ 方法规定了获取关联对象的顺序（在语法方面使用一个SQL的 +ORDER BY+ 语句）。
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, -> { order "date_confirmed DESC" }
+end
+</ruby>
+
+h6. +readonly+
+
+如果使用 +readonly+ 方法，那么通过关联获取的对象都是只读的。
+
+h6. +select+
+
++select+ 方法覆写 用于获取关联对象的SQL +SELECT+ 语句。默认情形下Rails获取所有的字段。
+
+WARNING: 如果指定了自己的 +select+ ，确认其包含了主键和关联模型的外键，否则Rails会抛出一个错误。
+
+h6. +distinct+
+
+使用 +distinct+ 方法来使（关联对象的）集合避免重复。和 +:through+ 选项同时使用时，这个选项通常很有用。
+
+<ruby>
+class Person < ActiveRecord::Base
+  has_many :readings
+  has_many :posts, through: :readings
+end
+
+person = Person.create(name: 'John')
+post   = Post.create(name: 'a1')
+person.posts << post
+person.posts << post
+person.posts.inspect # => [#<Post id: 5, name: "a1">, #<Post id: 5, name: "a1">]
+Reading.all.inspect  # => [#<Reading id: 12, person_id: 5, post_id: 5>, #<Reading id: 13, person_id: 5, post_id: 5>]
+</ruby>
+
+在以上例子中有两个readings， +person.posts+ 取出它们（两个post对象），尽管这两个记录都指向（数据库里的）同一个post记录。
+
+现在让我们来设置 +distinct+：
+
+<ruby>
+class Person
+  has_many :readings
+  has_many :posts, -> { distinct }, through: :readings
+end
+
+person = Person.create(name: 'Honda')
+post   = Post.create(name: 'a1')
+person.posts << post
+person.posts << post
+person.posts.inspect # => [#<Post id: 7, name: "a1">]
+Reading.all.inspect  # => [#<Reading id: 16, person_id: 7, post_id: 7>, #<Reading id: 17, person_id: 7, post_id: 7>]
+</ruby>
+
+在上述例子中仍然有两个readings。但 +person.posts+ 只有一个post，因为这个集合只加载唯一的记录。
+
+如果想确定在插入时，所有已存在的关联所包含的记录是各自不同的（这样可以确定在查看关联时我们不会找到重复的记录），应该在数据表里添加一个唯一的索引。例如，如果有一个名为 +person_posts+ 的数据表，我们希望确定所有的posts是唯一的，我们可以在migration中添加以下内容：
+
+<ruby>
+add_index :person_posts, :post, unique: true
+</ruby>
+
+需要注意的是，用类似 +include?+ 的方法来检查唯一性会受制于 "竞争条件":http://en.wikipedia.org/wiki/Race_condition 。不要尝试使用 +include?+ 来在一个关联中实行唯一性。例如用上述的post例子，以下代码很可能造成竞争，因为多个用户可能在同一时间尝试以下操作：
+
+<ruby>
+person.posts << post unless person.posts.include?(post)
+</ruby>
+
+h5. 什么时候保存对象？
+
+当向一个 +has_many+ 关联赋值一个对象时，这个对象会自动保存（以便更新其外键）。如果在一个语句里赋值多个对象，这些对象全部都会保存。
+
+如果其中某个对象因校验错误而保存失败，那么赋值语句将返回 +false+ ，赋值被取消。
+
+如果父对象（声明 +has_many+ 关联的对象）未保存（即其 +new_record?+ 方法返回 +true+ ），那么其子对象在添加（到对象集合）时不会保存。当父对象保存时，所有关联中未保存的成员会自动保存。
+
+如果想向一个 +has_many+ 关联赋值一个对象，但不希望保存这个对象，使用 +collection.build+ 方法。
+
+h4. +has_and_belongs_to_many+ 关联参考
+
++has_and_belongs_to_many+ 新建一个和另一模型的多对多关系。从数据库角度看，它通过一个中间的联接表（join table）关联两个类。这个联接表分别包含指向两个类的外键。
+
+h5. +has_and_belongs_to_many+ 添加的方法
+
+当声明一个 +has_and_belongs_to_many+ 关联时，声明的类自动获得16个和这个关联相关的方法：
+
+* +collection(force_reload = false)+
+* +collection<<(object, ...)+
+* +collection.delete(object, ...)+
+* +collection.destroy(object, ...)+
+* +collection=objects+
+* +collection_singular_ids+
+* +collection_singular_ids=ids+
+* +collection.clear+
+* +collection.empty?+
+* +collection.size+
+* +collection.find(...)+
+* +collection.where(...)+
+* +collection.exists?(...)+
+* +collection.build(attributes = {})+
+* +collection.create(attributes = {})+
+* +collection.create!(attributes = {})+
+
+在这些方法中， +collection+ 用第一个传入 +has_and_belongs_to_many+ 的symbol参数名取代， +collection_singular+ 用这个symbol的单数形式取代。例如在以下声明中：
+
+<ruby>
+class Part < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies
+end
+</ruby>
+
+每个part模型的实例会有以下方法：
+
+<ruby>
+assemblies(force_reload = false)
+assemblies<<(object, ...)
+assemblies.delete(object, ...)
+assemblies.destroy(object, ...)
+assemblies=objects
+assembly_ids
+assembly_ids=ids
+assemblies.clear
+assemblies.empty?
+assemblies.size
+assemblies.find(...)
+assemblies.where(...)
+assemblies.exists?(...)
+assemblies.build(attributes = {}, ...)
+assemblies.create(attributes = {})
+assemblies.create!(attributes = {})
+</ruby>
+
+h6. Additional Column Methods 额外的字段方法
+
+如果一个 +has_and_belongs_to_many+ 的联接表（join table）除了两个外键外有额外的字段，这些字段会被当做属性，添加到从关联中获得的记录中。这些带有额外属性的记录总是只读的，因为Rails不能保存对这些（额外）属性的修改。
+
+WARNING: 在 +has_and_belongs_to_many+ 的联接表中使用额外属性的做法已经被弃用了。如果需要对在多对多关系中联接两个模型的数据表做这样的复杂操作，应该使用 +has_many :through+ 来代替 +has_and_belongs_to_many+ 。
+
+h6. +collection(force_reload = false)+
+
++collection+ 方法返回包含所有关联对象的一个数组。如果没有关联对象，它返回一个空数组。
+
+<ruby>
+@assemblies = @part.assemblies
+</ruby>
+
+h6. +collection<<(object, ...)+
+
++collection<<+ 方法向（关联对象的）集合中添加一个或多个对象。它在联接表中新建记录。
+
+<ruby>
+@part.assemblies << @assembly
+</ruby>
+
+NOTE: 这个方法的别名是 +collection.concat+ 和 +collection.push+ 。
+
+h6. +collection.delete(object, ...)+
+
++collection.delete+ 方法从（关联对象的）集合中去掉一个或多个对象。它在联接表中删除记录。这不会删除（关联）对象。
+
+<ruby>
+@part.assemblies.delete(@assembly1)
+</ruby>
+
+WARNING: 这个方法不会触发联接模型的回调函数。
+
+h6. +collection.destroy(object, ...)+
+
++collection.destroy+ 方法调用每个联接表中的记录的 +destory+ 方法，从（关联对象的）集合中去掉一个或多个对象，包括调用回调函数。这个方法不会销毁（关联）对象。
+
+<ruby>
+@part.assemblies.destroy(@assembly1)
+</ruby>
+
+h6. +collection=objects+
+
++collection=+ 方法通过适当的添加和删除，使（关联对象的）集合只包含赋值提供的对象。
+
+h6. +collection_singular_ids+
+
++collection_singular_id+ 方法返回集合中关联对象的id的一个数组。
+
+<ruby>
+@assembly_ids = @part.assembly_ids
+</ruby>
+
+h6. +collection_singular_ids=ids+
+
++collection_singular_ids=+ 方法接收一个数组，通过适当的添加和删除，使（关联对象的）集合里的对象由数组里的主键值确定。
+
+h6. +collection.clear+
+
++collection.clear+ 方法通过删除联接表中的行，清除所有集合中的对象。这个方法不会销毁关联的对象。
+
+h6. +collection.empty?+
+
+如果集合中没有任何关联对象， +collection.empty?+ 方法返回 +true+ 。
+
+<ruby>
+<% if @part.assemblies.empty? %>
+  This part is not used in any assemblies
+<% end %>
+</ruby>
+
+h6. +collection.size+
+
++collection.size+ 方法返回集合中的对象个数。
+
+<ruby>
+@assembly_count = @part.assemblies.size
+</ruby>
+
+h6. +collection.find(...)+
+
++collection.find+ 方法从集合中寻找对象。它和 +ActiveRecord::Base.find+ 的语法和选项一样。它还添加了“对象必须在集合内” 这一附加条件。
+
+<ruby>
+@assembly = @part.assemblies.find(1)
+</ruby>
+
+h6. +collection.where(...)+
+
++collection.where+ 方法在集合内基于提供的条件寻找对象。但这些对象会被延迟加载（loaded lazily），意思是只有到这些对象被访问的时候才会查询数据库。它还添加了“对象必须在集合内” 这一附加条件。
+
+<ruby>
+@new_assemblies = @part.assemblies.where("created_at > ?", 2.days.ago)
+</ruby>
+
+h6. +collection.exists?(...)+
+
++collection.exists?+ 方法检查集合中是否存在一个对象满足给出的条件。它和 +ActiveRecord::Base.exists?+ 的语法和选项一样。
+
+h6. +collection.build(attributes = {})+
+
++collection.build+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过联接表的链接也会被创建，但这些关联对象还 _没有_ 被保存。
+
+<ruby>
+@assembly = @part.assemblies.build({assembly_name: "Transmission housing"})
+</ruby>
+
+h6. +collection.create(attributes = {})+
+
++collection.create+ 方法返回一个关联类型的新对象。这个对象将用传入的属性值进行初始化，且通过联接表的链接也会被创建。一旦这个对象通过关联模型指定的所有校验，这个关联对象将 _会_ 保存。
+
+<ruby>
+@assembly = @part.assemblies.create({assembly_name: "Transmission housing"})
+</ruby>
+
+h6. +collection.create!(attributes = {})+
+
+和 +collection.create+ 一样，但在记录无效时抛出 +ActiveRecord::RecordInvalid+ 的异常。
+
+h5. +has_and_belongs_to_many+ 的选项
+
+尽管Rails机智的默认设定在大多数情况下都工作良好，但有些时候我们想定制 +has_and_belongs_to_many+ 关联引用的行为。通过在创建关联时传入选项，可以轻松完成定制。例如，以下关联使用了两个选项：
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies, uniq: true,
+                                       read_only: true
+end
+</ruby>
+
++has_and_belongs_to_many+ 支持以下选项：
+
+* +:association_foreign_key+
+* +:autosave+
+* +:class_name+
+* +:foreign_key+
+* +:join_table+
+* +:validate+
+
+h6. +:association_foreign_key+
+
+按惯例，Rails假定联接表中用于保存指向另一模型的外键的字段名是另一模型的名字加上 +_id+ 后缀。 +:association_foreign_key+ 使我们可以直接设定这个外键名：
+
+TIP: 在设定多对多的自连接（self-join）时，会用到 +:foreign_key+ 和 +:association_foreign_key+ 。例如：
+
+<ruby>
+class User < ActiveRecord::Base
+  has_and_belongs_to_many :friends,
+      class_name: "User",
+      foreign_key: "this_user_id",
+      association_foreign_key: "other_user_id"
+end
+</ruby>
+
+h6. +:autosave+
+
+如果设置 +:autosave+ 选项为 +true+ ，Rails会在保存父对象时，保存所有载入的成员并销毁所有标记为销毁的成员。
+
+h6. +:class_name+
+
+如果另一模型的名字无法通过关联名推导出来，我们可以用 +:class_name+ 选项提供模型名。例如，如果一个part有很多assemblies，但实际上assemblies的模型名是 +Garget+ ，我们可以这样设定：
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies, class_name: "Gadget"
+end
+</ruby>
+
+h6. +:foreign_key+
+
+按惯例，Rails假定联接表上用于保存指向当前模型的外键的字段名是当前模型的名字加上 +_id+ 后缀。 +:foreign_key+ 使我们可以直接设定这个外键名：
+
+<ruby>
+class User < ActiveRecord::Base
+  has_and_belongs_to_many :friends,
+      class_name: "User",
+      foreign_key: "this_user_id",
+      association_foreign_key: "other_user_id"
+end
+</ruby>
+
+h6. +:join_table+
+
+如果联接表的基于字典序的默认名不是我们想要的，我们可以用 +:join_table+ 选项来覆写默认值。
+
+h6. +:validate+
+
+如果设置 +:validate+ 选项值为 +false+ ，那么当保存当前对象时，关联的对象将不会被校验。默认值为 +true+: 关联对象在保存当前对象时会被校验。
+
+h5. +has_and_belongs_to_many+ 的关联范围
+
+有些时候我们需要定制 +has_and_belongs_to_many+ 使用的查询。可以通过scope block来完成定制。例如：
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies, -> { where active: true }
+end
+</ruby>
+
+我们可以在scope block里使用任意的标准 "查询方法":active_record_querying.html 。以下将讨论这几点：
+
+* +where+
+* +extending+
+* +group+
+* +includes+
+* +limit+
+* +offset+
+* +order+
+* +readonly+
+* +select+
+* +uniq+
+
+h6. +where+
+
++where+ 方法指定关联对象必须满足的条件。
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies,
+    -> { where "factory = 'Seattle'" }
+end
+</ruby>
+
+也可以通过哈希表来设置条件：
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies,
+    -> { where factory: 'Seattle' }
+end
+</ruby>
+
+如果使用了哈希风格的 +where+ ，那么通过关联新建的记录将会自动用这个哈希表来限定。在这个例子中，使用 +@parts.assemblies.create+ 或 +@parts.assemblies.build+ 新建的orders的factory字段的值都为 "Seattle" 。
+
+h6. +extending+
+
++extending+ 方法指定一个命名模块来拓展association proxy。关联拓展将在本文<a href="#association-extensions">后面部分</a>详述。
+
+h6. +group+
+
++group+ 方法提供一个字段名来将得到的结果分组，在查询的SQL中使用 +GROUP BY+ 语句。
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies, -> { group "factory" }
+end
+</ruby>
+
+h6. +includes+
+
+我们可以使用 +includes+ 方法来指定这个关联被调用时需要被eager-loaded的第二层关联。
+
+h6. +limit+
+
++limit+ 方法限定通过关联获取的关联对象的数量。
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies,
+    -> { order("created_at DESC").limit(50) }
+end
+</ruby>
+
+h6. +offset+
+
++offset+ 方法指定通过关联获取对象的起始偏移位置。例如， +-> { offset(11) }+ 会跳过前11个记录。
+
+h6. +order+
+
++order+ 方法规定了获取关联对象的顺序（在语法方面使用一个SQL的 +ORDER BY+ 语句）。
+
+<ruby>
+class Parts < ActiveRecord::Base
+  has_and_belongs_to_many :assemblies,
+    -> { order "assembly_name ASC" }
+end
+</ruby>
+
+h6. +readonly+
+
+如果使用 +readonly+ 方法，那么通过关联获取的对象都是只读的。
+
+h6. +select+
+
++select+ 方法覆写用于获取关联对象的SQL +SELECT+ 语句。默认情形下Rails获取所有的字段。
+
+h6. +uniq+
+
++uniq+ 方法去掉集合中重复的对象。
+
+h5. 什么时候保存对象？
+
+当向一个 +has_and_belongs_to_many+ 赋值一个对象时，这个对象会自动保存（以便更新联接表）。如果在一个语句中赋值多个对象，这些对象都会保存。
+
+如果这些对象其中一个因校验错误保存失败，那么赋值语句返回 +false+ ，赋值取消。
+
+如果父对象（指声明 +has_and_belongs_to_many+ 的关联）未保存（即是其 +new_record?+ 方法返回 +true+ ），那么当子对象被添加时它们不会保存。当父对象保存时，关联中所有的未保存成员会自动保存。
+
+如果向 +has_and_belongs_to_many+ 赋值一个对象，但不希望这个对象保存，使用 +collection.build+ 方法。
+
+h4. Association Callbacks 关联回调函数
+
+一般回调函数挂接到（hook into） ActiveRecord对象的生存期（life cycle）中，使我们可以在不同的点上对这些对象进行操作。例如，我们可以使用一个 +:before_save+ 回调函数来让某些事情在对象保存前发生。
+
+关联回调函数和一般回调函数类似，但它们是由（关联对象）集合的生存期（life cycle）中的事件触发。以下是4种可用的关联回调函数：
+
+* +before_add+
+* +after_add+
+* +before_remove+
+* +after_remove+
+
+通过在关联声明中添加选项来定义关联回调函数，例如：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders, before_add: :check_credit_limit
+
+  def check_credit_limit(order)
+    ...
+  end
+end
+</ruby>
+
+Rails将添加或删除的对象作为参数传给回调函数。
+
+将多个回调函数作为一个数组传入声明中，可以将它们堆叠在一个事件上：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders,
+    before_add: [:check_credit_limit, :calculate_shipping_charges]
+
+  def check_credit_limit(order)
+    ...
+  end
+
+  def calculate_shipping_charges(order)
+    ...
+  end
+end
+</ruby>
+
+如果 +before_add+ 回调函数抛出一个异常，这个对象将不会被添加到集合中。类似的，如果 +before_remove+ 回调函数抛出一个异常，这个对象也不会从集合中删除。
+
+h4. Association Extensions 关联的拓展
+
+我们所拥有的功能不仅仅局限在Rails自动内建到关联代理对象（association proxy object）的方法。我们还可以通过匿名模块拓展这些对象，添加新的finders，creators，或其他方法。例如：
+
+<ruby>
+class Customer < ActiveRecord::Base
+  has_many :orders do
+    def find_by_order_prefix(order_number)
+      find_by_region_id(order_number[0..2])
+    end
+  end
+end
+</ruby>
+
+如果有一个可供许多关联共享的拓展，可以用命名拓展模块。例如：
+
+<ruby>
+module FindRecentExtension
+  def find_recent
+    where("created_at > ?", 5.days.ago)
+  end
+end
+
+class Customer < ActiveRecord::Base
+  has_many :orders, -> { extending FindRecentExtension }
+end
+
+class Supplier < ActiveRecord::Base
+  has_many :deliveries, -> { extending FindRecentExtension }
+end
+</ruby>
+
+拓展可以利用以下三个 +proxy_association+ accessor的属性来引用关联代理（association proxy）的内部：
+
+* +proxy_association.owner+ 返回关联的持有对象；这个模型关联是对象的一部分。
+* +proxy_association.reflection+ 返回描述这个关联的reflection object。 【译者注：ActiveRecord中的association对应的类是 "ActiveRecord::Reflection::AssociationReflection":https://github.com/rails/rails/blob/828134b7561bf4473580d76bd8d7ae97e9b1db92/activerecord/lib/active_record/reflection.rb#L176 】
+* +proxy_association.target+ 对于 +belongs_to+ 和 +has_one+ 返回关联的对象；对于 +has_many+ 和 +has_and_belongs_to_many+ 返回关联的对象集合。
